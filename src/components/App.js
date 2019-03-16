@@ -67,9 +67,13 @@ class App extends Component {
   }
 
   addNode(graphRef, nodeName) {
-    // var xycoords = d3.mouse(graphRef.svgG.node()),
-      // d = {id: graphRef.idct++, title: nodeName, x: xycoords[0], y: xycoords[1]};
-    var d = {id: graphRef.idct++, title: nodeName, x: graphRef.state.bounds.width / 2, y: graphRef.state.bounds.height / 2};
+    var bodyEl = document.getElementById('mainRender');
+
+    var width = bodyEl.clientWidth,
+      height = bodyEl.clientHeight;
+
+    var d = {id: graphRef.idct++, title: nodeName, x: width / 2, y: height / 2};
+    console.log(d)
     graphRef.nodes.push(d);
     graphRef.updateGraph();
   }
@@ -80,7 +84,7 @@ class App extends Component {
     const globalAccessor = this;
     this.graphCreatorInstance = null;
 
-    var GraphCreator = function GraphCreator(svg, nodes, edges, bounds) {
+    var GraphCreator = function GraphCreator(svg, nodes, edges) {
       globalAccessor.graphCreatorInstance = this;
       var thisGraph = this;
       thisGraph.idct = 0;
@@ -98,7 +102,6 @@ class App extends Component {
         lastKeyDown: -1,
         shiftNodeDrag: false,
         selectedText: null,
-        bounds
       };
 
       // define arrow markers for graph links
@@ -161,11 +164,6 @@ class App extends Component {
       });
 
       svg.call(dragSvg).on('dblclick.zoom', null);
-
-      // listen for resize
-      window.onresize = function () {
-        thisGraph.updateWindow(svg);
-      };
 
       // handle download data
       d3.select('#download-input').on('click', function () {
@@ -696,22 +694,12 @@ class App extends Component {
       d3.select('.' + this.consts.graphClass).attr('transform', 'translate(' + d3.event.translate + ') scale(' + d3.event.scale + ')');
     };
 
-    GraphCreator.prototype.updateWindow = function (svg) {
-      var docEl = document.documentElement,
-        bodyEl = document.getElementsByTagName('body')[0];
-      var x = window.innerWidth || docEl.clientWidth || bodyEl.clientWidth;
-      var y = window.innerHeight || docEl.clientHeight || bodyEl.clientHeight;
-      this.state.bounds = {x, y};
-      console.log(this.state.bounds)
-    };
-
     /**** MAIN ****/
 
-    var docEl = document.documentElement,
-      bodyEl = document.getElementsByTagName('body')[0];
+    var bodyEl = document.getElementById('mainRender');
 
-    var width = window.innerWidth || docEl.clientWidth || bodyEl.clientWidth,
-      height = window.innerHeight || docEl.clientHeight || bodyEl.clientHeight;
+    var width = bodyEl.clientWidth,
+      height = bodyEl.clientHeight;
 
     var xLoc = width / 2 - 25,
       yLoc = 100;
@@ -730,7 +718,7 @@ class App extends Component {
     const svg = d3.select('#mainRender');
 
 
-    this.graph = new GraphCreator(svg, nodes, edges, {width, height});
+    this.graph = new GraphCreator(svg, nodes, edges);
     this.graph.setIdCt(2);
     this.graph.updateGraph();
   }
