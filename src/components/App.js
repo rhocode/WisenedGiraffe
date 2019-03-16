@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 
 export default class App extends Component {
 
@@ -45,7 +45,7 @@ export default class App extends Component {
       thisGraph.circles = svgG.append('g').selectAll('g');
 
       thisGraph.drag = d3.behavior.drag().origin(function (d) {
-        return { x: d.x, y: d.y };
+        return {x: d.x, y: d.y};
       }).on('drag', function (args) {
         thisGraph.state.justDragged = true;
         thisGraph.dragmove.call(thisGraph, args);
@@ -96,12 +96,12 @@ export default class App extends Component {
       d3.select('#download-input').on('click', function () {
         var saveEdges = [];
         thisGraph.edges.forEach(function (val, i) {
-          saveEdges.push({ source: val.source.id, target: val.target.id });
+          saveEdges.push({source: val.source.id, target: val.target.id});
         });
         var blob = new Blob([window.JSON.stringify({
           'nodes': thisGraph.nodes,
           'edges': saveEdges
-        })], { type: 'text/plain;charset=utf-8' });
+        })], {type: 'text/plain;charset=utf-8'});
         saveAs(blob, 'mydag.json');
       });
 
@@ -207,10 +207,12 @@ export default class App extends Component {
     GraphCreator.prototype.insertTitleLinebreaks = function (gEl, title) {
       var words = title.split(/\s+/g),
         nwords = words.length;
-      var el = gEl.append('text').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
+      var el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
       for (var i = 0; i < words.length; i++) {
-        var tspan = el.append('tspan').text(words[i]);
-        if (i > 0) tspan.attr('x', 0).attr('dy', '15');
+        var backgroundText = el.append('text').attr({'fill': 'white', 'stroke': 'white', 'stroke-width': 8}).text(words[i]);
+        if (i > 0) backgroundText.attr('x', 0).attr('dy', 15 * i);
+        var tspan = el.append('text').attr('fill', 'black').text(words[i]);
+        if (i > 0) tspan.attr('x', 0).attr('dy', 15 * i);
       }
     };
 
@@ -325,6 +327,7 @@ export default class App extends Component {
           thisGraph.insertTitleLinebreaks(d3node, d.title);
           d3.select(this.parentElement).remove();
         });
+
       return d3txt;
     };
 
@@ -345,7 +348,7 @@ export default class App extends Component {
 
       if (mouseDownNode !== d) {
         // we're in a different node: create new edge for mousedown edge and add to graph
-        var newEdge = { source: mouseDownNode, target: d };
+        var newEdge = {source: mouseDownNode, target: d};
         var filtRes = thisGraph.paths.filter(function (d) {
           if (d.source === newEdge.target && d.target === newEdge.source) {
             thisGraph.edges.splice(thisGraph.edges.indexOf(d), 1);
@@ -368,7 +371,7 @@ export default class App extends Component {
             var d3txt = thisGraph.changeTextOfNode(d3node, d);
             var txtNode = d3txt.node();
             thisGraph.selectElementContents(txtNode);
-            txtNode.focus();
+            // txtNode.focus();
           } else {
             if (state.selectedEdge) {
               thisGraph.removeSelectFromEdge();
@@ -402,16 +405,16 @@ export default class App extends Component {
       } else if (state.graphMouseDown && d3.event.shiftKey) {
         // clicked not dragged from svg
         var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = { id: thisGraph.idct++, title: 'new concept', x: xycoords[0], y: xycoords[1] };
+          d = {id: thisGraph.idct++, title: 'new concept', x: xycoords[0], y: xycoords[1]};
         thisGraph.nodes.push(d);
         thisGraph.updateGraph();
         // make title of text immediently editable
-        var d3txt = thisGraph.changeTextOfNode(thisGraph.circles.filter(function (dval) {
-            return dval.id === d.id;
-          }), d),
-          txtNode = d3txt.node();
-        thisGraph.selectElementContents(txtNode);
-        txtNode.focus();
+        // var d3txt = thisGraph.changeTextOfNode(thisGraph.circles.filter(function (dval) {
+        //     return dval.id === d.id;
+        //   }), d),
+        //   txtNode = d3txt.node();
+        // thisGraph.selectElementContents(txtNode);
+        // txtNode.focus();
       } else if (state.shiftNodeDrag) {
         // dragged from node
         state.shiftNodeDrag = false;
@@ -467,24 +470,30 @@ export default class App extends Component {
 
     GraphCreator.prototype.calculatePathTooltipPosition = function (link_label) {
 
-      link_label.attr('x', function(d) {
+      link_label.attr('x', function (d) {
         var node = d3.select(link_label.node().parentElement).selectAll('path').node();
         var pathLength = node.getTotalLength();
         d.point = node.getPointAtLength(pathLength / 2);
         //MAKE THIS 100 AN ACTUAL OFFSET
         return d.point.x - 100;
-      }).attr('y', function(d) {
+      }).attr('y', function (d) {
         return d.point.y - 100;
       });
     };
 
-    GraphCreator.prototype.insertEdgeLabel = function(gEl, label) {
+    GraphCreator.prototype.insertEdgeLabel = function (gEl, label) {
       // var link_label = gEl.append('text');
       // link_label.style('text-anchor', 'middle')
       //   .style('dominant-baseline', 'central')
       //   .attr('class', 'edge-label').text(label);
       //
       // this.calculateLabelPosition(link_label);
+
+
+
+
+
+
       var div_label = gEl.append('foreignObject').attr({
         'width': '200px',
         'height': '200px',
@@ -499,11 +508,10 @@ export default class App extends Component {
           'class': 'tooltip'
         }).append('p')
         .attr('class', 'lead')
-        .html('Holmes was certainly not a difficult man to live with.');
+        .html('200 Memes per second');
 
       this.calculatePathTooltipPosition(div_label);
     };
-
     // call to propagate changes to graph
     GraphCreator.prototype.updateGraph = function () {
 
@@ -517,37 +525,48 @@ export default class App extends Component {
 
       var paths = thisGraph.paths;
 
-
       // update existing paths
-      paths.select('path').style('marker-end', 'url(#end-arrow)').classed(consts.selectedClass, function (d) {
+      paths.selectAll('path').classed(consts.selectedClass, function (d) {
         return d === state.selectedEdge;
       }).attr('d', function (d) {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
       });
 
-
       // paths.select('text').each(function(d) {
       //   thisGraph.calculateLabelPosition(d3.select(this));
       // });
 
-      paths.select('foreignObject.path-tooltip').each(function(d) {
+      paths.select('foreignObject.path-tooltip').each(function (d) {
         thisGraph.calculatePathTooltipPosition(d3.select(this));
       });
 
       // add new paths
       const pathObject = paths.enter().append('g');
 
-      pathObject.append('path').style('marker-end', 'url(#end-arrow)').classed('link', true).attr('d', function (d) {
+      pathObject.append('path').style('marker-end', 'url(#end-arrow)').classed('link real-link', true).attr('d', function (d) {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
-      }).on('mousedown', function (d) {
-        thisGraph.pathMouseDown.call(thisGraph, d3.select(this), d);
-      }).on('mouseup', function (d) {
-        state.mouseDownLink = null;
+      }).attr('id', function(d) {
+        return 'path-' + d.source.id + '-' + d.target.id;
       });
 
-      pathObject.each(function(d) {
+      pathObject.each(function (d) {
         thisGraph.insertEdgeLabel(d3.select(this), 'Sample Link');
       });
+
+      // Add a copy of the path to the front, but make it invisible
+      pathObject.append('path').classed('link hidden-hitbox', true).attr('d', function (d) {
+        return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
+      }).on('mouseover', function (d) {
+        d3.select();
+        console.log(d);
+      }).on('mousedown', function (d) {
+        console.log(d);
+        // thisGraph.pathMouseDown.call(thisGraph, d3.select(this), d);
+      }).on('mouseup', function (d) {
+        console.log(d);
+        // state.mouseDownLink = null;
+      });
+
 
       // remove old links
       paths.exit().remove();
@@ -564,21 +583,31 @@ export default class App extends Component {
       // add new nodes
       var newGs = thisGraph.circles.enter().append('g');
 
-      newGs.classed(consts.circleGClass, true).attr('transform', function (d) {
-        return 'translate(' + d.x + ',' + d.y + ')';
-      }).on('mouseover', function (d) {
-        if (state.shiftNodeDrag) {
-          d3.select(this).classed(consts.connectClass, true);
-        }
-      }).on('mouseout', function (d) {
-        d3.select(this).classed(consts.connectClass, false);
-      }).on('mousedown', function (d) {
-        thisGraph.circleMouseDown.call(thisGraph, d3.select(this), d);
-      }).on('mouseup', function (d) {
-        thisGraph.circleMouseUp.call(thisGraph, d3.select(this), d);
-      }).call(thisGraph.drag);
+      newGs.classed(consts.circleGClass, true)
+        .attr('transform', function (d) {
+          return 'translate(' + d.x + ',' + d.y + ')';
+        })
+        .on('mouseover', function (d) {
+          if (state.shiftNodeDrag) {
+            d3.select(this).classed(consts.connectClass, true);
+          }
+        }).on('mouseout', function (d) {
+          d3.select(this).classed(consts.connectClass, false);
+        }).on('mousedown', function (d) {
+          thisGraph.circleMouseDown.call(thisGraph, d3.select(this), d);
+        }).on('mouseup', function (d) {
+          thisGraph.circleMouseUp.call(thisGraph, d3.select(this), d);
+        }).call(thisGraph.drag);
 
       newGs.append('circle').attr('r', String(consts.nodeRadius));
+
+      var images = newGs.append('svg:image')
+        .attr('xlink:href',  function(d) { return 'https://i.imgur.com/DEHn9RZ.png';})
+        .attr('x', function(d) { return -50;})
+        .attr('y', function(d) { return -50;})
+        .attr('height', 100)
+        .attr('width', 100);
+
 
       newGs.each(function (d) {
         thisGraph.insertTitleLinebreaks(d3.select(this), d.title);
@@ -618,17 +647,29 @@ export default class App extends Component {
       yLoc = 100;
 
     // initial node data
-    var nodes = [{ title: 'new concept', id: 0, x: xLoc, y: yLoc }, { title: 'new concept', id: 1, x: xLoc, y: yLoc + 200 }];
-    var edges = [{ source: nodes[1], target: nodes[0] }];
+    var nodes = [
+      {title: '0 memes/sec', id: 0, x: xLoc, y: yLoc}, {
+        title: '0 memes/sec',
+        id: 1,
+        x: xLoc,
+        y: yLoc + 200
+      }];
+    var edges = [{source: nodes[1], target: nodes[0]}];
 
     /** MAIN SVG **/
-    var svg = d3.select('body').append('svg').attr('width', width).attr('height', height);
+    const svg = d3.select('#mainRender');
+
     var graph = new GraphCreator(svg, nodes, edges);
     graph.setIdCt(2);
     graph.updateGraph();
   }
-  render() {
+
+  componentDidMount() {
     this.generateMeme(window.d3);
-    return <div />;
   }
+
+  render() {
+    return <div id="renderParent" className="full-div"><svg id="mainRender"/></div>;
+  }
+
 }

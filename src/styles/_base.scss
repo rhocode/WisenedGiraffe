@@ -1,95 +1,9 @@
-//body {
-//  margin: 0;
-//  padding: 0;
-//  overflow: hidden;
-//}
-//
-//p {
-//  /*text-align: center; */
-//  /*overflow: overlay;*/
-//  /*position: relative;*/
-//  color: red;
-//}
-//
-//body {
-//  -webkit-touch-callout: none;
-//  -webkit-user-select: none;
-//  -khtml-user-select: none;
-//  -moz-user-select: none;
-//  -ms-user-select: none;
-//  user-select: none;
-//  background-color: rgb(248, 248, 248)
-//}
-//
-//.conceptG text {
-//  pointer-events: none;
-//}
-//
-//g.conceptG circle {
-//  fill: #F6FBFF;
-//  stroke: #333;
-//  stroke-width: 2px;
-//}
-//
-//g.conceptG:hover circle {
-//  fill: rgb(200, 238, 241);
-//}
-//
-//g.selected circle {
-//  fill: rgb(250, 232, 255);
-//}
-//
-//g.selected:hover circle {
-//  fill: rgb(250, 232, 255);
-//}
-//
-//path.link {
-//  fill: none;
-//  stroke: khaki;
-//  stroke-width: 3px;
-//  cursor: default;
-//}
-//
-//marker {
-//  fill: black;
-//  stroke: black;
-//}
-//
-//#mark-end-arrow, #end-arrow, #end-arrow path, #mark-end-arrow path {
-//  /* targeted to the marker used to make the arrows*/
-//}
-//
-//text {
-//  /*nodes text color*/
-//  fill: orangered;
-//}
-//
-//path.link:hover {
-//  stroke: rgb(94, 196, 204);
-//}
-//
-//g.connect-node circle {
-//  fill: #BEFFFF;
-//}
-//
-//path.link.hidden {
-//  stroke-width: 0;
-//}
-//
-//path.link.selected {
-//  stroke: rgb(229, 172, 247);
-//}
-//
-//.divs div {
-//  border-radius: 50%;
-//  background: red;
-//  position: absolute;
-//}
-
 body{
   margin: 0;
   padding: 0;
   overflow:hidden;
+  height: 100vh;
+  width: 100vw;
 }
 
 p{
@@ -185,6 +99,11 @@ path.link.selected {
   stroke: rgb(229, 172, 247);
 }
 
+path.hidden-hitbox{
+  stroke-width: 12;
+  stroke-opacity: 0;
+}
+
 div.full-div {
   height: 100%;
   width: 100%;
@@ -195,4 +114,13 @@ div.full-div {
 
 div.tooltip {
 
+}
+
+svg#mainRender {
+  height: 100%;
+  width: 100%;
+}
+
+tspan.node-label {
+  color: white;
 }
