@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import grey from '@material-ui/core/colors/grey';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -41,6 +42,12 @@ const styles = theme => ({
   toolbar: theme.mixins.toolbar,
   logo: {
     width: drawerWidth,
+  }
+});
+
+const theme = createMuiTheme({
+  palette: {
+    primary: grey,
   }
 });
 
@@ -739,13 +746,15 @@ class App extends Component {
     const { classes } = this.props;
     return <div className={classes.root}>
       <CssBaseline />
-      <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            <img className={classes.logo} src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png" title="logo" />
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      <MuiThemeProvider theme={theme}>
+        <AppBar position="fixed" className={classes.appBar}>
+          <Toolbar>
+            <Typography variant="h6" color="inherit" noWrap>
+              <img className={classes.logo} src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png" title="logo" />
+            </Typography>
+          </Toolbar>
+        </AppBar>
+      </MuiThemeProvider>
       <Drawer
         className={classes.drawer}
         variant="permanent"
