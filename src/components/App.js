@@ -11,7 +11,9 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import CardMedia from '@material-ui/core/CardMedia';
+import AddBoxIcon from '@material-ui/icons/AddBox';
+import HelpIcon from '@material-ui/icons/Help';
+import InfoIcon from '@material-ui/icons/Info';
 
 const drawerWidth = 240;
 
@@ -732,6 +734,7 @@ class App extends Component {
         <List>
           {['New Miner', 'New Smelter', 'New Constructor', 'New Assembler', 'New Coal Generator'].map((text, index) => (
             <ListItem button key={text}>
+              <ListItemIcon><AddBoxIcon /></ListItemIcon>
               <ListItemText primary={text} />
             </ListItem>
           ))}
