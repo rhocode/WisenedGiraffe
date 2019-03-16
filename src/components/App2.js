@@ -137,7 +137,7 @@ export default class App2 extends Component {
               thisGraph.updateGraph();
             } catch (err) {
               window.alert('Error parsing uploaded file\nerror message: ' + err.message);
-              return;
+
             }
           };
           filereader.readAsText(uploadFile);
@@ -288,7 +288,7 @@ export default class App2 extends Component {
         state.shiftNodeDrag = d3.event.shiftKey;
         // reposition dragged directed edge
         thisGraph.dragLine.classed('hidden', false).attr('d', 'M' + d.x + ',' + d.y + 'L' + d.x + ',' + d.y);
-        return;
+
       }
     };
 
@@ -374,7 +374,7 @@ export default class App2 extends Component {
         }
       }
       state.mouseDownNode = null;
-      return;
+
     }; // end of circles mouseup
 
     // mousedown on main svg

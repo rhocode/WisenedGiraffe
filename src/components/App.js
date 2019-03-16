@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import { withStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import {withStyles, MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
@@ -15,6 +15,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
+
+import data from './data';
 
 /* global d3 */
 
@@ -48,6 +50,9 @@ const styles = theme => ({
 });
 
 const theme = createMuiTheme({
+  typography: {
+    useNextVariants: true,
+  },
   palette: {
     primary: {
       main: '#424242'
@@ -55,12 +60,18 @@ const theme = createMuiTheme({
   }
 });
 
+// const isFunction = (functionToCheck) => functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
+
+const getKeys = (obj) => Object.keys(obj).filter(function (elem) {
+  return elem != 'get';
+});
+
 class App extends Component {
 
   constructor(props) {
     super(props);
 
-    this.state= {
+    this.state = {
       nodes: {},
       edges: {},
       selectedNode: null,
@@ -73,15 +84,17 @@ class App extends Component {
       shiftNodeDrag: false,
       selectedText: null,
     };
+
+    this.generateData();
   }
 
-  addNode(graphRef, nodeName) {
+  addNode(graphRef, machine) {
     var bodyEl = document.getElementById('mainRender');
     var width = bodyEl.clientWidth,
       height = bodyEl.clientHeight;
-
-    var d = {id: graphRef.idct++, title: nodeName, x: width / 2, y: height / 2};
-  graphRef.nodes.push(d);
+    console.log(machine);
+    var d = {id: graphRef.idct++, name: machine.name, x: width / 2, y: height / 2, machine};
+    graphRef.nodes.push(d);
     graphRef.updateGraph();
   }
 
@@ -223,7 +236,7 @@ class App extends Component {
               thisGraph.updateGraph();
             } catch (err) {
               window.alert('Error parsing uploaded file\nerror message: ' + err.message);
-              return;
+
             }
           };
           filereader.readAsText(uploadFile);
@@ -297,7 +310,11 @@ class App extends Component {
         nwords = words.length;
       var el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
       for (var i = 0; i < words.length; i++) {
-        var backgroundText = el.append('text').attr({'fill': 'white', 'stroke': 'white', 'stroke-width': 8}).text(words[i]);
+        var backgroundText = el.append('text').attr({
+          'fill': 'white',
+          'stroke': 'white',
+          'stroke-width': 8
+        }).text(words[i]);
         if (i > 0) backgroundText.attr('x', 0).attr('dy', 15 * i);
         var tspan = el.append('text').attr('fill', 'black').text(words[i]);
         if (i > 0) tspan.attr('x', 0).attr('dy', 15 * i);
@@ -377,7 +394,7 @@ class App extends Component {
         state.shiftNodeDrag = d3.event.shiftKey;
         // reposition dragged directed edge
         thisGraph.dragLine.classed('hidden', false).attr('d', 'M' + d.x + ',' + d.y + 'L' + d.x + ',' + d.y);
-        return;
+
       }
     };
 
@@ -449,9 +466,9 @@ class App extends Component {
           // clicked, not dragged
           if (d3.event.shiftKey) {
             // shift-clicked node: edit text content
-            var d3txt = thisGraph.changeTextOfNode(d3node, d);
-            var txtNode = d3txt.node();
-            thisGraph.selectElementContents(txtNode);
+            // var d3txt = thisGraph.changeTextOfNode(d3node, d);
+            // var txtNode = d3txt.node();
+            // thisGraph.selectElementContents(txtNode);
             // txtNode.focus();
           } else {
             if (state.selectedEdge) {
@@ -468,7 +485,7 @@ class App extends Component {
         }
       }
       state.mouseDownNode = null;
-      return;
+
     }; // end of circles mouseup
 
     // mousedown on main svg
@@ -486,7 +503,7 @@ class App extends Component {
       } else if (state.graphMouseDown && d3.event.shiftKey) {
         // clicked not dragged from svg
 
-        globalAccessor.addNode(thisGraph, "Debug Node");
+        globalAccessor.addNode(thisGraph, {name: 'Debug Node'});
       } else if (state.shiftNodeDrag) {
         // dragged from node
         state.shiftNodeDrag = false;
@@ -531,17 +548,6 @@ class App extends Component {
       this.state.lastKeyDown = -1;
     };
 
-    // GraphCreator.prototype.calculateLabelPosition = function (link_label) {
-    //   link_label.attr('x', function(d) {
-    //     var node = d3.select(link_label.node().parentElement).selectAll('path').node();
-    //     var pathLength = node.getTotalLength();
-    //     d.point = node.getPointAtLength(pathLength / 2);
-    //     return d.point.x;
-    //   }).attr('y', function(d) {
-    //     return d.point.y;
-    //   });
-    // };
-
     GraphCreator.prototype.calculatePathTooltipPosition = function (link_label) {
 
       link_label.attr('x', function (d) {
@@ -558,13 +564,7 @@ class App extends Component {
       return d.source.id + '-' + d.target.id;
     };
 
-    GraphCreator.prototype.insertEdgeLabel = function (gEl, label) {
-      // var link_label = gEl.append('text');
-      // link_label.style('text-anchor', 'middle')
-      //   .style('dominant-baseline', 'central')
-      //   .attr('class', 'edge-label').text(label);
-      //
-      // this.calculateLabelPosition(link_label);
+    GraphCreator.prototype.insertEdgeLabel = function (gEl) {
       const thisGraph = this;
 
       var div_label = gEl.append('foreignObject').attr({
@@ -573,7 +573,7 @@ class App extends Component {
         'class': 'path-tooltip'
       });
 
-      const subDiv = div_label.append('xhtml:div').attr({
+      div_label.append('xhtml:div').attr({
         'class': 'path-tooltip-div'
       })
         .append('div')
@@ -581,21 +581,16 @@ class App extends Component {
           'class': 'tooltip'
         }).append('p')
         .attr('class', 'lead')
-        .attr('id', function(d) {
+        .attr('id', function (d) {
           return thisGraph.nodeNaming(d);
-        }).html(function(d) {
+        }).html(function (d) {
           return d;
-        }).attr('dummy_attr', function(d) {
+        }).attr('dummy_attr', function (d) {
           const node = d3.select(this).node();
           d3.select(d3.select(this).node().parentElement.parentElement.parentElement)
-          .attr('width', node.clientWidth + 0.5).attr('height', node.clientHeight + 0.5);
+            .attr('width', node.clientWidth + 0.5).attr('height', node.clientHeight + 0.5);
           return 'meep';
         });
-
-
-      // .text();
-
-      // look here you idiot //
 
       this.calculatePathTooltipPosition(div_label);
     };
@@ -619,10 +614,6 @@ class App extends Component {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
       });
 
-      // paths.select('text').each(function(d) {
-      //   thisGraph.calculateLabelPosition(d3.select(this));
-      // });
-
       paths.select('foreignObject.path-tooltip').each(function (d) {
         thisGraph.calculatePathTooltipPosition(d3.select(this));
       });
@@ -632,7 +623,7 @@ class App extends Component {
 
       pathObject.append('path').style('marker-end', 'url(#end-arrow)').classed('link real-link', true).attr('d', function (d) {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
-      }).attr('id', function(d) {
+      }).attr('id', function (d) {
         return 'path-' + thisGraph.nodeNaming(d);
       });
 
@@ -644,11 +635,11 @@ class App extends Component {
       pathObject.append('path').classed('link hidden-hitbox', true).attr('d', function (d) {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
       }).on('mouseover', function (d) {
-        d3.select('#path-'+ thisGraph.nodeNaming(d)).classed('tooltip', true);
+        d3.select('#path-' + thisGraph.nodeNaming(d)).classed('tooltip', true);
       }).on('mouseout', function (d) {
-        d3.select('#path-'+ thisGraph.nodeNaming(d)).classed('tooltip', false);
+        d3.select('#path-' + thisGraph.nodeNaming(d)).classed('tooltip', false);
       }).on('mousedown', function (d) {
-        thisGraph.pathMouseDown.call(thisGraph, d3.select('#path-'+ thisGraph.nodeNaming(d)), d);
+        thisGraph.pathMouseDown.call(thisGraph, d3.select('#path-' + thisGraph.nodeNaming(d)), d);
       }).on('mouseup', function (d) {
         state.mouseDownLink = null;
       });
@@ -688,15 +679,30 @@ class App extends Component {
       newGs.append('circle').attr('r', String(consts.nodeRadius));
 
       var images = newGs.append('svg:image')
-        .attr('xlink:href',  function(d) { return 'https://i.imgur.com/DEHn9RZ.png';})
-        .attr('x', function(d) { return -50;})
-        .attr('y', function(d) { return -50;})
+        .attr('class', function (d) {
+          if (d.machine && d.machine.icon) {
+            return 'machine-icon';
+          }
+          return 'dev-icon';
+        })
+        .attr('xlink:href', function (d) {
+          if (d.machine && d.machine.icon) {
+            return d.machine.icon;
+          }
+          return 'https://i.imgur.com/oBmfK3w.png';
+        })
+        .attr('x', function (d) {
+          return -50;
+        })
+        .attr('y', function (d) {
+          return -50;
+        })
         .attr('height', 100)
         .attr('width', 100);
 
 
       newGs.each(function (d) {
-        thisGraph.insertTitleLinebreaks(d3.select(this), d.title);
+        thisGraph.insertTitleLinebreaks(d3.select(this), d.name);
       });
 
       // remove old nodes
@@ -713,7 +719,6 @@ class App extends Component {
     this.generateMeme(window.d3);
 
 
-
     /**** MAIN ****/
 
     var bodyEl = document.getElementById('mainRender');
@@ -725,8 +730,8 @@ class App extends Component {
 
     // initial node data
     var nodes = [
-      {title: '0 memes/sec', id: 0, x: xLoc, y: yLoc}, {
-        title: '0 memes/sec',
+      {name: '0 memes/sec', id: 0, x: xLoc, y: yLoc}, {
+        name: '0 memes/sec',
         id: 1,
         x: xLoc,
         y: yLoc + 200
@@ -741,55 +746,64 @@ class App extends Component {
     this.graph.updateGraph();
   }
 
+  generateOresList() {
+    const s = this.structures.RESOURCES;
+
+    return getKeys(s).map(function (a) {
+      const types = s.get[s[a]].types;
+      return Object.keys(types).map(function (resource_map) {
+        return types[resource_map];
+      });
+    }).flat();
+  }
+
+  generateOreButtons() {
+    const types = this.generateOresList();
+
+    return types.map(resource_type =>
+      (<ListItem button key={resource_type.name} onClick={() => this.addNode(this.graphCreatorInstance, resource_type)}>
+        <ListItemIcon><AddBoxIcon/></ListItemIcon>
+        <ListItemText primary={resource_type.name}/>
+      </ListItem>)
+    );
+  }
+
+
+  generateMachineButtons() {
+    const types = this.generateMachinesList();
+    return types.map(machine =>
+      (<ListItem button key={machine.name} onClick={() => this.addNode(this.graphCreatorInstance, machine)}>
+        <ListItemIcon><AddBoxIcon/></ListItemIcon>
+        <ListItemText primary={machine.name}/>
+      </ListItem>)
+    );
+  }
+
+  generateMachinesList() {
+    const s = this.structures.MACHINES;
+    return Object.keys(s).map(function (a) {
+      const marks = s[a].types;
+      return Object.keys(marks).map(function (b) {
+        return marks[b];
+      });
+    }).flat();
+  }
+
+  generateData() {
+    this.structures = data;
+  }
+
   render() {
-
-    let id_counter = 0;
-
-    var machine_types = {
-      miner : { types : [{ name : 'Miner Mk.1', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png'}, { name : 'Miner Mk.2', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png'}]},
-      smelter : { types : [{ name : 'Smelter Mk.1', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png'}, { name : 'Smelter Mk.2', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png' }]},
-      assembler : { types : [{ name : 'Assembler Mk.1', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Assembler.png' }, { name : 'Assembler Mk.2', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Assembler.png' }]},
-      manufacturer : { types : [{ name : 'Manufacturer Mk.1', icon : '' }, { name : 'Manufacturer Mk.2', icon : '' }]},
-      coal_generator : { types : [{ name: 'Coal Generator', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Coal_Generator.png', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Coal_Generator.png' }]}
-    }
-
-    id_counter = 0;
-    var purity = {
-      impure : { name : 'Impure', id : id_counter++},
-      normal : { name : 'Normal', id : id_counter++},
-      pure : { name : 'Pure', id : id_counter++}
-    }
-
-    id_counter = 0;
-    var resources = {
-      iron : { id : id_counter++, name : 'Iron', purity : {[purity.impure.id] : 30, [purity.normal.id] : 60, [purity.pure.id] : 120}, icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png' },
-      coal : { id : id_counter++, name : 'Coal', purity : {[purity.impure.id] : 30, [purity.normal.id] : 60, [purity.pure.id] : 120}, icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Coal.png' },
-      copper : { id : id_counter++, name : 'Copper', purity : {[purity.impure.id] : 30, [purity.normal.id] : 60, [purity.pure.id] : 120}, icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Copper_Ore.png' },
-      limestone : { id : id_counter++, name : 'Limestone', purity : {[purity.impure.id] : 30, [purity.normal.id] : 60, [purity.pure.id] : 120}, icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Limestone.png' }
-    }
-
-    var items = {
-      iron_ingot : { name : 'Iron Ingot', id : id_counter++, crafting : [{ from : resources.iron, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png'},
-      iron_plate : { name : 'Iron Plate', id : id_counter++, crafting : [{ from : items.iron_ingot, in_quantity : 2, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Plate.png'},
-      iron_rod : { name : 'Iron Rod', id : id_counter++, crafting : [{ from : items.iron_ingot, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Rod.png'},
-      screw : { name : 'Screw', id : id_counter++, crafting : [{ from : items.iron_rod, in_quantity : 1, out_quantity : 5 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Screw.png'},
-      copper_ingot : { name : 'Copper Ingot', id : id_counter++, crafting : [{ from : resources.copper, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Copper_Ingot.png'},
-      wire : { name : 'Wire', id : id_counter++, crafting : [{ from : items.copper_ingot, in_quantity : 1, out_quantity : 3 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Wire.png'},
-      cable : { name : 'Cable', id : id_counter++, crafting : [{ from : items.wire, in_quantity : 2, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Cable.png'},
-      concrete : { name : 'Concrete', id : id_counter++, crafting : [{ from : resources.limestone, in_quantity :  3, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Concrete.png'},
-      reinforced_iron_plate : { name : 'Reinforced Iron Plate', id : id_counter++, crafting : [{ from: [{in : items.iron_plate, in_quantity : 4}, {in : items.screw, in_quantity : 24}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Reinforced_Iron_Plate.png'},
-      modular_frame : { name : 'Modular Frame', id : id_counter++, crafting : [{ from: [{in : items.reinforced_iron_plate, in_quantity : 3}, {in : items.iron_rod, in_quantity : 6}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Modular_Frame.png'},
-      rotor : { name : 'Rotor', id : id_counter++, crafting : [{ from: [{in : items.iron_rod, in_quantity : 3}, {in : items.screw, in_quantity : 22}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Rotor.png'}
-    }
-
-    const { classes } = this.props;
+    const {classes} = this.props;
     return <div className={classes.root}>
-      <CssBaseline />
+      <CssBaseline/>
       <MuiThemeProvider theme={theme}>
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
-            <Typography variant="h7" color="inherit" noWrap>
-              <img className={classes.logo} src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png" title="logo" />
+            <Typography variant="h6" color="inherit" noWrap>
+              <img className={classes.logo}
+                src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
+                title="logo"/>
             </Typography>
           </Toolbar>
         </AppBar>
@@ -801,33 +815,23 @@ class App extends Component {
           paper: classes.drawerPaper,
         }}
       >
-        <div className={classes.toolbar} />
+        <div className={classes.toolbar}/>
         <List>
-          {Object.keys(machine_types).map((a, b) => machine_types[a].name ).map((text) => (
-            <ListItem button key={text} onClick={() => this.addNode(this.graphCreatorInstance, "Fuck you")}>
-              <ListItemIcon><AddBoxIcon /></ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
+          {this.generateMachineButtons()}
         </List>
-        <Divider />
+        <Divider/>
         <List>
-          {Object.keys(resources).map((a, b) => resources[a].name).map((text) => (
-            <ListItem button key={text}>
-              <ListItemIcon><AddBoxIcon /></ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItem>
-          ))}
+          {this.generateOreButtons()}
         </List>
-        <Divider />
+        <Divider/>
         <List>
           <ListItem button key='Help'>
-            <ListItemIcon><HelpIcon /></ListItemIcon>
-            <ListItemText primary='Help' />
+            <ListItemIcon><HelpIcon/></ListItemIcon>
+            <ListItemText primary='Help'/>
           </ListItem>
           <ListItem button key='About'>
-            <ListItemIcon><InfoIcon /></ListItemIcon>
-            <ListItemText primary='About' />
+            <ListItemIcon><InfoIcon/></ListItemIcon>
+            <ListItemText primary='About'/>
           </ListItem>
         </List>
       </Drawer>
@@ -836,7 +840,7 @@ class App extends Component {
       </main>
     </div>;
 
-  };
+  }
 
 }
 
