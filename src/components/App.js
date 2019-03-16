@@ -9,9 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import CardMedia from '@material-ui/core/CardMedia';
 
 const drawerWidth = 240;
 
@@ -461,6 +459,8 @@ class App extends Component {
         // dragged from node
         state.shiftNodeDrag = false;
         thisGraph.dragLine.classed('hidden', true);
+      } else if (state.graphMouseDown) {
+        // SVG was clicked, should we delete?
       }
       state.graphMouseDown = false;
     };
@@ -523,6 +523,10 @@ class App extends Component {
       });
     };
 
+    GraphCreator.prototype.nodeNaming = function (d) {
+      return d.source.id + '-' + d.target.id;
+    };
+
     GraphCreator.prototype.insertEdgeLabel = function (gEl, label) {
       // var link_label = gEl.append('text');
       // link_label.style('text-anchor', 'middle')
@@ -530,11 +534,7 @@ class App extends Component {
       //   .attr('class', 'edge-label').text(label);
       //
       // this.calculateLabelPosition(link_label);
-
-
-
-
-
+      const thisGraph = this;
 
       var div_label = gEl.append('foreignObject').attr({
         'width': '200px',
@@ -542,15 +542,22 @@ class App extends Component {
         'class': 'path-tooltip'
       });
 
-      div_label.append('xhtml:div').attr({
-        'class': 'full-div'
+      const subDiv = div_label.append('xhtml:div').attr({
+        'class': 'path-tooltip-div'
       })
         .append('div')
         .attr({
           'class': 'tooltip'
         }).append('p')
         .attr('class', 'lead')
-        .html('200 Memes per second');
+        .attr('id', function(d) {
+          return thisGraph.nodeNaming(d);
+        }).html(function(d) {
+          return d;
+        });
+      // .text();
+
+      // look here you idiot //
 
       this.calculatePathTooltipPosition(div_label);
     };
@@ -588,7 +595,7 @@ class App extends Component {
       pathObject.append('path').style('marker-end', 'url(#end-arrow)').classed('link real-link', true).attr('d', function (d) {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
       }).attr('id', function(d) {
-        return 'path-' + d.source.id + '-' + d.target.id;
+        return 'path-' + thisGraph.nodeNaming(d);
       });
 
       pathObject.each(function (d) {
@@ -599,14 +606,13 @@ class App extends Component {
       pathObject.append('path').classed('link hidden-hitbox', true).attr('d', function (d) {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
       }).on('mouseover', function (d) {
-        d3.select();
-        console.log(d);
+        d3.select('#path-'+ thisGraph.nodeNaming(d)).classed('tooltip', true);
+      }).on('mouseout', function (d) {
+        d3.select('#path-'+ thisGraph.nodeNaming(d)).classed('tooltip', false);
       }).on('mousedown', function (d) {
-        console.log(d);
-        // thisGraph.pathMouseDown.call(thisGraph, d3.select(this), d);
+        thisGraph.pathMouseDown.call(thisGraph, d3.select('#path-'+ thisGraph.nodeNaming(d)), d);
       }).on('mouseup', function (d) {
-        console.log(d);
-        // state.mouseDownLink = null;
+        state.mouseDownLink = null;
       });
 
 
@@ -740,7 +746,7 @@ class App extends Component {
         <List>
           {['Help', 'About'].map((text, index) => (
             <ListItem button key={text}>
-              
+
               <ListItemText primary={text} />
             </ListItem>
           ))}
