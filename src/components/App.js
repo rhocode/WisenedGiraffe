@@ -49,7 +49,9 @@ const styles = theme => ({
 
 const theme = createMuiTheme({
   palette: {
-    primary: grey,
+    primary: {
+      main: '#424242'
+    },
   }
 });
 
@@ -740,18 +742,43 @@ class App extends Component {
 
   render() {
 
-    var machines = {
-      miner : { name : 'Miner' },
-      smelter : { name : 'Smelter' },
-      assembler : { name : 'Assembler' },
-      coal_generator : { name: 'Coal Generator' }
+    let id_counter = 0;
+
+    var machine_types = {
+      miner : { types : [{ name : 'Miner Mk.1', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png'}, { name : 'Miner Mk.2', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png'}]},
+      smelter : { types : [{ name : 'Smelter Mk.1', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png'}, { name : 'Smelter Mk.2', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png' }]},
+      assembler : { types : [{ name : 'Assembler Mk.1', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Assembler.png' }, { name : 'Assembler Mk.2', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Assembler.png' }]},
+      manufacturer : { types : [{ name : 'Manufacturer Mk.1', icon : '' }, { name : 'Manufacturer Mk.2', icon : '' }]},
+      coal_generator : { types : [{ name: 'Coal Generator', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Coal_Generator.png', icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Coal_Generator.png' }]}
     }
 
+    id_counter = 0;
+    var purity = {
+      impure : { name : 'Impure', id : id_counter++},
+      normal : { name : 'Normal', id : id_counter++},
+      pure : { name : 'Pure', id : id_counter++}
+    }
+
+    id_counter = 0;
     var resources = {
-      iron : { name : 'Iron' },
-      coal : { name : 'Coal' },
-      copper : { name : 'Copper' },
-      limestone : { name : 'Limestone' }
+      iron : { id : id_counter++, name : 'Iron', purity : {[purity.impure.id] : 30, [purity.normal.id] : 60, [purity.pure.id] : 120}, icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png' },
+      coal : { id : id_counter++, name : 'Coal', purity : {[purity.impure.id] : 30, [purity.normal.id] : 60, [purity.pure.id] : 120}, icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Coal.png' },
+      copper : { id : id_counter++, name : 'Copper', purity : {[purity.impure.id] : 30, [purity.normal.id] : 60, [purity.pure.id] : 120}, icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Copper_Ore.png' },
+      limestone : { id : id_counter++, name : 'Limestone', purity : {[purity.impure.id] : 30, [purity.normal.id] : 60, [purity.pure.id] : 120}, icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Limestone.png' }
+    }
+
+    var items = {
+      iron_ingot : { id : id_counter++, crafting : [{ from : resources.iron, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png'},
+      iron_plate : { id : id_counter++, crafting : [{ from : items.iron_ingot, in_quantity : 2, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Plate.png'},
+      iron_rod : { id : id_counter++, crafting : [{ from : items.iron_ingot, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Rod.png'},
+      screw : { id : id_counter++, crafting : [{ from : items.iron_rod, in_quantity : 1, out_quantity : 5 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Screw.png'},
+      copper_ingot : { id : id_counter++, crafting : [{ from : resources.copper, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Copper_Ingot.png'},
+      wire : { id : id_counter++, crafting : [{ from : items.copper_ingot, in_quantity : 1, out_quantity : 3 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Wire.png'},
+      cable : { id : id_counter++, crafting : [{ from : items.wire, in_quantity : 2, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Cable.png'},
+      concrete : { id : id_counter++, crafting : [{ from : resources.limestone, in_quantity :  3, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Concrete.png'},
+      reinforced_iron_plate : { id : id_counter++, crafting : [{ from: [{in : items.iron_plate, in_quantity : 4}, {in : items.screw, in_quantity : 24}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Reinforced_Iron_Plate.png'},
+      modular_frame : { id : id_counter++, crafting : [{ from: [{in : items.reinforced_iron_plate, in_quantity : 3}, {in : items.iron_rod, in_quantity : 6}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Modular_Frame.png'},
+      rotor : { id : id_counter++, crafting : [{ from: [{in : items.iron_rod, in_quantity : 3}, {in : items.screw, in_quantity : 22}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Rotor.png'}
     }
 
     const { classes } = this.props;
@@ -760,7 +787,7 @@ class App extends Component {
       <MuiThemeProvider theme={theme}>
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
-            <Typography variant="h6" color="inherit" noWrap>
+            <Typography variant="h7" color="inherit" noWrap>
               <img className={classes.logo} src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png" title="logo" />
             </Typography>
           </Toolbar>
@@ -775,7 +802,7 @@ class App extends Component {
       >
         <div className={classes.toolbar} />
         <List>
-          {Object.keys(machines).map((a, b) => machines[a].name ).map((text) => (
+          {Object.keys(machine_types).map((a, b) => machine_types[a].name ).map((text) => (
             <ListItem button key={text} onClick={() => this.addNode(this.graphCreatorInstance, "Fuck you")}>
               <ListItemIcon><AddBoxIcon /></ListItemIcon>
               <ListItemText primary={text} />
