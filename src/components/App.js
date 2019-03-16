@@ -15,6 +15,8 @@ import AddBoxIcon from '@material-ui/icons/AddBox';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
 
+/* global d3 */
+
 const drawerWidth = 240;
 
 const styles = theme => ({
@@ -48,10 +50,29 @@ class App extends Component {
 
   constructor(props) {
     super(props);
+
+    this.state= {
+      nodes: {},
+      edges: {},
+    };
+  }
+
+  addNode(graphRef, nodeName) {
+    // var xycoords = d3.mouse(graphRef.svgG.node()),
+      // d = {id: graphRef.idct++, title: nodeName, x: xycoords[0], y: xycoords[1]};
+    var d = {id: graphRef.idct++, title: nodeName, x: graphRef.state.bounds.width / 2, y: graphRef.state.bounds.height / 2};
+    graphRef.nodes.push(d);
+    graphRef.updateGraph();
   }
 
   generateMeme(d3) {
-    var GraphCreator = function GraphCreator(svg, nodes, edges) {
+
+    const globalState = this.state;
+    const globalAccessor = this;
+    this.graphCreatorInstance = null;
+
+    var GraphCreator = function GraphCreator(svg, nodes, edges, bounds) {
+      globalAccessor.graphCreatorInstance = this;
       var thisGraph = this;
       thisGraph.idct = 0;
 
@@ -67,7 +88,8 @@ class App extends Component {
         justScaleTransGraph: false,
         lastKeyDown: -1,
         shiftNodeDrag: false,
-        selectedText: null
+        selectedText: null,
+        bounds
       };
 
       // define arrow markers for graph links
@@ -448,17 +470,8 @@ class App extends Component {
         state.justScaleTransGraph = false;
       } else if (state.graphMouseDown && d3.event.shiftKey) {
         // clicked not dragged from svg
-        var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = {id: thisGraph.idct++, title: 'new concept', x: xycoords[0], y: xycoords[1]};
-        thisGraph.nodes.push(d);
-        thisGraph.updateGraph();
-        // make title of text immediently editable
-        // var d3txt = thisGraph.changeTextOfNode(thisGraph.circles.filter(function (dval) {
-        //     return dval.id === d.id;
-        //   }), d),
-        //   txtNode = d3txt.node();
-        // thisGraph.selectElementContents(txtNode);
-        // txtNode.focus();
+
+        globalAccessor.addNode(thisGraph, "Debug Node");
       } else if (state.shiftNodeDrag) {
         // dragged from node
         state.shiftNodeDrag = false;
@@ -679,15 +692,11 @@ class App extends Component {
         bodyEl = document.getElementsByTagName('body')[0];
       var x = window.innerWidth || docEl.clientWidth || bodyEl.clientWidth;
       var y = window.innerHeight || docEl.clientHeight || bodyEl.clientHeight;
-      svg.attr('width', x).attr('height', y);
+      this.state.bounds = {x, y};
+      console.log(this.state.bounds)
     };
 
     /**** MAIN ****/
-
-    // // warn the user when leaving
-    // window.onbeforeunload = function () {
-    //   return 'Make sure to save your graph locally before leaving :-)';
-    // };
 
     var docEl = document.documentElement,
       bodyEl = document.getElementsByTagName('body')[0];
@@ -711,13 +720,15 @@ class App extends Component {
     /** MAIN SVG **/
     const svg = d3.select('#mainRender');
 
-    var graph = new GraphCreator(svg, nodes, edges);
-    graph.setIdCt(2);
-    graph.updateGraph();
+
+    this.graph = new GraphCreator(svg, nodes, edges, {width, height});
+    this.graph.setIdCt(2);
+    this.graph.updateGraph();
   }
 
   componentDidMount() {
     this.generateMeme(window.d3);
+    console.log(this.state);
   }
 
   render() {
@@ -756,7 +767,7 @@ class App extends Component {
         <div className={classes.toolbar} />
         <List>
           {Object.keys(machines).map((a, b) => machines[a].name ).map((text) => (
-            <ListItem button key={text}>
+            <ListItem button key={text} onClick={() => this.addNode(this.graphCreatorInstance, "Fuck you")}>
               <ListItemIcon><AddBoxIcon /></ListItemIcon>
               <ListItemText primary={text} />
             </ListItem>
