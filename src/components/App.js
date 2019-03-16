@@ -1,9 +1,51 @@
 import React, {Component} from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Drawer from '@material-ui/core/Drawer';
+import AppBar from '@material-ui/core/AppBar';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import List from '@material-ui/core/List';
+import Divider from '@material-ui/core/Divider';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import CardMedia from '@material-ui/core/CardMedia';
 
-export default class App extends Component {
+const drawerWidth = 240;
 
-  constructor() {
-    super();
+const styles = theme => ({
+  root: {
+    display: 'flex',
+    flexGrow: 1,
+    flexBasis: 'auto',
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+  },
+  content: {
+    display: 'flex',
+    flexGrow: 1,
+    paddingTop: 64,
+  },
+  toolbar: theme.mixins.toolbar,
+  logo: {
+    width: drawerWidth,
+  }
+});
+
+class App extends Component {
+
+  constructor(props) {
+    super(props);
   }
 
   generateMeme(d3) {
@@ -669,7 +711,52 @@ export default class App extends Component {
   }
 
   render() {
-    return <div id="renderParent" className="full-div"><svg id="mainRender"/></div>;
-  }
+    const { classes } = this.props;
+    return <div className={classes.root}>
+      <CssBaseline />
+      <AppBar position="fixed" className={classes.appBar}>
+        <Toolbar>
+          <Typography variant="h6" color="inherit" noWrap>
+            <img className={classes.logo} src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png" title="logo" />
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        className={classes.drawer}
+        variant="permanent"
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+      >
+        <div className={classes.toolbar} />
+        <List>
+          {['New Miner', 'New Smelter', 'New Constructor', 'New Assembler', 'New Coal Generator'].map((text, index) => (
+            <ListItem button key={text}>
+              <ListItemText primary={text} />
+            </ListItem>
+          ))}
+        </List>
+        <Divider />
+        <List>
+          {['Help', 'About'].map((text, index) => (
+            <ListItem button key={text}>
+              
+              <ListItemText primary={text} />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+      <main className={classes.content}>
+        <svg id="mainRender"/>
+      </main>
+    </div>;
+
+  };
 
 }
+
+App.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles)(App);
