@@ -63,19 +63,40 @@ class App extends Component {
     this.state= {
       nodes: {},
       edges: {},
+      selectedNode: null,
+      selectedEdge: null,
+      mouseDownNode: null,
+      mouseDownLink: null,
+      justDragged: false,
+      justScaleTransGraph: false,
+      lastKeyDown: -1,
+      shiftNodeDrag: false,
+      selectedText: null,
     };
   }
 
   addNode(graphRef, nodeName) {
     var bodyEl = document.getElementById('mainRender');
-
     var width = bodyEl.clientWidth,
       height = bodyEl.clientHeight;
 
     var d = {id: graphRef.idct++, title: nodeName, x: width / 2, y: height / 2};
-    console.log(d)
-    graphRef.nodes.push(d);
+  graphRef.nodes.push(d);
     graphRef.updateGraph();
+  }
+
+  addEdge(graphRef, edgeData) {
+    var newEdge = {source: edgeData.from, target: edgeData.to};
+    var filtRes = graphRef.paths.filter(function (d) {
+      if (d.source === newEdge.target && d.target === newEdge.source) {
+        graphRef.edges.splice(graphRef.edges.indexOf(d), 1);
+      }
+      return d.source === newEdge.source && d.target === newEdge.target;
+    });
+    if (!filtRes[0].length) {
+      graphRef.edges.push(newEdge);
+      graphRef.updateGraph();
+    }
   }
 
   generateMeme(d3) {
@@ -83,6 +104,7 @@ class App extends Component {
     const globalState = this.state;
     const globalAccessor = this;
     this.graphCreatorInstance = null;
+
 
     var GraphCreator = function GraphCreator(svg, nodes, edges) {
       globalAccessor.graphCreatorInstance = this;
@@ -92,17 +114,7 @@ class App extends Component {
       thisGraph.nodes = nodes || [];
       thisGraph.edges = edges || [];
 
-      thisGraph.state = {
-        selectedNode: null,
-        selectedEdge: null,
-        mouseDownNode: null,
-        mouseDownLink: null,
-        justDragged: false,
-        justScaleTransGraph: false,
-        lastKeyDown: -1,
-        shiftNodeDrag: false,
-        selectedText: null,
-      };
+      thisGraph.state = globalAccessor.state;
 
       // define arrow markers for graph links
       var defs = svg.append('svg:defs');
@@ -125,7 +137,7 @@ class App extends Component {
       thisGraph.drag = d3.behavior.drag().origin(function (d) {
         return {x: d.x, y: d.y};
       }).on('drag', function (args) {
-        thisGraph.state.justDragged = true;
+        globalAccessor.state.justDragged = true;
         thisGraph.dragmove.call(thisGraph, args);
       }).on('dragend', function () {
         // todo check if edge-mode is selected
@@ -181,6 +193,7 @@ class App extends Component {
       // handle uploaded data
       d3.select('#upload-input').on('click', function () {
         document.getElementById('hidden-file-upload').click();
+        document.getElementById('hidden-file-upload').click();
       });
       d3.select('#hidden-file-upload').on('change', function () {
         if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -225,6 +238,8 @@ class App extends Component {
       });
     };
 
+    this.GraphCreator = GraphCreator;
+
     GraphCreator.prototype.setIdCt = function (idct) {
       this.idct = idct;
     };
@@ -245,7 +260,7 @@ class App extends Component {
 
     GraphCreator.prototype.dragmove = function (d) {
       var thisGraph = this;
-      if (thisGraph.state.shiftNodeDrag) {
+      if (globalAccessor.state.shiftNodeDrag) {
         thisGraph.dragLine.attr('d', 'M' + d.x + ',' + d.y + 'L' + d3.mouse(thisGraph.svgG.node())[0] + ',' + d3.mouse(this.svgG.node())[1]);
       } else {
         d.x += d3.event.dx;
@@ -303,40 +318,40 @@ class App extends Component {
     GraphCreator.prototype.replaceSelectEdge = function (d3Path, edgeData) {
       var thisGraph = this;
       d3Path.classed(thisGraph.consts.selectedClass, true);
-      if (thisGraph.state.selectedEdge) {
+      if (globalAccessor.state.selectedEdge) {
         thisGraph.removeSelectFromEdge();
       }
-      thisGraph.state.selectedEdge = edgeData;
+      globalAccessor.state.selectedEdge = edgeData;
     };
 
     GraphCreator.prototype.replaceSelectNode = function (d3Node, nodeData) {
       var thisGraph = this;
       d3Node.classed(this.consts.selectedClass, true);
-      if (thisGraph.state.selectedNode) {
+      if (globalAccessor.state.selectedNode) {
         thisGraph.removeSelectFromNode();
       }
-      thisGraph.state.selectedNode = nodeData;
+      globalAccessor.state.selectedNode = nodeData;
     };
 
     GraphCreator.prototype.removeSelectFromNode = function () {
       var thisGraph = this;
       thisGraph.circles.filter(function (cd) {
-        return cd.id === thisGraph.state.selectedNode.id;
+        return cd.id === globalAccessor.state.selectedNode.id;
       }).classed(thisGraph.consts.selectedClass, false);
-      thisGraph.state.selectedNode = null;
+      globalAccessor.state.selectedNode = null;
     };
 
     GraphCreator.prototype.removeSelectFromEdge = function () {
       var thisGraph = this;
       thisGraph.paths.filter(function (cd) {
-        return cd === thisGraph.state.selectedEdge;
+        return cd === globalAccessor.state.selectedEdge;
       }).classed(thisGraph.consts.selectedClass, false);
-      thisGraph.state.selectedEdge = null;
+      globalAccessor.state.selectedEdge = null;
     };
 
     GraphCreator.prototype.pathMouseDown = function (d3path, d) {
       var thisGraph = this,
-        state = thisGraph.state;
+        state = globalAccessor.state;
       d3.event.stopPropagation();
       state.mouseDownLink = d;
 
@@ -355,7 +370,7 @@ class App extends Component {
     // mousedown on node
     GraphCreator.prototype.circleMouseDown = function (d3node, d) {
       var thisGraph = this,
-        state = thisGraph.state;
+        state = globalAccessor.state;
       d3.event.stopPropagation();
       state.mouseDownNode = d;
       if (d3.event.shiftKey) {
@@ -407,7 +422,7 @@ class App extends Component {
     // mouseup on nodes
     GraphCreator.prototype.circleMouseUp = function (d3node, d) {
       var thisGraph = this,
-        state = thisGraph.state,
+        state = globalAccessor.state,
         consts = thisGraph.consts;
       // reset the states
       state.shiftNodeDrag = false;
@@ -415,23 +430,16 @@ class App extends Component {
 
       var mouseDownNode = state.mouseDownNode;
 
-      if (!mouseDownNode) return;
+      if (!mouseDownNode) {
+        return;
+      }
 
+      // Set the drag line as hidden!
       thisGraph.dragLine.classed('hidden', true);
 
       if (mouseDownNode !== d) {
-        // we're in a different node: create new edge for mousedown edge and add to graph
-        var newEdge = {source: mouseDownNode, target: d};
-        var filtRes = thisGraph.paths.filter(function (d) {
-          if (d.source === newEdge.target && d.target === newEdge.source) {
-            thisGraph.edges.splice(thisGraph.edges.indexOf(d), 1);
-          }
-          return d.source === newEdge.source && d.target === newEdge.target;
-        });
-        if (!filtRes[0].length) {
-          thisGraph.edges.push(newEdge);
-          thisGraph.updateGraph();
-        }
+        // Create node and add it to the graph.
+        globalAccessor.addEdge(thisGraph, {from: mouseDownNode, to: d});
       } else {
         // we're in the same node
         if (state.justDragged) {
@@ -465,7 +473,7 @@ class App extends Component {
 
     // mousedown on main svg
     GraphCreator.prototype.svgMouseDown = function () {
-      this.state.graphMouseDown = true;
+      globalAccessor.state.graphMouseDown = true;
     };
 
     // mouseup on main svg
@@ -540,10 +548,9 @@ class App extends Component {
         var node = d3.select(link_label.node().parentElement).selectAll('path').node();
         var pathLength = node.getTotalLength();
         d.point = node.getPointAtLength(pathLength / 2);
-        //MAKE THIS 100 AN ACTUAL OFFSET
-        return d.point.x - 100;
+        return d.point.x - (d3.select(this).attr('width') / 2);
       }).attr('y', function (d) {
-        return d.point.y - 100;
+        return d.point.y - (d3.select(this).attr('height') / 2);
       });
     };
 
@@ -578,7 +585,14 @@ class App extends Component {
           return thisGraph.nodeNaming(d);
         }).html(function(d) {
           return d;
+        }).attr('dummy_attr', function(d) {
+          const node = d3.select(this).node();
+          d3.select(d3.select(this).node().parentElement.parentElement.parentElement)
+          .attr('width', node.clientWidth + 0.5).attr('height', node.clientHeight + 0.5);
+          return 'meep';
         });
+
+
       // .text();
 
       // look here you idiot //
@@ -693,13 +707,18 @@ class App extends Component {
       this.state.justScaleTransGraph = true;
       d3.select('.' + this.consts.graphClass).attr('transform', 'translate(' + d3.event.translate + ') scale(' + d3.event.scale + ')');
     };
+  }
+
+  componentDidMount() {
+    this.generateMeme(window.d3);
+
+
 
     /**** MAIN ****/
 
     var bodyEl = document.getElementById('mainRender');
 
-    var width = bodyEl.clientWidth,
-      height = bodyEl.clientHeight;
+    var width = bodyEl.clientWidth;
 
     var xLoc = width / 2 - 25,
       yLoc = 100;
@@ -717,15 +736,9 @@ class App extends Component {
     /** MAIN SVG **/
     const svg = d3.select('#mainRender');
 
-
-    this.graph = new GraphCreator(svg, nodes, edges);
+    this.graph = new this.GraphCreator(svg, nodes, edges);
     this.graph.setIdCt(2);
     this.graph.updateGraph();
-  }
-
-  componentDidMount() {
-    this.generateMeme(window.d3);
-    console.log(this.state);
   }
 
   render() {
