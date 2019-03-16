@@ -9,8 +9,8 @@ import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
@@ -463,6 +463,8 @@ class App extends Component {
         // dragged from node
         state.shiftNodeDrag = false;
         thisGraph.dragLine.classed('hidden', true);
+      } else if (state.graphMouseDown) {
+        // SVG was clicked, should we delete?
       }
       state.graphMouseDown = false;
     };
@@ -525,6 +527,10 @@ class App extends Component {
       });
     };
 
+    GraphCreator.prototype.nodeNaming = function (d) {
+      return d.source.id + '-' + d.target.id;
+    };
+
     GraphCreator.prototype.insertEdgeLabel = function (gEl, label) {
       // var link_label = gEl.append('text');
       // link_label.style('text-anchor', 'middle')
@@ -532,11 +538,7 @@ class App extends Component {
       //   .attr('class', 'edge-label').text(label);
       //
       // this.calculateLabelPosition(link_label);
-
-
-
-
-
+      const thisGraph = this;
 
       var div_label = gEl.append('foreignObject').attr({
         'width': '200px',
@@ -544,15 +546,22 @@ class App extends Component {
         'class': 'path-tooltip'
       });
 
-      div_label.append('xhtml:div').attr({
-        'class': 'full-div'
+      const subDiv = div_label.append('xhtml:div').attr({
+        'class': 'path-tooltip-div'
       })
         .append('div')
         .attr({
           'class': 'tooltip'
         }).append('p')
         .attr('class', 'lead')
-        .html('200 Memes per second');
+        .attr('id', function(d) {
+          return thisGraph.nodeNaming(d);
+        }).html(function(d) {
+          return d;
+        });
+      // .text();
+
+      // look here you idiot //
 
       this.calculatePathTooltipPosition(div_label);
     };
@@ -590,7 +599,7 @@ class App extends Component {
       pathObject.append('path').style('marker-end', 'url(#end-arrow)').classed('link real-link', true).attr('d', function (d) {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
       }).attr('id', function(d) {
-        return 'path-' + d.source.id + '-' + d.target.id;
+        return 'path-' + thisGraph.nodeNaming(d);
       });
 
       pathObject.each(function (d) {
@@ -601,14 +610,13 @@ class App extends Component {
       pathObject.append('path').classed('link hidden-hitbox', true).attr('d', function (d) {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
       }).on('mouseover', function (d) {
-        d3.select();
-        console.log(d);
+        d3.select('#path-'+ thisGraph.nodeNaming(d)).classed('tooltip', true);
+      }).on('mouseout', function (d) {
+        d3.select('#path-'+ thisGraph.nodeNaming(d)).classed('tooltip', false);
       }).on('mousedown', function (d) {
-        console.log(d);
-        // thisGraph.pathMouseDown.call(thisGraph, d3.select(this), d);
+        thisGraph.pathMouseDown.call(thisGraph, d3.select('#path-'+ thisGraph.nodeNaming(d)), d);
       }).on('mouseup', function (d) {
-        console.log(d);
-        // state.mouseDownLink = null;
+        state.mouseDownLink = null;
       });
 
 
@@ -713,6 +721,21 @@ class App extends Component {
   }
 
   render() {
+
+    var machines = {
+      miner : { name : 'Miner' },
+      smelter : { name : 'Smelter' },
+      assembler : { name : 'Assembler' },
+      coal_generator : { name: 'Coal Generator' }
+    }
+
+    var resources = {
+      iron : { name : 'Iron' },
+      coal : { name : 'Coal' },
+      copper : { name : 'Copper' },
+      limestone : { name : 'Limestone' }
+    }
+
     const { classes } = this.props;
     return <div className={classes.root}>
       <CssBaseline />
@@ -732,7 +755,7 @@ class App extends Component {
       >
         <div className={classes.toolbar} />
         <List>
-          {['New Miner', 'New Smelter', 'New Constructor', 'New Assembler', 'New Coal Generator'].map((text, index) => (
+          {Object.keys(machines).map((a, b) => machines[a].name ).map((text) => (
             <ListItem button key={text}>
               <ListItemIcon><AddBoxIcon /></ListItemIcon>
               <ListItemText primary={text} />
@@ -741,12 +764,23 @@ class App extends Component {
         </List>
         <Divider />
         <List>
-          {['Help', 'About'].map((text, index) => (
+          {Object.keys(resources).map((a, b) => resources[a].name).map((text) => (
             <ListItem button key={text}>
-              
+              <ListItemIcon><AddBoxIcon /></ListItemIcon>
               <ListItemText primary={text} />
             </ListItem>
           ))}
+        </List>
+        <Divider />
+        <List>
+          <ListItem button key='Help'>
+            <ListItemIcon><HelpIcon /></ListItemIcon>
+            <ListItemText primary='Help' />
+          </ListItem>
+          <ListItem button key='About'>
+            <ListItemIcon><InfoIcon /></ListItemIcon>
+            <ListItemText primary='About' />
+          </ListItem>
         </List>
       </Drawer>
       <main className={classes.content}>

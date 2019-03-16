@@ -118,6 +118,33 @@ div.tooltip {
   flex: 1;
 }
 
+
+path.link.selected {
+  stroke: rgb(229, 172, 247) !important;
+}
+
+path.hidden-hitbox{
+  stroke-width: 12;
+  stroke-opacity: 0;
+}
+
+path.tooltip {
+  stroke: rgb(100, 50, 100);
+}
+
+.path-tooltip-div {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+svg#mainRender {
+  height: 100%;
+  width: 100%;
+}
+
 tspan.node-label {
   color: white;
 }
