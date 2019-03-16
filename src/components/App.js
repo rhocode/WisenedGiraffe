@@ -768,17 +768,17 @@ class App extends Component {
     }
 
     var items = {
-      iron_ingot : { id : id_counter++, crafting : [{ from : resources.iron, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png'},
-      iron_plate : { id : id_counter++, crafting : [{ from : items.iron_ingot, in_quantity : 2, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Plate.png'},
-      iron_rod : { id : id_counter++, crafting : [{ from : items.iron_ingot, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Rod.png'},
-      screw : { id : id_counter++, crafting : [{ from : items.iron_rod, in_quantity : 1, out_quantity : 5 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Screw.png'},
-      copper_ingot : { id : id_counter++, crafting : [{ from : resources.copper, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Copper_Ingot.png'},
-      wire : { id : id_counter++, crafting : [{ from : items.copper_ingot, in_quantity : 1, out_quantity : 3 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Wire.png'},
-      cable : { id : id_counter++, crafting : [{ from : items.wire, in_quantity : 2, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Cable.png'},
-      concrete : { id : id_counter++, crafting : [{ from : resources.limestone, in_quantity :  3, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Concrete.png'},
-      reinforced_iron_plate : { id : id_counter++, crafting : [{ from: [{in : items.iron_plate, in_quantity : 4}, {in : items.screw, in_quantity : 24}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Reinforced_Iron_Plate.png'},
-      modular_frame : { id : id_counter++, crafting : [{ from: [{in : items.reinforced_iron_plate, in_quantity : 3}, {in : items.iron_rod, in_quantity : 6}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Modular_Frame.png'},
-      rotor : { id : id_counter++, crafting : [{ from: [{in : items.iron_rod, in_quantity : 3}, {in : items.screw, in_quantity : 22}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Rotor.png'}
+      iron_ingot : { name : 'Iron Ingot', id : id_counter++, crafting : [{ from : resources.iron, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png'},
+      iron_plate : { name : 'Iron Plate', id : id_counter++, crafting : [{ from : items.iron_ingot, in_quantity : 2, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Plate.png'},
+      iron_rod : { name : 'Iron Rod', id : id_counter++, crafting : [{ from : items.iron_ingot, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Rod.png'},
+      screw : { name : 'Screw', id : id_counter++, crafting : [{ from : items.iron_rod, in_quantity : 1, out_quantity : 5 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Screw.png'},
+      copper_ingot : { name : 'Copper Ingot', id : id_counter++, crafting : [{ from : resources.copper, in_quantity : 1, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Copper_Ingot.png'},
+      wire : { name : 'Wire', id : id_counter++, crafting : [{ from : items.copper_ingot, in_quantity : 1, out_quantity : 3 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Wire.png'},
+      cable : { name : 'Cable', id : id_counter++, crafting : [{ from : items.wire, in_quantity : 2, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Cable.png'},
+      concrete : { name : 'Concrete', id : id_counter++, crafting : [{ from : resources.limestone, in_quantity :  3, out_quantity : 1 }], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Concrete.png'},
+      reinforced_iron_plate : { name : 'Reinforced Iron Plate', id : id_counter++, crafting : [{ from: [{in : items.iron_plate, in_quantity : 4}, {in : items.screw, in_quantity : 24}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Reinforced_Iron_Plate.png'},
+      modular_frame : { name : 'Modular Frame', id : id_counter++, crafting : [{ from: [{in : items.reinforced_iron_plate, in_quantity : 3}, {in : items.iron_rod, in_quantity : 6}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Modular_Frame.png'},
+      rotor : { name : 'Rotor', id : id_counter++, crafting : [{ from: [{in : items.iron_rod, in_quantity : 3}, {in : items.screw, in_quantity : 22}], out_quantity : 1} ], icon : 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Rotor.png'}
     }
 
     const { classes } = this.props;
