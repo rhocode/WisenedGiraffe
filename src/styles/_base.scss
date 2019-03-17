@@ -61,9 +61,9 @@ marker{
 }
 
 g.conceptG circle{
-  fill: #F6FBFF;
-  stroke: #333;
-  stroke-width: 0px;
+  fill: #FFE0B2;
+  stroke: #FFCC80;
+  stroke-width: 1px;
 }
 
 g.conceptG:hover circle {
@@ -80,13 +80,29 @@ g.selected:hover circle{
 
 path.link {
   fill: none;
-  stroke: #333;
+  stroke: #4CAF50;
   stroke-width: 6px;
   cursor: default;
 }
 
+#end-arrow:hover {
+  fill: #4CAF50;
+}
+
+#end-arrow.selected {
+  fill: #039BE5;
+}
+
+#end-arrow {
+  fill: #4CAF50;
+}
+
 path.link:hover{
-  stroke: rgb(94, 196, 204);
+  stroke: #81C784;
+}
+
+path.link.selected {
+  stroke: #388E3C;
 }
 
 g.connect-node circle{
@@ -97,9 +113,7 @@ path.link.hidden{
   stroke-width: 0;
 }
 
-path.link.selected {
-  stroke: rgb(229, 172, 247);
-}
+
 
 path.hidden-hitbox{
   stroke-width: 12;
@@ -119,9 +133,8 @@ div.tooltip {
   flex: 1;
 }
 
-
 path.link.selected {
-  stroke: rgb(229, 172, 247) !important;
+  stroke: #039BE5;
 }
 
 path.hidden-hitbox{
@@ -130,7 +143,7 @@ path.hidden-hitbox{
 }
 
 path.tooltip {
-  stroke: rgb(100, 50, 100);
+  stroke: #A5D6A7;
 }
 
 .path-tooltip-div {

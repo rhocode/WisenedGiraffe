@@ -33,7 +33,8 @@ s.MACHINES = {
       },
       [s.MACHINE_VERSIONS.MARK_TWO]: {
         name: 'Constructor Mk.2',
-        icon: bUrl + 'Constructor.png'
+        icon: bUrl + 'Constructor.png',
+        hidden: 1
       }
     }
   },
@@ -48,7 +49,8 @@ s.MACHINES = {
       },
       [s.MACHINE_VERSIONS.MARK_TWO]: {
         name: 'Miner Mk.2',
-        icon: bUrl + 'Miner_MK1.png'
+        icon: bUrl + 'Miner_MK1.png',
+        hidden: true
       }
     }
   },
@@ -62,7 +64,9 @@ s.MACHINES = {
       },
       [s.MACHINE_VERSIONS.MARK_TWO]: {
         name: 'Smelter Mk.2',
-        icon: bUrl + 'Smelter.png'
+        icon: bUrl + 'Smelter.png',
+        hidden: true
+
       }
     }
   },
@@ -76,12 +80,14 @@ s.MACHINES = {
       },
       [s.MACHINE_VERSIONS.MARK_TWO]: {
         name: 'Assembler Mk.2',
-        icon: bUrl + 'Assembler.png'
+        icon: bUrl + 'Assembler.png',
+        hidden: true
       }
     }
   },
   //Assemblers
   [s.MACHINE_NODE_TYPES.MANUFACTURER]: {
+    hidden: true,
     node_type: machine_type_nodes,
     types: {
       [s.MACHINE_VERSIONS.MARK_ONE]: {
@@ -90,12 +96,13 @@ s.MACHINES = {
       },
       [s.MACHINE_VERSIONS.MARK_TWO]: {
         name: 'Manufacturer Mk.2',
-        icon: null
+        icon: null,
       }
     }
   },
   //Coal Generator
-  [s.MACHINE_NODE_TYPES.COAL_GENERATOR_NODE]: {
+  [s.MACHINE_NODE_TYPES.GOAL_GENERATOR]: {
+    hidden: true,
     node_type: machine_type_nodes,
     types: {
       [s.MACHINE_VERSIONS.MARK_ONE]: {
@@ -116,7 +123,7 @@ s.GRAPH_TYPES = {
 };
 
 s.PURITY_TYPES = {
-  IMPURE: 'IMPURE_NODE',
+  IMPURE: 'IMPURE',
   NORMAL: 'NORMAL',
   PURE: 'PURE',
   get get() {
@@ -148,6 +155,7 @@ s.RESOURCES = {
       get [s.RESOURCES.IRON]() {
         return {
           node_type: resource_type_node,
+          produces: s.ITEMS.IRON_ORE,
           name: 'Iron Ore',
           types: {
             [s.PURITY_TYPES.IMPURE]: {
@@ -169,6 +177,8 @@ s.RESOURCES = {
         return {
           node_type: resource_type_node,
           name: 'Coal Ore',
+          produces: s.ITEMS.COAL_ORE,
+          hidden: true,
           types: {
             [s.PURITY_TYPES.IMPURE]: {
               name: 'Impure Coal',
@@ -189,6 +199,7 @@ s.RESOURCES = {
         return {
           node_type: resource_type_node,
           name: 'Copper Ore',
+          produces: s.ITEMS.COPPER_ORE,
           types: {
             [s.PURITY_TYPES.IMPURE]: {
               name: 'Impure Copper',
@@ -208,7 +219,9 @@ s.RESOURCES = {
       get [s.RESOURCES.LIMESTONE]() {
         return {
           node_type: resource_type_node,
+          produces: s.ITEMS.LIMESTONE,
           name: 'Limestone Ore',
+          hidden: true,
           types: {
             [s.PURITY_TYPES.IMPURE]: {
               name: 'Impure Limestone',
@@ -230,6 +243,8 @@ s.RESOURCES = {
 };
 
 s.ITEMS = {
+  IRON_ORE: 'IRON_ORE',
+  COPPER_ORE: 'COPPER_ORE',
   IRON_INGOT: 'IRON_INGOT',
   IRON_PLATE: 'IRON_PLATE',
   IRON_ROD: 'IRON_ROD',
@@ -243,6 +258,88 @@ s.ITEMS = {
   ROTOR: 'ROTOR',
   get get() {
     return {
+      get [s.ITEMS.COPPER_ORE]() {
+        return {
+          name: 'Copper Ore',
+          crafting: [
+            {
+              get in() {
+                return [
+                  {resource: s.RESOURCES.COPPER, quantity: 1, raw: true, purity: s.PURITY_TYPES.IMPURE}
+                ];
+              },
+              machine: s.MACHINE_NODE_TYPES.MINER,
+              output_quantity: 1,
+              time: 2,
+              power: 5
+            },
+            {
+              get in() {
+                return [
+                  {resource: s.RESOURCES.COPPER, quantity: 1, raw: true, purity: s.PURITY_TYPES.NORMAL}
+                ];
+              },
+              machine: s.MACHINE_NODE_TYPES.MINER,
+              output_quantity: 1,
+              time: 1,
+              power: 5
+            },
+            {
+              get in() {
+                return [
+                  {resource: s.RESOURCES.COPPER, quantity: 1, raw: true, purity: s.PURITY_TYPES.PURE}
+                ];
+              },
+              machine: s.MACHINE_NODE_TYPES.MINER,
+              output_quantity: 1,
+              time: 0.5,
+              power: 5
+            }
+          ],
+          icon: bUrl + 'Copper_Ore.png'
+        };
+      },
+      get [s.ITEMS.IRON_ORE]() {
+        return {
+          name: 'Iron Ore',
+          crafting: [
+            {
+              get in() {
+                return [
+                  {resource: s.RESOURCES.IRON, quantity: 1, raw: true, purity: s.PURITY_TYPES.IMPURE}
+                ];
+              },
+              machine: s.MACHINE_NODE_TYPES.MINER,
+              output_quantity: 1,
+              time: 2,
+              power: 5
+            },
+            {
+              get in() {
+                return [
+                  {resource: s.RESOURCES.IRON, quantity: 1, raw: true, purity: s.PURITY_TYPES.NORMAL}
+                ];
+              },
+              machine: s.MACHINE_NODE_TYPES.MINER,
+              output_quantity: 1,
+              time: 1,
+              power: 5
+            },
+            {
+              get in() {
+                return [
+                  {resource: s.RESOURCES.IRON, quantity: 1, raw: true, purity: s.PURITY_TYPES.PURE}
+                ];
+              },
+              machine: s.MACHINE_NODE_TYPES.MINER,
+              output_quantity: 1,
+              time: 0.5,
+              power: 5
+            }
+          ],
+          icon: bUrl + 'Iron_Ore.png'
+        };
+      },
       get [s.ITEMS.IRON_INGOT]() {
         return {
           name: 'Iron Ingot',
@@ -250,7 +347,7 @@ s.ITEMS = {
             {
               get in() {
                 return [
-                  {resource: s.RESOURCES.IRON, quantity: 1, raw: true}
+                  {resource: s.ITEMS.IRON_ORE, quantity: 1}
                 ];
               },
               machine: s.MACHINE_NODE_TYPES.SMELTER,
@@ -326,7 +423,7 @@ s.ITEMS = {
             {
               get in() {
                 return [
-                  {resource: s.RESOURCES.COPPER, quantity: 1, raw: true}
+                  {resource: s.ITEMS.COPPER_ORE, quantity: 1}
                 ];
               },
               machine: s.MACHINE_NODE_TYPES.SMELTER,
@@ -378,7 +475,8 @@ s.ITEMS = {
       },
       get [s.ITEMS.CONCRETE]() {
         return {
-          name: 'Modular Frame',
+          name: 'Concrete',
+          hidden: true,
           crafting: [
             {
               get in() {
@@ -390,10 +488,11 @@ s.ITEMS = {
               machine: s.MACHINE_NODE_TYPES.CONSTRUCTOR,
               output_quantity: 1,
               time: 4,
-              power: 4
+              power: 4,
+              hidden: true,
             }
           ],
-          icon: bUrl + 'Modular_Frame.png'
+          icon: bUrl + 'Concrete.png'
         };
       },
       get [s.ITEMS.REINFORCED_IRON_PLATE]() {
@@ -412,21 +511,21 @@ s.ITEMS = {
               time: 12,
               power: 15
             },
-            {
-              get restricted() {
-                return !s.PLAYER_UNLOCKS.RESEARCH_UNLOCKED_ALTERNATE_REINFORCED_IRON_PLATE;
-              },
-              get in() {
-                return [
-                  {resource: s.ITEMS.IRON_PLATE, quantity: 10},
-                  {resource: s.ITEMS.SCREW, quantity: 24}
-                ];
-              },
-              machine: s.MACHINE_NODE_TYPES.ASSEMBLER,
-              output_quantity: 3,
-              time: 24,
-              power: 15
-            }
+            // { // Unhide once we have better handling
+            //   get restricted() {
+            //     return !s.PLAYER_UNLOCKS.RESEARCH_UNLOCKED_ALTERNATE_REINFORCED_IRON_PLATE;
+            //   },
+            //   get in() {
+            //     return [
+            //       {resource: s.ITEMS.IRON_PLATE, quantity: 10},
+            //       {resource: s.ITEMS.SCREW, quantity: 24}
+            //     ];
+            //   },
+            //   machine: s.MACHINE_NODE_TYPES.ASSEMBLER,
+            //   output_quantity: 3,
+            //   time: 24,
+            //   power: 15
+            // }
           ],
           icon: bUrl + 'Reinforced_Iron_Plate.png'
         };

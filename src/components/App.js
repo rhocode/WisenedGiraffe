@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import {withStyles, MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
-import grey from '@material-ui/core/colors/grey';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -15,12 +14,13 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
+import jsxToString from 'jsx-to-string';
 
 import data from './data';
 
 /* global d3 */
 
-const drawerWidth = 240;
+const drawerWidth = 310;
 
 const styles = theme => ({
   root: {
@@ -46,6 +46,17 @@ const styles = theme => ({
   toolbar: theme.mixins.toolbar,
   logo: {
     width: drawerWidth,
+  },
+  icons: {
+    marginRight: 0
+  },
+  pathIcon: {
+    height: 15,
+    width: 15,
+    display: 'inline-block'
+  },
+  pathText: {
+    display: 'inline-block'
   }
 });
 
@@ -60,11 +71,11 @@ const theme = createMuiTheme({
   }
 });
 
-// const isFunction = (functionToCheck) => functionToCheck && {}.toString.call(functionToCheck) === '[object Function]';
-
 const getKeys = (obj) => Object.keys(obj).filter(function (elem) {
   return elem != 'get';
 });
+
+const round = (num) => Math.round(num * 100) / 100;
 
 class App extends Component {
 
@@ -85,36 +96,226 @@ class App extends Component {
       selectedText: null,
     };
 
+    this.nodes = {};
+    this.inEdges = {};
+    this.outEdges = {};
+
     this.generateData();
   }
+
+  generateNodeDef(x, y, machine, id, produces = null, requires = null, name = 'Starting Node') {
+    return {produces, requires, id, name, x, y, machine};
+  }
+
 
   addNode(graphRef, machine) {
     var bodyEl = document.getElementById('mainRender');
     var width = bodyEl.clientWidth,
       height = bodyEl.clientHeight;
-    console.log(machine);
-    var d = {id: graphRef.idct++, name: machine.name, x: width / 2, y: height / 2, machine};
+
+    let produces, requires = null;
+    const p = machine.produces;
+    produces = {power: p.power, time: p.time, name: p.resource_name, quantity: p.output_quantity};
+    if (machine.base_type != this.structures.MACHINE_NODE_TYPES.MINER) {
+      requires = machine.produces.in;
+    }
+
+    var d = this.generateNodeDef(width / 2, height / 2, machine, graphRef.idct++, produces, requires, machine.name);
     graphRef.nodes.push(d);
+    this.addNodeToGraph(graphRef, d);
     graphRef.updateGraph();
   }
 
+  addNodeToGraph(graphRef, d) {
+    const nodeId = graphRef.idct - 1;
+    this.nodes[nodeId] = d;
+    this.outEdges[nodeId] = {};
+    this.inEdges[nodeId] = {};
+  }
+
+
+  removeNode(graphRef, l) {
+    graphRef.nodes.splice(graphRef.nodes.indexOf(l), 1);
+    this.removeNodeFromGraph(l);
+  }
+
+  removeNodeFromGraph(l) {
+    const nodeId = l.id;
+    delete this.nodes[nodeId];
+    delete this.inEdges[nodeId];
+    delete this.outEdges[nodeId];
+  }
+
   addEdge(graphRef, edgeData) {
+    const access = this;
     var newEdge = {source: edgeData.from, target: edgeData.to};
     var filtRes = graphRef.paths.filter(function (d) {
       if (d.source === newEdge.target && d.target === newEdge.source) {
-        graphRef.edges.splice(graphRef.edges.indexOf(d), 1);
+        access.removeEdge(graphRef, d);
       }
       return d.source === newEdge.source && d.target === newEdge.target;
     });
-    if (!filtRes[0].length) {
+
+    const fromResource = edgeData.from.produces.name;
+    const toResources = edgeData.to.requires ? edgeData.to.requires.map(elem => elem.resource) : [];
+    // Filter if it doesn't resolve
+    if (!filtRes[0].length && toResources.includes(fromResource)) {
       graphRef.edges.push(newEdge);
+      this.addEdgeToGraph(edgeData);
       graphRef.updateGraph();
     }
   }
 
+  addEdgeToGraph(edgeData) {
+    console.log(edgeData.to.id);
+    console.log(edgeData.from.id);
+
+
+    this.inEdges[edgeData.to.id][edgeData.from.id] =  {};
+    this.outEdges[edgeData.from.id][edgeData.to.id] = {}
+
+  }
+
+  removeEdge(graphRef, l) {
+    graphRef.edges.splice(graphRef.edges.indexOf(l), 1);
+    this.removeEdgeFromGraph(l);
+  }
+
+  removeEdgeFromGraph(edgeData) {
+    console.log("===================");
+    console.log(this.inEdges, edgeData.target.id, edgeData.source.id);
+    delete this.inEdges[edgeData.source.id][edgeData.target.id];
+
+    console.log(this.outEdges, edgeData.source.id, edgeData.target.id);
+    delete this.outEdges[edgeData.target.id][edgeData.source.id];
+
+  }
+
+  addResourceIcon(parentElement) {
+    const s = this.structures;
+    const requirements = parentElement.datum().requires ? parentElement.datum().requires.length : 0;
+    for (let i = 0 ; i < requirements; i++) {
+      //Text First
+      const input = parentElement.append('text').text(function(d) {
+        const resource = s.ITEMS.get[d.requires[i].resource];
+
+        return resource.name;
+      })
+        .attr('y', function (d) {
+          return 65 + (20 * i);
+        })
+        .attr('x', function (d) {
+          return 15 / 2;
+        });
+      const bound = input.node().getBBox();
+
+      parentElement.append('svg:image')
+        .attr('class', function (d) {
+          if (d.machine && d.machine.icon) {
+            return 'machine-icon';
+          }
+          return 'dev-icon';
+        })
+        .attr('xlink:href', function (d) {
+          const resource = s.ITEMS.get[d.requires[i].resource];
+          if (resource && resource.icon) {
+            return resource.icon;
+          }
+          return 'https://i.imgur.com/oBmfK3w.png';
+        })
+        .attr('x', function (d) {
+          return bound.x - 15;
+        })
+        .attr('y', function (d) {
+          return bound.y + 1;
+        })
+        .attr('height', 15)
+        .attr('width', 15);
+    }
+
+    // ========================
+    //Text First
+    if (requirements == 0) {
+      const input = parentElement.append('text').text(function(d) {
+        // const resource = s.ITEMS.get[d.requires[i].resource];
+        return  round(60/d.produces.time) + '/min';
+        // return resource.name;
+      })
+        .attr('y', function (d) {
+          return 65;
+        })
+        .attr('x', function (d) {
+          return 15 / 2;
+        });
+      const input_bound = input.node().getBBox();
+
+      parentElement.append('svg:image')
+        .attr('class', function (d) {
+          if (d.machine && d.machine.icon) {
+            return 'machine-icon';
+          }
+          return 'dev-icon';
+        })
+        .attr('xlink:href', function (d) {
+          const resource = s.ITEMS.get[d.produces.name];
+          if (resource && resource.icon) {
+            return resource.icon;
+          }
+          return 'https://i.imgur.com/oBmfK3w.png';
+        })
+        .attr('x', function (d) {
+          return input_bound.x - 15;
+        })
+        .attr('y', function (d) {
+          return input_bound.y + 1;
+        })
+        .attr('height', 15)
+        .attr('width', 15);
+    }
+    //===================================
+
+    //Output text next
+    const output = parentElement.append('text').text(function(d) {
+      const resource = s.ITEMS.get[d.produces.name];
+
+      return resource.name;
+    })
+      .attr('y', function (d) {
+        return -53;
+      })
+      .attr('x', function (d) {
+        return 15 / 2;
+      });
+    const bound = output.node().getBBox();
+
+    parentElement.append('svg:image')
+      .attr('class', function (d) {
+        if (d.machine && d.machine.icon) {
+          return 'machine-icon';
+        }
+        return 'dev-icon';
+      })
+      .attr('xlink:href', function (d) {
+        const resource = s.ITEMS.get[d.produces.name];
+        if (resource && resource.icon) {
+          return resource.icon;
+        }
+        return 'https://i.imgur.com/oBmfK3w.png';
+      })
+      .attr('x', function (d) {
+        return bound.x - 15;
+      })
+      .attr('y', function (d) {
+        return bound.y + 1;
+      })
+      .attr('height', 15)
+      .attr('width', 15);
+
+  }
+
+
   generateMeme(d3) {
 
-    const globalState = this.state;
     const globalAccessor = this;
     this.graphCreatorInstance = null;
 
@@ -305,8 +506,11 @@ class App extends Component {
     };
 
     /* insert svg line breaks: taken from http://stackoverflow.com/questions/13241475/how-do-i-include-newlines-in-labels-in-d3-charts */
-    GraphCreator.prototype.insertTitleLinebreaks = function (gEl, title) {
-      var words = title.split(/\s+/g),
+    GraphCreator.prototype.insertNodeTitle = function (gEl) {
+      const title = gEl.datum().name;
+      console.log('New node:', JSON.stringify(gEl.datum()));
+
+      var words = title.split(/-/g),
         nwords = words.length;
       var el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
       for (var i = 0; i < words.length; i++) {
@@ -319,6 +523,8 @@ class App extends Component {
         var tspan = el.append('text').attr('fill', 'black').text(words[i]);
         if (i > 0) tspan.attr('x', 0).attr('dy', 15 * i);
       }
+
+      globalAccessor.addResourceIcon(el);
     };
 
     // remove edges associated with a node
@@ -328,7 +534,7 @@ class App extends Component {
           return l.source === node || l.target === node;
         });
       toSplice.map(function (l) {
-        thisGraph.edges.splice(thisGraph.edges.indexOf(l), 1);
+        globalAccessor.removeEdge(thisGraph, l);
       });
     };
 
@@ -382,6 +588,7 @@ class App extends Component {
       } else {
         thisGraph.removeSelectFromEdge();
       }
+      thisGraph.updateGraph();
     };
 
     // mousedown on node
@@ -394,7 +601,6 @@ class App extends Component {
         state.shiftNodeDrag = d3.event.shiftKey;
         // reposition dragged directed edge
         thisGraph.dragLine.classed('hidden', false).attr('d', 'M' + d.x + ',' + d.y + 'L' + d.x + ',' + d.y);
-
       }
     };
 
@@ -455,7 +661,7 @@ class App extends Component {
       thisGraph.dragLine.classed('hidden', true);
 
       if (mouseDownNode !== d) {
-        // Create node and add it to the graph.
+        // Create edge and add it to the graph.
         globalAccessor.addEdge(thisGraph, {from: mouseDownNode, to: d});
       } else {
         // we're in the same node
@@ -480,6 +686,7 @@ class App extends Component {
               thisGraph.replaceSelectNode(d3node, d);
             } else {
               thisGraph.removeSelectFromNode();
+
             }
           }
         }
@@ -502,8 +709,7 @@ class App extends Component {
         state.justScaleTransGraph = false;
       } else if (state.graphMouseDown && d3.event.shiftKey) {
         // clicked not dragged from svg
-
-        globalAccessor.addNode(thisGraph, {name: 'Debug Node'});
+        // globalAccessor.addNode(thisGraph, {name: 'Debug Node'});
       } else if (state.shiftNodeDrag) {
         // dragged from node
         state.shiftNodeDrag = false;
@@ -531,12 +737,13 @@ class App extends Component {
       case consts.DELETE_KEY:
         d3.event.preventDefault();
         if (selectedNode) {
-          thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
+          //remove the node
+          globalAccessor.removeNode(thisGraph, selectedNode);
           thisGraph.spliceLinksForNode(selectedNode);
           state.selectedNode = null;
           thisGraph.updateGraph();
         } else if (selectedEdge) {
-          thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
+          globalAccessor.removeEdge(thisGraph, selectedEdge);
           state.selectedEdge = null;
           thisGraph.updateGraph();
         }
@@ -564,8 +771,32 @@ class App extends Component {
       return d.source.id + '-' + d.target.id;
     };
 
+    GraphCreator.prototype.calculateLabelPosition = function (link_label, text) {
+      text.attr('x', function(d) {
+        var node = d3.select(link_label.node().parentElement).selectAll('path').node();
+        var pathLength = node.getTotalLength();
+        d.point = node.getPointAtLength(pathLength / 2);
+        return d.point.x;
+      }).attr('y', function(d) {
+        return d.point.y;
+      });
+    };
+
     GraphCreator.prototype.insertEdgeLabel = function (gEl) {
+      process
+      // var link_label = gEl.append('g').attr('class', 'textLabel');
+      //
+      // const text =  link_label.append('text')
+      //   .style('text-anchor', 'middle')
+      //   .style('dominant-baseline', 'central')
+      //   .attr('class', 'edge-label').text("WHAT");
+      //
+      // this.calculateLabelPosition(link_label, text);
+
       const thisGraph = this;
+      const {classes} = globalAccessor.props;
+
+      console.log(classes.pathIcon);
 
       var div_label = gEl.append('foreignObject').attr({
         'width': '200px',
@@ -584,7 +815,10 @@ class App extends Component {
         .attr('id', function (d) {
           return thisGraph.nodeNaming(d);
         }).html(function (d) {
-          return d;
+          return jsxToString(<div><div><img class={classes.pathIcon}
+            src="https://i.imgur.com/oBmfK3w.png" title="logo"/>
+            <div class={classes.pathText}>Hello there!</div>
+          </div></div>);
         }).attr('dummy_attr', function (d) {
           const node = d3.select(this).node();
           d3.select(d3.select(this).node().parentElement.parentElement.parentElement)
@@ -614,6 +848,10 @@ class App extends Component {
         return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
       });
 
+      // paths.select('.edge-label').each(function(d) {
+      //   thisGraph.calculateLabelPosition(d3.select(this.parentElement), d3.select(this));
+      // });
+
       paths.select('foreignObject.path-tooltip').each(function (d) {
         thisGraph.calculatePathTooltipPosition(d3.select(this));
       });
@@ -628,7 +866,7 @@ class App extends Component {
       });
 
       pathObject.each(function (d) {
-        thisGraph.insertEdgeLabel(d3.select(this), 'Sample Link');
+        thisGraph.insertEdgeLabel(d3.select(this));
       });
 
       // Add a copy of the path to the front, but make it invisible
@@ -702,11 +940,12 @@ class App extends Component {
 
 
       newGs.each(function (d) {
-        thisGraph.insertTitleLinebreaks(d3.select(this), d.name);
+        thisGraph.insertNodeTitle(d3.select(this));
       });
 
       // remove old nodes
       thisGraph.circles.exit().remove();
+      console.log(globalAccessor.outEdges, globalAccessor.inEdges, globalAccessor.nodes);
     };
 
     GraphCreator.prototype.zoomed = function () {
@@ -718,9 +957,7 @@ class App extends Component {
   componentDidMount() {
     this.generateMeme(window.d3);
 
-
     /**** MAIN ****/
-
     var bodyEl = document.getElementById('mainRender');
 
     var width = bodyEl.clientWidth;
@@ -728,21 +965,19 @@ class App extends Component {
     var xLoc = width / 2 - 25,
       yLoc = 100;
 
-    // initial node data
-    var nodes = [
-      {name: '0 memes/sec', id: 0, x: xLoc, y: yLoc}, {
-        name: '0 memes/sec',
-        id: 1,
-        x: xLoc,
-        y: yLoc + 200
-      }];
-    var edges = [{source: nodes[1], target: nodes[0]}];
+    // // initial node data
+    // var nodes = [
+    //   this.generateNodeDef(xLoc, yLoc, null, 0, null, "Debug Node 1"),
+    //   this.generateNodeDef(xLoc, yLoc + 200, null, 1, null, "Debug Node 1")
+    // ];
+    // var edges = [{source: nodes[1], target: nodes[0]}];
 
     /** MAIN SVG **/
     const svg = d3.select('#mainRender');
 
-    this.graph = new this.GraphCreator(svg, nodes, edges);
-    this.graph.setIdCt(2);
+    this.graph = new this.GraphCreator(svg);
+    // this.graph = new this.GraphCreator(svg, nodes, edges);
+    this.graph.setIdCt(0);
     this.graph.updateGraph();
   }
 
@@ -750,48 +985,129 @@ class App extends Component {
     const s = this.structures.RESOURCES;
 
     return getKeys(s).map(function (a) {
+      if (s.get[s[a]].hidden) return null;
       const types = s.get[s[a]].types;
       return Object.keys(types).map(function (resource_map) {
+        types[resource_map].produces = s.get[s[a]].produces;
+        types[resource_map].quality = resource_map;
+
         return types[resource_map];
       });
-    }).flat();
+
+    }).flat().filter(elem => elem != null);
   }
 
-  generateOreButtons() {
-    const types = this.generateOresList();
-
-    return types.map(resource_type =>
-      (<ListItem button key={resource_type.name} onClick={() => this.addNode(this.graphCreatorInstance, resource_type)}>
-        <ListItemIcon><AddBoxIcon/></ListItemIcon>
-        <ListItemText primary={resource_type.name}/>
-      </ListItem>)
-    );
-  }
+  // generateOreButtons() {
+  //   const types = this.generateOresList();
+  //
+  //   return types.map(resource_type =>
+  //     (<ListItem button key={resource_type.name} onClick={() => this.addNode(this.graphCreatorInstance, resource_type)}>
+  //       <ListItemIcon><AddBoxIcon/></ListItemIcon>
+  //       <ListItemText primary={resource_type.name}/>
+  //     </ListItem>)
+  //   );
+  // }
 
 
   generateMachineButtons() {
     const types = this.generateMachinesList();
-    return types.map(machine =>
-      (<ListItem button key={machine.name} onClick={() => this.addNode(this.graphCreatorInstance, machine)}>
-        <ListItemIcon><AddBoxIcon/></ListItemIcon>
-        <ListItemText primary={machine.name}/>
-      </ListItem>)
+    const {classes} = this.props;
+    let id = 0;
+    return types.map(machine => {
+      return (<div key={'machine-list-panel=' + (++id)}><Divider/> {machine.map(each_machine =>
+        <ListItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>
+          <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
+          <ListItemText primary={each_machine.name}/>
+        </ListItem>
+      )}</div>);
+    }
     );
   }
 
   generateMachinesList() {
     const s = this.structures.MACHINES;
+    const m = this.structures.MACHINE_NODE_TYPES.MINER;
+    const n = this.structures.MACHINE_NODE_TYPES;
+    const ores = this.generateOresList();
     return Object.keys(s).map(function (a) {
-      const marks = s[a].types;
-      return Object.keys(marks).map(function (b) {
-        return marks[b];
-      });
-    }).flat();
+      if (s[a].hidden) return null;
+
+      if (a == m) {
+        const marks = s[a].types;
+        return Object.keys(marks).map(function (b) {
+          if (marks[b].hidden) return null;
+          const oresMap = ores.map(ore => {
+
+            const produces = ore.produces;
+
+            const recipies = n.get[a];
+
+            const rec = recipies.filter(elem => {
+              return elem.in[0].purity == ore.quality && elem.resource_name == ore.produces;
+            })[0];
+            return Object.assign({}, marks[b], {produces: rec}, {mining_data: ore}, {name: marks[b].name + ': ' + ore.name});
+          });
+          return oresMap;
+        });
+      } else {
+        const marks = s[a].types;
+        return Object.keys(marks).map(function (b) {
+          if (marks[b].hidden) return null;
+          const recipies = n.get[a];
+          return recipies.map(recipie => {
+            if (recipie.hidden) return null;
+            return Object.assign({}, marks[b], {produces: recipie}, {name: marks[b].name + ': ' + recipie.name});
+          }).filter(elem => elem != null);
+        });
+      }
+    }).flat(1).filter(item => item != null);
   }
 
   generateData() {
     this.structures = data;
+    this.mutateItemData();
+    this.mutateMachineData();
   }
+
+  mutateMachineData() {
+    getKeys(this.structures.MACHINES).map(key => {
+      getKeys(this.structures.MACHINES[key].types).map(subType => {
+        this.structures.MACHINES[key].types[subType].base_type = key;
+      });
+    });
+  }
+
+  mutateItemData() {
+    this.structures.MACHINE_NODE_TYPES.get = {};
+
+    const machineRecipies = this.structures.MACHINE_NODE_TYPES.get;
+
+    const items = this.structures.ITEMS;
+    const itemKeys = getKeys(this.structures.ITEMS);
+
+    itemKeys.map(element => {
+      const item = items.get[items[element]];
+      item.crafting.map((elem) => {
+        if (machineRecipies[elem.machine] == null) {
+          machineRecipies[elem.machine] = [];
+        }
+        machineRecipies[elem.machine].push(Object.assign({}, {name: item.name, resource_name: element}, elem));
+      });
+    });
+
+    const s = this.structures.RESOURCES;
+
+    getKeys(s).map(function (a) {
+      const types = s.get[s[a]].types;
+      Object.keys(types).map(function (resource_map) {
+
+        // For some reason, this doesn't work quite properly.
+        types[resource_map].produces = s.get[s[a]].produces;
+      });
+    });
+  }
+
+
 
   render() {
     const {classes} = this.props;
@@ -820,17 +1136,17 @@ class App extends Component {
           {this.generateMachineButtons()}
         </List>
         <Divider/>
-        <List>
-          {this.generateOreButtons()}
-        </List>
-        <Divider/>
+        {/*<List>*/}
+        {/*{this.generateOreButtons()}*/}
+        {/*</List>*/}
+        {/*<Divider/>*/}
         <List>
           <ListItem button key='Help'>
-            <ListItemIcon><HelpIcon/></ListItemIcon>
+            <ListItemIcon className={classes.icons}><HelpIcon/></ListItemIcon>
             <ListItemText primary='Help'/>
           </ListItem>
           <ListItem button key='About'>
-            <ListItemIcon><InfoIcon/></ListItemIcon>
+            <ListItemIcon className={classes.icons}><InfoIcon/></ListItemIcon>
             <ListItemText primary='About'/>
           </ListItem>
         </List>
