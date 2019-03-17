@@ -113,7 +113,7 @@ class App extends Component {
     return {produces, requires, id, name, x, y, machine};
   }
 
-  addNode(graphRef, machine) {
+  addNode(graphRef, machine, x = null, y = null) {
     console.log(JSON.stringify(machine));
     var bodyEl = document.getElementById('mainRender');
     var width = bodyEl.clientWidth,
@@ -126,7 +126,7 @@ class App extends Component {
       requires = machine.produces.in;
     }
 
-    var d = this.generateNodeDef(width / 2, height / 2, machine, graphRef.idct++, produces, requires, machine.name);
+    var d = this.generateNodeDef(x || width / 2, y || height / 2, machine, graphRef.idct++, produces, requires, machine.name);
     graphRef.nodes.push(d);
     this.addNodeToGraph(graphRef, d);
     graphRef.updateGraph();
@@ -1046,7 +1046,12 @@ class App extends Component {
     const types = this.generateMachinesList();
     const {classes} = this.props;
     let id = 0;
-    return types.map(machine => {
+
+    return Object.keys(types).map(mech => {
+      const machine = types[mech].data;
+      const machineGroupName = types[mech].name;
+      console.log(machineGroupName);
+
       return (<div key={'machine-list-panel=' + (++id)}><Divider/> {machine.map(each_machine =>
         <ListItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>
           <ListItemIcon className={classes.icons}><AddBoxIcon/></ListItemIcon>
@@ -1063,7 +1068,7 @@ class App extends Component {
     const m = this.structures.MACHINE_NODE_TYPES.MINER;
     const n = this.structures.MACHINE_NODE_TYPES;
     const ores = this.generateOresList();
-    return Object.keys(s).map(function (a) {
+    const returnObj = Object.keys(s).map(function (a) {
       if (s[a].hidden) return null;
 
       if (a == m) {
@@ -1092,7 +1097,19 @@ class App extends Component {
           }).filter(elem => elem != null);
         });
       }
-    }).flat(1).filter(item => item != null);
+    })
+    const adamHack = returnObj.flat().filter(item => item != null);
+    const returnMap = {};
+    const st = this.structures.MACHINE_NODE_TYPES;
+
+    adamHack.map(elem => {
+      returnMap[elem[0].base_type] = {
+        name: st.getFriendlyName[elem[0].base_type],
+        data: elem
+      };
+    });
+    return returnMap;
+    // return returnObj.flat(1).filter(item => item != null);
   }
 
   generateData()
