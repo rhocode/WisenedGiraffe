@@ -11,6 +11,8 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
@@ -94,6 +96,7 @@ class App extends Component {
       lastKeyDown: -1,
       shiftNodeDrag: false,
       selectedText: null,
+      anchorEl: null,
     };
 
     this.nodes = {};
@@ -101,6 +104,9 @@ class App extends Component {
     this.outputEdges = {};
 
     this.generateData();
+
+    this.handleMenuClick.bind(this);
+    this.handleMenuClose.bind(this);
   }
 
   calculateGraph() {
@@ -1041,10 +1047,21 @@ class App extends Component {
   // }
 
 
+  handleMenuClick(event){
+    console.log(event.currentTarget.id)
+    this.setState({anchorEl : event.currentTarget});
+  }
+
+  handleMenuClose() {
+    this.setState({anchorEl : null});
+  }
+
   generateMachineButtons()
   {
     const types = this.generateMachinesList();
     const {classes} = this.props;
+    const {anchorEl} = this.state;
+    console.log(anchorEl , this.handleMenuClose);
     let id = 0;
 
     return Object.keys(types).map(mech => {
@@ -1052,12 +1069,17 @@ class App extends Component {
       const machineGroupName = types[mech].name;
       console.log(machineGroupName);
 
-      return (<div key={'machine-list-panel=' + (++id)}><Divider/> {machine.map(each_machine =>
-        <ListItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>
-          <ListItemIcon className={classes.icons}><AddBoxIcon/></ListItemIcon>
-          <ListItemText primary={each_machine.name}/>
-        </ListItem>
-      )}</div>);
+      return (<div key={'machine-list-panel=' + (++id)}><Divider/> 
+      <ListItem id={machineGroupName + (++id)} onClick={(event) => this.handleMenuClick(event)}>
+        <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
+        <ListItemText primary={machineGroupName} />
+      </ListItem>
+      <Menu id={machineGroupName + (++id)} anchorEl={anchorEl} open={(anchorEl && anchorEl.includes(machineGroupName))} onClose={() => this.handleMenuClose()}>
+      {machine.map(each_machine =>
+        <MenuItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>{each_machine.name}</MenuItem>
+      )}
+      </Menu>
+      </div>);
     }
     );
   }
