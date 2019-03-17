@@ -109,6 +109,7 @@ class App extends Component {
     this.handleMenuClose.bind(this);
   }
 
+
   calculateGraph() {
     Object.keys(this.inputEdges).forEach((edge) => {
       console.log(edge);
@@ -815,12 +816,14 @@ class App extends Component {
           return thisGraph.nodeNaming(d);
         }).html(function (d) {
           console.log(d);
+          /*eslint-disable react/no-unknown-property*/
           return jsxToString(<div>
-            <div><img className={classes.pathIcon}
+            <div><img class={classes.pathIcon}
               src="https://i.imgur.com/oBmfK3w.png" title="logo"/>
-            <div className={classes.pathText}>Hello there!</div>
+            <div class={classes.pathText}>Hello there!</div>
             </div>
           </div>);
+        /*eslint-enable  react/no-unknown-property*/
         }).attr('dummy_attr', function (d) {
           const node = d3.select(this).node();
           d3.select(d3.select(this).node().parentElement.parentElement.parentElement)
@@ -901,6 +904,9 @@ class App extends Component {
       var newGs = thisGraph.circles.enter().append('g');
 
       newGs.classed(consts.circleGClass, true)
+        .attr('id', function(d) {
+          return 'graph-node-' + d.id;
+        })
         .attr('transform', function (d) {
           return 'translate(' + d.x + ',' + d.y + ')';
         })
@@ -980,7 +986,7 @@ class App extends Component {
     // this.graph = new this.GraphCreator(svg, nodes, edges);
     this.graph.setIdCt(0);
     this.graph.updateGraph();
-    this.addNode(this.graphCreatorInstance, {
+    const machine1 = {
       'name': 'Smelter Mk.1: Iron Ingot',
       'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png',
       'base_type': 'SMELTER_NODE',
@@ -993,8 +999,9 @@ class App extends Component {
         'time': 2,
         'power': 4
       }
-    });
-    this.addNode(this.graphCreatorInstance, {
+    };
+    this.addNode(this.graphCreatorInstance, machine1, 0, 200);
+    const machine2 = {
       'name': 'Miner Mk.1: Impure Iron',
       'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png',
       'base_type': 'MINER_NODE',
@@ -1013,13 +1020,18 @@ class App extends Component {
         'produces': 'IRON_ORE',
         'quality': 'IMPURE'
       }
-    });
-
-
+    };
+    this.addNode(this.graphCreatorInstance, machine2, 0, 0);
+    this.graph.updateGraph();
+    console.log(d3.select('#graph-node-1'));
+    // this.addEdge(this.graphCreatorInstance, {
+    //   'from': d3.select('#graph-node-1'),
+    //   'to': d3.select('#graph-node-0')
+    // });
+    this.graph.updateGraph();
   }
 
-  generateOresList()
-  {
+  generateOresList() {
     const s = this.structures.RESOURCES;
 
     return getKeys(s).map(function (a) {
@@ -1048,7 +1060,7 @@ class App extends Component {
 
 
   handleMenuClick(event){
-    console.log(event.currentTarget.id)
+    console.log(event.currentTarget.id);
     this.setState({anchorEl : event.currentTarget});
   }
 
@@ -1070,22 +1082,21 @@ class App extends Component {
       console.log(machineGroupName);
 
       return (<div key={'machine-list-panel=' + (++id)}><Divider/> 
-      <ListItem id={machineGroupName + (++id)} onClick={(event) => this.handleMenuClick(event)}>
-        <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
-        <ListItemText primary={machineGroupName} />
-      </ListItem>
-      <Menu id={machineGroupName + (++id)} anchorEl={anchorEl} open={(anchorEl && anchorEl.includes(machineGroupName))} onClose={() => this.handleMenuClose()}>
-      {machine.map(each_machine =>
-        <MenuItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>{each_machine.name}</MenuItem>
-      )}
-      </Menu>
+        <ListItem id={machineGroupName + (++id)} onClick={(event) => this.handleMenuClick(event)}>
+          <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
+          <ListItemText primary={machineGroupName} />
+        </ListItem>
+        <Menu id={machineGroupName + (++id)} anchorEl={anchorEl} open={(anchorEl && anchorEl.id.includes(machineGroupName)) || false} onClose={() => this.handleMenuClose()}>
+          {machine.map(each_machine =>
+            <MenuItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>{each_machine.name}</MenuItem>
+          )}
+        </Menu>
       </div>);
     }
     );
   }
 
-  generateMachinesList()
-  {
+  generateMachinesList() {
     const s = this.structures.MACHINES;
     const m = this.structures.MACHINE_NODE_TYPES.MINER;
     const n = this.structures.MACHINE_NODE_TYPES;
@@ -1119,7 +1130,7 @@ class App extends Component {
           }).filter(elem => elem != null);
         });
       }
-    })
+    });
     const adamHack = returnObj.flat().filter(item => item != null);
     const returnMap = {};
     const st = this.structures.MACHINE_NODE_TYPES;
@@ -1134,15 +1145,13 @@ class App extends Component {
     // return returnObj.flat(1).filter(item => item != null);
   }
 
-  generateData()
-  {
+  generateData() {
     this.structures = data;
     this.mutateItemData();
     this.mutateMachineData();
   }
 
-  mutateMachineData()
-  {
+  mutateMachineData() {
     getKeys(this.structures.MACHINES).map(key => {
       getKeys(this.structures.MACHINES[key].types).map(subType => {
         this.structures.MACHINES[key].types[subType].base_type = key;
@@ -1150,8 +1159,7 @@ class App extends Component {
     });
   }
 
-  mutateItemData()
-  {
+  mutateItemData() {
     this.structures.MACHINE_NODE_TYPES.get = {};
 
     const machineRecipies = this.structures.MACHINE_NODE_TYPES.get;
@@ -1175,14 +1183,13 @@ class App extends Component {
       const types = s.get[s[a]].types;
       Object.keys(types).map(function (resource_map) {
 
-      // For some reason, this doesn't work quite properly.
+        // For some reason, this doesn't work quite properly.
         types[resource_map].produces = s.get[s[a]].produces;
       });
     });
   }
 
-  render()
-  {
+  render() {
     const {classes} = this.props;
     return <div className={classes.root}>
       <CssBaseline/>
