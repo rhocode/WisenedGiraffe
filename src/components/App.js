@@ -97,8 +97,8 @@ class App extends Component {
     };
 
     this.nodes = {};
-    this.inEdges = {};
-    this.outEdges = {};
+    this.inputEdges = {};
+    this.outputEdges = {};
 
     this.generateData();
   }
@@ -129,8 +129,8 @@ class App extends Component {
   addNodeToGraph(graphRef, d) {
     const nodeId = graphRef.idct - 1;
     this.nodes[nodeId] = d;
-    this.outEdges[nodeId] = {};
-    this.inEdges[nodeId] = {};
+    this.outputEdges[nodeId] = {};
+    this.inputEdges[nodeId] = {};
   }
 
 
@@ -142,8 +142,8 @@ class App extends Component {
   removeNodeFromGraph(l) {
     const nodeId = l.id;
     delete this.nodes[nodeId];
-    delete this.inEdges[nodeId];
-    delete this.outEdges[nodeId];
+    delete this.inputEdges[nodeId];
+    delete this.outputEdges[nodeId];
   }
 
   addEdge(graphRef, edgeData) {
@@ -167,13 +167,9 @@ class App extends Component {
   }
 
   addEdgeToGraph(edgeData) {
-    console.log(edgeData.to.id);
-    console.log(edgeData.from.id);
-
-
-    this.inEdges[edgeData.to.id][edgeData.from.id] =  {};
-    this.outEdges[edgeData.from.id][edgeData.to.id] = {}
-
+    this.inputEdges[edgeData.to.id][edgeData.from.id] =  {};
+    this.outputEdges[edgeData.from.id][edgeData.to.id] = {};
+    console.log(this.inputEdges, this.outputEdges);
   }
 
   removeEdge(graphRef, l) {
@@ -183,12 +179,12 @@ class App extends Component {
 
   removeEdgeFromGraph(edgeData) {
     console.log("===================");
-    console.log(this.inEdges, edgeData.target.id, edgeData.source.id);
-    delete this.inEdges[edgeData.source.id][edgeData.target.id];
-
-    console.log(this.outEdges, edgeData.source.id, edgeData.target.id);
-    delete this.outEdges[edgeData.target.id][edgeData.source.id];
-
+    console.log(this.inputEdges, this.outputEdges);
+    console.log("===================");
+    console.log(this.inputEdges, edgeData.target.id, edgeData.source.id);
+    console.log(this.outputEdges, edgeData.source.id, edgeData.target.id);
+    delete this.inputEdges[edgeData.target.id][edgeData.source.id];
+    delete this.outputEdges[edgeData.source.id][edgeData.target.id];
   }
 
   addResourceIcon(parentElement) {
@@ -738,8 +734,8 @@ class App extends Component {
         d3.event.preventDefault();
         if (selectedNode) {
           //remove the node
-          globalAccessor.removeNode(thisGraph, selectedNode);
           thisGraph.spliceLinksForNode(selectedNode);
+          globalAccessor.removeNode(thisGraph, selectedNode);
           state.selectedNode = null;
           thisGraph.updateGraph();
         } else if (selectedEdge) {
@@ -783,7 +779,6 @@ class App extends Component {
     };
 
     GraphCreator.prototype.insertEdgeLabel = function (gEl) {
-      process
       // var link_label = gEl.append('g').attr('class', 'textLabel');
       //
       // const text =  link_label.append('text')
@@ -945,7 +940,7 @@ class App extends Component {
 
       // remove old nodes
       thisGraph.circles.exit().remove();
-      console.log(globalAccessor.outEdges, globalAccessor.inEdges, globalAccessor.nodes);
+      console.log(globalAccessor.outputEdges, globalAccessor.inputEdges, globalAccessor.nodes);
     };
 
     GraphCreator.prototype.zoomed = function () {
