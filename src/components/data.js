@@ -11,7 +11,17 @@ s.MACHINE_NODE_TYPES = {
   ASSEMBLER: 'ASSEMBLER_NODE',
   MANUFACTURER: 'MANUFACTURER_NODE',
   GOAL_GENERATOR: 'COAL_GENERATOR_NODE',
-  CONSTRUCTOR: 'CONSTRUCTOR_NODE'
+  CONSTRUCTOR: 'CONSTRUCTOR_NODE',
+  get getFriendlyName() {
+    return  {
+      [s.MACHINE_NODE_TYPES.MINER] : 'Miner',
+      [s.MACHINE_NODE_TYPES.SMELTER] : 'Smelter',
+      [s.MACHINE_NODE_TYPES.ASSEMBLER] : 'Assembler',
+      [s.MACHINE_NODE_TYPES.MANUFACTURER] : 'Manufacturer',
+      [s.MACHINE_NODE_TYPES.GOAL_GENERATOR] : 'Coal Generator',
+      [s.MACHINE_NODE_TYPES.CONSTRUCTOR] : 'Constructor',
+    };
+  }
 };
 
 const machine_type_nodes = s.NODES.MACHINE_NODE;

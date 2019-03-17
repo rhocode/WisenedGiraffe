@@ -72,7 +72,7 @@ const theme = createMuiTheme({
 });
 
 const getKeys = (obj) => Object.keys(obj).filter(function (elem) {
-  return elem != 'get';
+  return elem != 'get' && elem != 'getFriendlyName';
 });
 
 const round = (num) => Math.round(num * 100) / 100;
@@ -103,12 +103,18 @@ class App extends Component {
     this.generateData();
   }
 
+  calculateGraph() {
+    Object.keys(this.inputEdges).forEach((edge) => {
+      console.log(edge);
+    });
+  }
+
   generateNodeDef(x, y, machine, id, produces = null, requires = null, name = 'Starting Node') {
     return {produces, requires, id, name, x, y, machine};
   }
 
-
   addNode(graphRef, machine) {
+    console.log(JSON.stringify(machine));
     var bodyEl = document.getElementById('mainRender');
     var width = bodyEl.clientWidth,
       height = bodyEl.clientHeight;
@@ -147,6 +153,7 @@ class App extends Component {
   }
 
   addEdge(graphRef, edgeData) {
+    console.log(JSON.stringify(edgeData));
     const access = this;
     var newEdge = {source: edgeData.from, target: edgeData.to};
     var filtRes = graphRef.paths.filter(function (d) {
@@ -167,9 +174,8 @@ class App extends Component {
   }
 
   addEdgeToGraph(edgeData) {
-    this.inputEdges[edgeData.to.id][edgeData.from.id] =  {};
+    this.inputEdges[edgeData.to.id][edgeData.from.id] = {};
     this.outputEdges[edgeData.from.id][edgeData.to.id] = {};
-    console.log(this.inputEdges, this.outputEdges);
   }
 
   removeEdge(graphRef, l) {
@@ -178,11 +184,6 @@ class App extends Component {
   }
 
   removeEdgeFromGraph(edgeData) {
-    console.log("===================");
-    console.log(this.inputEdges, this.outputEdges);
-    console.log("===================");
-    console.log(this.inputEdges, edgeData.target.id, edgeData.source.id);
-    console.log(this.outputEdges, edgeData.source.id, edgeData.target.id);
     delete this.inputEdges[edgeData.target.id][edgeData.source.id];
     delete this.outputEdges[edgeData.source.id][edgeData.target.id];
   }
@@ -190,9 +191,9 @@ class App extends Component {
   addResourceIcon(parentElement) {
     const s = this.structures;
     const requirements = parentElement.datum().requires ? parentElement.datum().requires.length : 0;
-    for (let i = 0 ; i < requirements; i++) {
+    for (let i = 0; i < requirements; i++) {
       //Text First
-      const input = parentElement.append('text').text(function(d) {
+      const input = parentElement.append('text').text(function (d) {
         const resource = s.ITEMS.get[d.requires[i].resource];
 
         return resource.name;
@@ -232,9 +233,9 @@ class App extends Component {
     // ========================
     //Text First
     if (requirements == 0) {
-      const input = parentElement.append('text').text(function(d) {
+      const input = parentElement.append('text').text(function (d) {
         // const resource = s.ITEMS.get[d.requires[i].resource];
-        return  round(60/d.produces.time) + '/min';
+        return round(60 / d.produces.time) + '/min';
         // return resource.name;
       })
         .attr('y', function (d) {
@@ -271,7 +272,7 @@ class App extends Component {
     //===================================
 
     //Output text next
-    const output = parentElement.append('text').text(function(d) {
+    const output = parentElement.append('text').text(function (d) {
       const resource = s.ITEMS.get[d.produces.name];
 
       return resource.name;
@@ -504,7 +505,6 @@ class App extends Component {
     /* insert svg line breaks: taken from http://stackoverflow.com/questions/13241475/how-do-i-include-newlines-in-labels-in-d3-charts */
     GraphCreator.prototype.insertNodeTitle = function (gEl) {
       const title = gEl.datum().name;
-      console.log('New node:', JSON.stringify(gEl.datum()));
 
       var words = title.split(/-/g),
         nwords = words.length;
@@ -768,12 +768,12 @@ class App extends Component {
     };
 
     GraphCreator.prototype.calculateLabelPosition = function (link_label, text) {
-      text.attr('x', function(d) {
+      text.attr('x', function (d) {
         var node = d3.select(link_label.node().parentElement).selectAll('path').node();
         var pathLength = node.getTotalLength();
         d.point = node.getPointAtLength(pathLength / 2);
         return d.point.x;
-      }).attr('y', function(d) {
+      }).attr('y', function (d) {
         return d.point.y;
       });
     };
@@ -790,8 +790,6 @@ class App extends Component {
 
       const thisGraph = this;
       const {classes} = globalAccessor.props;
-
-      console.log(classes.pathIcon);
 
       var div_label = gEl.append('foreignObject').attr({
         'width': '200px',
@@ -810,10 +808,13 @@ class App extends Component {
         .attr('id', function (d) {
           return thisGraph.nodeNaming(d);
         }).html(function (d) {
-          return jsxToString(<div><div><img class={classes.pathIcon}
-            src="https://i.imgur.com/oBmfK3w.png" title="logo"/>
-            <div class={classes.pathText}>Hello there!</div>
-          </div></div>);
+          console.log(d);
+          return jsxToString(<div>
+            <div><img className={classes.pathIcon}
+              src="https://i.imgur.com/oBmfK3w.png" title="logo"/>
+            <div className={classes.pathText}>Hello there!</div>
+            </div>
+          </div>);
         }).attr('dummy_attr', function (d) {
           const node = d3.select(this).node();
           d3.select(d3.select(this).node().parentElement.parentElement.parentElement)
@@ -825,7 +826,7 @@ class App extends Component {
     };
     // call to propagate changes to graph
     GraphCreator.prototype.updateGraph = function () {
-
+      globalAccessor.calculateGraph();
       var thisGraph = this,
         consts = thisGraph.consts,
         state = thisGraph.state;
@@ -940,7 +941,6 @@ class App extends Component {
 
       // remove old nodes
       thisGraph.circles.exit().remove();
-      console.log(globalAccessor.outputEdges, globalAccessor.inputEdges, globalAccessor.nodes);
     };
 
     GraphCreator.prototype.zoomed = function () {
@@ -974,9 +974,46 @@ class App extends Component {
     // this.graph = new this.GraphCreator(svg, nodes, edges);
     this.graph.setIdCt(0);
     this.graph.updateGraph();
+    this.addNode(this.graphCreatorInstance, {
+      'name': 'Smelter Mk.1: Iron Ingot',
+      'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png',
+      'base_type': 'SMELTER_NODE',
+      'produces': {
+        'name': 'Iron Ingot',
+        'resource_name': 'IRON_INGOT',
+        'in': [{'resource': 'IRON_ORE', 'quantity': 1}],
+        'machine': 'SMELTER_NODE',
+        'output_quantity': 1,
+        'time': 2,
+        'power': 4
+      }
+    });
+    this.addNode(this.graphCreatorInstance, {
+      'name': 'Miner Mk.1: Impure Iron',
+      'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png',
+      'base_type': 'MINER_NODE',
+      'produces': {
+        'name': 'Iron Ore',
+        'resource_name': 'IRON_ORE',
+        'in': [{'resource': 'IRON', 'quantity': 1, 'raw': true, 'purity': 'IMPURE'}],
+        'machine': 'MINER_NODE',
+        'output_quantity': 1,
+        'time': 2,
+        'power': 5
+      },
+      'mining_data': {
+        'name': 'Impure Iron',
+        'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png',
+        'produces': 'IRON_ORE',
+        'quality': 'IMPURE'
+      }
+    });
+
+
   }
 
-  generateOresList() {
+  generateOresList()
+  {
     const s = this.structures.RESOURCES;
 
     return getKeys(s).map(function (a) {
@@ -1004,14 +1041,15 @@ class App extends Component {
   // }
 
 
-  generateMachineButtons() {
+  generateMachineButtons()
+  {
     const types = this.generateMachinesList();
     const {classes} = this.props;
     let id = 0;
     return types.map(machine => {
       return (<div key={'machine-list-panel=' + (++id)}><Divider/> {machine.map(each_machine =>
         <ListItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>
-          <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
+          <ListItemIcon className={classes.icons}><AddBoxIcon/></ListItemIcon>
           <ListItemText primary={each_machine.name}/>
         </ListItem>
       )}</div>);
@@ -1019,7 +1057,8 @@ class App extends Component {
     );
   }
 
-  generateMachinesList() {
+  generateMachinesList()
+  {
     const s = this.structures.MACHINES;
     const m = this.structures.MACHINE_NODE_TYPES.MINER;
     const n = this.structures.MACHINE_NODE_TYPES;
@@ -1032,8 +1071,6 @@ class App extends Component {
         return Object.keys(marks).map(function (b) {
           if (marks[b].hidden) return null;
           const oresMap = ores.map(ore => {
-
-            const produces = ore.produces;
 
             const recipies = n.get[a];
 
@@ -1058,13 +1095,15 @@ class App extends Component {
     }).flat(1).filter(item => item != null);
   }
 
-  generateData() {
+  generateData()
+  {
     this.structures = data;
     this.mutateItemData();
     this.mutateMachineData();
   }
 
-  mutateMachineData() {
+  mutateMachineData()
+  {
     getKeys(this.structures.MACHINES).map(key => {
       getKeys(this.structures.MACHINES[key].types).map(subType => {
         this.structures.MACHINES[key].types[subType].base_type = key;
@@ -1072,7 +1111,8 @@ class App extends Component {
     });
   }
 
-  mutateItemData() {
+  mutateItemData()
+  {
     this.structures.MACHINE_NODE_TYPES.get = {};
 
     const machineRecipies = this.structures.MACHINE_NODE_TYPES.get;
@@ -1096,15 +1136,14 @@ class App extends Component {
       const types = s.get[s[a]].types;
       Object.keys(types).map(function (resource_map) {
 
-        // For some reason, this doesn't work quite properly.
+      // For some reason, this doesn't work quite properly.
         types[resource_map].produces = s.get[s[a]].produces;
       });
     });
   }
 
-
-
-  render() {
+  render()
+  {
     const {classes} = this.props;
     return <div className={classes.root}>
       <CssBaseline/>
