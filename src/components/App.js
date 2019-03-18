@@ -11,18 +11,19 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
 import jsxToString from 'jsx-to-string';
 
 import data from './data';
+import newData from './newData';
 
 /* global d3 */
 
 const drawerWidth = 310;
+
+
 
 const styles = theme => ({
   root: {
@@ -111,8 +112,15 @@ class App extends Component {
 
 
   calculateGraph() {
-    Object.keys(this.inputEdges).forEach((edge) => {
-      // console.log(edge);
+    console.log(newData);
+    console.log("Calculation Run")
+    Object.keys(this.inputEdges).forEach((e) => {
+      const edge = this.inputEdges[e];
+      if (Object.keys(edge) == 0) {
+        return;
+      }
+
+      console.log(this.inputEdges[e]);
     });
   }
 
@@ -240,7 +248,7 @@ class App extends Component {
     if (requirements == 0) {
       const input = parentElement.append('text').text(function (d) {
         // const resource = s.ITEMS.get[d.requires[i].resource];
-        return round(60 / d.produces.time) + '/min';
+        return round(60 / d.produces.time * d.produces.quantity) + '/min';
         // return resource.name;
       })
         .attr('y', function (d) {
@@ -1247,9 +1255,7 @@ class App extends Component {
         <svg id="mainRender"/>
       </main>
     </div>;
-
   }
-
 }
 
 App.propTypes = {
