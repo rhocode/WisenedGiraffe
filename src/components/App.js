@@ -112,7 +112,7 @@ class App extends Component {
 
   calculateGraph() {
     Object.keys(this.inputEdges).forEach((edge) => {
-      console.log(edge);
+      // console.log(edge);
     });
   }
 
@@ -121,7 +121,6 @@ class App extends Component {
   }
 
   addNode(graphRef, machine, x = null, y = null) {
-    console.log(JSON.stringify(machine));
     var bodyEl = document.getElementById('mainRender');
     var width = bodyEl.clientWidth,
       height = bodyEl.clientHeight;
@@ -160,7 +159,6 @@ class App extends Component {
   }
 
   addEdge(graphRef, edgeData) {
-    console.log(JSON.stringify(edgeData));
     const access = this;
     var newEdge = {source: edgeData.from, target: edgeData.to};
     var filtRes = graphRef.paths.filter(function (d) {
@@ -815,7 +813,6 @@ class App extends Component {
         .attr('id', function (d) {
           return thisGraph.nodeNaming(d);
         }).html(function (d) {
-          console.log(d);
           /*eslint-disable react/no-unknown-property*/
           return jsxToString(<div>
             <div><img class={classes.pathIcon}
@@ -1023,11 +1020,10 @@ class App extends Component {
     };
     this.addNode(this.graphCreatorInstance, machine2, 0, 0);
     this.graph.updateGraph();
-    console.log(d3.select('#graph-node-1'));
-    // this.addEdge(this.graphCreatorInstance, {
-    //   'from': d3.select('#graph-node-1'),
-    //   'to': d3.select('#graph-node-0')
-    // });
+    this.addEdge(this.graphCreatorInstance, {
+      'from': d3.select('#graph-node-1').datum(),
+      'to': d3.select('#graph-node-0').datum()
+    });
     this.graph.updateGraph();
   }
 
@@ -1142,7 +1138,6 @@ class App extends Component {
       };
     });
     return returnMap;
-    // return returnObj.flat(1).filter(item => item != null);
   }
 
   generateData() {
