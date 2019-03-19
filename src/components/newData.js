@@ -228,29 +228,45 @@ const data = [
   },
   { key: 'machine_version',
     value: [
+      {name: 'internal'},
       {name: 'Mk.1'},
       {name: 'Mk.2'},
       {name: 'Mk.3'},
+      {name: 'Mk.4'},
+      {name: 'Mk.5'},
+      {name: 'Mk.6'},
     ]
   },
   {
     key: 'path_type',
     value: [
       {name: 'Item Belt Mk 1',
-        speed: 100,
+        speed: 60,
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1')
       },
       {name: 'Item Belt Mk 2',
-        speed: 100,
+        speed: 120,
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2')
       },
       {name: 'Item Belt Mk 3',
-        speed: 100,
+        speed: 270,
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.3')
       },
+      {name: 'Item Belt Mk 4',
+        speed: 450,
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.4')
+      },
+      {name: 'Item Belt Mk 5',
+        speed: 6600,
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.5')
+      },
+      {name: 'Item Belt Mk 6',
+        speed: 900,
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.6')
+      },
       {name: 'internal',
-        speed: 999,
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.3')
+        speed: 9999999,
+        machine_version_id: getTableEntryIdByName('machine_version', 'internal')
       },
     ]
   },
@@ -264,10 +280,25 @@ const data = [
       {name: 'Coal Generator', plural: 'Coal Generators'},
       {name: 'Manufacturer', plural: 'Manufacturer'},
       {name: 'Container', plural: 'Containers'},
+      {name: 'Logistic', plural: 'Logistics'},
     ]
   },
   { key: 'machine_node',
     value: [
+      { name: 'Splitter',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
+        speed: 100,
+        icon: baseUrl + 'Splitter.png'
+      },
+      { name: 'Merger',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
+        speed: 100,
+        icon: baseUrl + 'Merger.png'
+      },
       { name: 'Miner Mk.1',
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),

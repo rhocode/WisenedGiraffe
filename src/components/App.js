@@ -37,9 +37,12 @@ const styles = theme => ({
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
+    display: 'flex',
+    paddingTop: 64
   },
   drawerPaper: {
     width: drawerWidth,
+    position: 'unset'
   },
   content: {
     display: 'flex',
@@ -113,7 +116,7 @@ class App extends Component {
 
   calculateGraph() {
     console.log(newData);
-    console.log("Calculation Run")
+    console.log('Calculation Run');
     Object.keys(this.inputEdges).forEach((e) => {
       const edge = this.inputEdges[e];
       if (Object.keys(edge) == 0) {
@@ -136,7 +139,7 @@ class App extends Component {
     let produces, requires = null;
     const p = machine.produces;
     produces = {power: p.power, time: p.time, name: p.resource_name, quantity: p.output_quantity};
-    if (machine.base_type != this.structures.MACHINE_NODE_TYPES.MINER) {
+    if (machine.base_type !== this.structures.MACHINE_NODE_TYPES.MINER) {
       requires = machine.produces.in;
     }
 
@@ -1103,17 +1106,17 @@ class App extends Component {
     let id = 0;
 
     return Object.keys(types).map(mech => {
-        const machine = types[mech].data;
-        const machineGroupName = types[mech].name;
-        console.log(machineGroupName);
+      const machine = types[mech].data;
+      const machineGroupName = types[mech].name;
+      console.log(machineGroupName);
 
-        return (<div key={'machine-list-panel=' + (++id)}><Divider/> {machine.map(each_machine =>
-          <ListItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>
-            <ListItemIcon className={classes.icons}><AddBoxIcon/></ListItemIcon>
-            <ListItemText primary={each_machine.name}/>
-          </ListItem>
-        )}</div>);
-      }
+      return (<div key={'machine-list-panel=' + (++id)}><Divider/> {machine.map(each_machine =>
+        <ListItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>
+          <ListItemIcon className={classes.icons}><AddBoxIcon/></ListItemIcon>
+          <ListItemText primary={each_machine.name}/>
+        </ListItem>
+      )}</div>);
+    }
     );
   }
 
@@ -1223,37 +1226,33 @@ class App extends Component {
             </Typography>
           </Toolbar>
         </AppBar>
+        <Drawer
+          className={classes.drawer}
+          variant="permanent"
+          classes={{
+            paper: classes.drawerPaper,
+          }}
+        >
+          {/*<div className={classes.toolbar}/>*/}
+          <List>
+            {this.generateMachineButtons()}
+          </List>
+          <Divider/>
+          <List>
+            <ListItem button key='Help'>
+              <ListItemIcon className={classes.icons}><HelpIcon/></ListItemIcon>
+              <ListItemText primary='Help'/>
+            </ListItem>
+            <ListItem button key='About'>
+              <ListItemIcon className={classes.icons}><InfoIcon/></ListItemIcon>
+              <ListItemText primary='About'/>
+            </ListItem>
+          </List>
+        </Drawer>
+        <main className={classes.content}>
+          <svg id="mainRender"/>
+        </main>
       </MuiThemeProvider>
-      <Drawer
-        className={classes.drawer}
-        variant="permanent"
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-      >
-        <div className={classes.toolbar}/>
-        <List>
-          {this.generateMachineButtons()}
-        </List>
-        <Divider/>
-        {/*<List>*/}
-        {/*{this.generateOreButtons()}*/}
-        {/*</List>*/}
-        {/*<Divider/>*/}
-        <List>
-          <ListItem button key='Help'>
-            <ListItemIcon className={classes.icons}><HelpIcon/></ListItemIcon>
-            <ListItemText primary='Help'/>
-          </ListItem>
-          <ListItem button key='About'>
-            <ListItemIcon className={classes.icons}><InfoIcon/></ListItemIcon>
-            <ListItemText primary='About'/>
-          </ListItem>
-        </List>
-      </Drawer>
-      <main className={classes.content}>
-        <svg id="mainRender"/>
-      </main>
     </div>;
   }
 }
