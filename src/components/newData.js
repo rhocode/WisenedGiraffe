@@ -609,53 +609,58 @@ const data = [
   }
 ];
 
-schemaBuilder.connect().then(async db => {
-  const schema = db.getSchema();
-  const promiseList = [];
+const createDatabase = () => {
+  const createDB = async () => {
+    const p = schemaBuilder.connect().then(async db => {
+      const schema = db.getSchema();
+      const promiseList = [];
 
-  for(let i = 0; i < data.length; i++) {
-    const obj = data[i];
-    const key = obj.key;
-    const table = schema.table(key);
-    const rows = [];
-    const valuePromiseRows = [];
+      for(let i = 0; i < data.length; i++) {
+        const obj = data[i];
+        const key = obj.key;
+        const table = schema.table(key);
+        const rows = [];
+        const valuePromiseRows = [];
 
-    if (typeof obj.value == 'function') {
-      const value = await obj.value(db);
-      value.forEach((row, index) => {
-        row.hidden = row.hidden || false;
-        row.id = index;
-        rows.push(table.createRow(row));
-      });
-    } else {
-      for (let j = 0; j < obj.value.length; j++) {
-        const index = j;
-        const row = obj.value[j];
-        row.hidden = row.hidden || false;
-        row.id = index;
+        if (typeof obj.value == 'function') {
+          const value = await obj.value(db);
+          value.forEach((row, index) => {
+            row.hidden = row.hidden || false;
+            row.id = index;
+            rows.push(table.createRow(row));
+          });
+        } else {
+          for (let j = 0; j < obj.value.length; j++) {
+            const index = j;
+            const row = obj.value[j];
+            row.hidden = row.hidden || false;
+            row.id = index;
 
-        const blockingPromises = Object.keys(row).map( async k => {
-          if (typeof row[k] == 'function') {
-            row[k] = await row[k](db);
+            const blockingPromises = Object.keys(row).map( async k => {
+              if (typeof row[k] == 'function') {
+                row[k] = await row[k](db);
+              }
+              return Promise.resolve();
+            });
+
+            await Promise.all(blockingPromises);
+            rows.push(table.createRow(row));
+            valuePromiseRows.push(Promise.resolve());
           }
-          return Promise.resolve();
-        });
+        }
 
-        await Promise.all(blockingPromises);
-        rows.push(table.createRow(row));
-        valuePromiseRows.push(Promise.resolve());
+        await Promise.all(valuePromiseRows);
+        await db.insertOrReplace().into(table).values(rows).exec();
+        console.log('Loaded ' + rows.length + ' into ' +  key);
       }
-    }
+      await Promise.all(promiseList);
+      return db;
+    });
 
-    await Promise.all(valuePromiseRows);
-    await db.insertOrReplace().into(table).values(rows).exec();
-    console.log('Loaded ' + rows.length + ' into ' +  key);
-  }
-  return Promise.all(promiseList);
-}).then(async () => {
-  console.log('Done!');
-});
+    return await p;
+  };
+  console.log("mount3");
+  return createDB();
+};
 
-const s = {};
-
-export default s;
+export default createDatabase;

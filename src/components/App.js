@@ -11,15 +11,14 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
 import jsxToString from 'jsx-to-string';
 
 import data from './data';
-import newData from './newData';
+import createDatabase from './newData';
+import GraphSvg from './GraphSvg';
 
 /* global d3 */
 
@@ -107,14 +106,10 @@ class App extends Component {
     this.outputEdges = {};
 
     this.generateData();
-
-    this.handleMenuClick.bind(this);
-    this.handleMenuClose.bind(this);
   }
 
 
   calculateGraph() {
-    console.log(newData);
     console.log('Calculation Run');
     Object.keys(this.inputEdges).forEach((e) => {
       const edge = this.inputEdges[e];
@@ -969,72 +964,76 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.generateMeme(window.d3);
+    createDatabase().then((db) => {
+      this.setState({db, loaded: true})
+    }).then(() => {
+      this.generateMeme(window.d3);
 
-    /**** MAIN ****/
-    var bodyEl = document.getElementById('mainRender');
+      /**** MAIN ****/
+      var bodyEl = document.getElementById('mainRender');
 
-    var width = bodyEl.clientWidth;
+      var width = bodyEl.clientWidth;
 
-    var xLoc = width / 2 - 25,
-      yLoc = 100;
+      var xLoc = width / 2 - 25,
+        yLoc = 100;
 
-    // // initial node data
-    // var nodes = [
-    //   this.generateNodeDef(xLoc, yLoc, null, 0, null, "Debug Node 1"),
-    //   this.generateNodeDef(xLoc, yLoc + 200, null, 1, null, "Debug Node 1")
-    // ];
-    // var edges = [{source: nodes[1], target: nodes[0]}];
+      // // initial node data
+      // var nodes = [
+      //   this.generateNodeDef(xLoc, yLoc, null, 0, null, "Debug Node 1"),
+      //   this.generateNodeDef(xLoc, yLoc + 200, null, 1, null, "Debug Node 1")
+      // ];
+      // var edges = [{source: nodes[1], target: nodes[0]}];
 
-    /** MAIN SVG **/
-    const svg = d3.select('#mainRender');
+      /** MAIN SVG **/
+      const svg = d3.select('#mainRender');
 
-    this.graph = new this.GraphCreator(svg);
-    // this.graph = new this.GraphCreator(svg, nodes, edges);
-    this.graph.setIdCt(0);
-    this.graph.updateGraph();
-    const machine1 = {
-      'name': 'Smelter Mk.1: Iron Ingot',
-      'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png',
-      'base_type': 'SMELTER_NODE',
-      'produces': {
-        'name': 'Iron Ingot',
-        'resource_name': 'IRON_INGOT',
-        'in': [{'resource': 'IRON_ORE', 'quantity': 1}],
-        'machine': 'SMELTER_NODE',
-        'output_quantity': 1,
-        'time': 2,
-        'power': 4
-      }
-    };
-    this.addNode(this.graphCreatorInstance, machine1, 0, 200);
-    const machine2 = {
-      'name': 'Miner Mk.1: Impure Iron',
-      'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png',
-      'base_type': 'MINER_NODE',
-      'produces': {
-        'name': 'Iron Ore',
-        'resource_name': 'IRON_ORE',
-        'in': [{'resource': 'IRON', 'quantity': 1, 'raw': true, 'purity': 'IMPURE'}],
-        'machine': 'MINER_NODE',
-        'output_quantity': 1,
-        'time': 2,
-        'power': 5
-      },
-      'mining_data': {
-        'name': 'Impure Iron',
-        'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png',
-        'produces': 'IRON_ORE',
-        'quality': 'IMPURE'
-      }
-    };
-    this.addNode(this.graphCreatorInstance, machine2, 0, 0);
-    this.graph.updateGraph();
-    this.addEdge(this.graphCreatorInstance, {
-      'from': d3.select('#graph-node-1').datum(),
-      'to': d3.select('#graph-node-0').datum()
+      this.graph = new this.GraphCreator(svg);
+      // this.graph = new this.GraphCreator(svg, nodes, edges);
+      this.graph.setIdCt(0);
+      this.graph.updateGraph();
+      const machine1 = {
+        'name': 'Smelter Mk.1: Iron Ingot',
+        'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png',
+        'base_type': 'SMELTER_NODE',
+        'produces': {
+          'name': 'Iron Ingot',
+          'resource_name': 'IRON_INGOT',
+          'in': [{'resource': 'IRON_ORE', 'quantity': 1}],
+          'machine': 'SMELTER_NODE',
+          'output_quantity': 1,
+          'time': 2,
+          'power': 4
+        }
+      };
+      this.addNode(this.graphCreatorInstance, machine1, 0, 200);
+      const machine2 = {
+        'name': 'Miner Mk.1: Impure Iron',
+        'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png',
+        'base_type': 'MINER_NODE',
+        'produces': {
+          'name': 'Iron Ore',
+          'resource_name': 'IRON_ORE',
+          'in': [{'resource': 'IRON', 'quantity': 1, 'raw': true, 'purity': 'IMPURE'}],
+          'machine': 'MINER_NODE',
+          'output_quantity': 1,
+          'time': 2,
+          'power': 5
+        },
+        'mining_data': {
+          'name': 'Impure Iron',
+          'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png',
+          'produces': 'IRON_ORE',
+          'quality': 'IMPURE'
+        }
+      };
+      this.addNode(this.graphCreatorInstance, machine2, 0, 0);
+      this.graph.updateGraph();
+      this.addEdge(this.graphCreatorInstance, {
+        'from': d3.select('#graph-node-1').datum(),
+        'to': d3.select('#graph-node-0').datum()
+      });
+      this.graph.updateGraph();
     });
-    this.graph.updateGraph();
   }
 
   generateOresList() {
@@ -1232,21 +1231,7 @@ class App extends Component {
             paper: classes.drawerPaper,
           }}
         >
-          {/*<div className={classes.toolbar}/>*/}
           <List>
-            {
-            // <div key={'machine-list-panel=' + (++id)}><Divider/>
-            //     <ListItem id={machineGroupName + (++id)} onClick={(event) => this.handleMenuClick(event)}>
-            //       <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
-            //       <ListItemText primary={machineGroupName} />
-            //     </ListItem>
-            //     <Menu id={machineGroupName + (++id)} anchorEl={anchorEl} open={(anchorEl && anchorEl.id.includes(machineGroupName)) || false} onClose={() => this.handleMenuClose()}>
-            //       {machine.map(each_machine =>
-            //         <MenuItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>{each_machine.name}</MenuItem>
-            //       )}
-            //     </Menu>
-            //   </div>
-            }
           </List>
           <List>
             <ListItem button key='Help'>
@@ -1260,7 +1245,7 @@ class App extends Component {
           </List>
         </Drawer>
         <main className={classes.content}>
-          <svg id="mainRender"/>
+          <GraphSvg />
         </main>
       </MuiThemeProvider>
     </div>;
