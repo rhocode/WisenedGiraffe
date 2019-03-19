@@ -23,8 +23,6 @@ import newData from './newData';
 
 const drawerWidth = 310;
 
-
-
 const styles = theme => ({
   root: {
     display: 'flex',

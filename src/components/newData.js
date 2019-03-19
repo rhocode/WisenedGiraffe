@@ -32,11 +32,14 @@ schemaBuilder.createTable('machine_class')
 schemaBuilder.createTable('machine_node')
   .addColumn('id', lf.Type.INTEGER)
   .addColumn('speed', lf.Type.INTEGER)
+  .addColumn('power', lf.Type.INTEGER)
+  .addNullable(['power'])
   .addPrimaryKey(['id'])
   .addColumn('name', lf.Type.STRING)
   .addColumn('hidden', lf.Type.BOOLEAN)
   .addColumn('node_type_id', lf.Type.STRING)
   .addColumn('icon', lf.Type.STRING);
+
 
 schemaBuilder.createTable('path_type')
   .addColumn('id', lf.Type.INTEGER)
@@ -82,10 +85,10 @@ schemaBuilder.createTable('recipe')
   .addPrimaryKey(['id'])
   .addColumn('name', lf.Type.STRING)
   .addColumn('inputs', lf.Type.OBJECT)
-  .addColumn('item_id', lf.Type.INTEGER)
-  .addColumn('machine_node_id', lf.Type.INTEGER)
-  .addColumn('output_item_quantity', lf.Type.INTEGER)
+  .addColumn('machine_class_id', lf.Type.INTEGER)
+  .addColumn('item_id', lf.Type.INTEGER) // The output Item Id
   .addColumn('time', lf.Type.INTEGER)
+  .addColumn('quantity', lf.Type.INTEGER)
   .addColumn('power', lf.Type.INTEGER)
   .addColumn('hidden', lf.Type.BOOLEAN)
   .addColumn('player_unlock_id', lf.Type.INTEGER)
@@ -114,17 +117,34 @@ const getTableEntryIdByName = (table, name) => {
   };
 };
 
-const getTableEntries = (table, db) => {
-  const tableRef = db.getSchema().table(table);
-  return new Promise((resolve) => {
-    db.select().from(tableRef).exec()
-      .then((rows) => {
-        resolve(rows);
-      });
-  });
-};
+// const getTableEntries = (table, db) => {
+//   const tableRef = db.getSchema().table(table);
+//   return new Promise((resolve) => {
+//     db.select().from(tableRef).exec()
+//       .then((rows) => {
+//         resolve(rows);
+//       });
+//   });
+// };
 
 const baseUrl = 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/';
+
+const parseRecipeIngredients = recipes => {
+  return async db => {
+    for (let i = 0 ; i < recipes.length; i++) {
+      const recipe = recipes[i];
+      const keys = Object.keys(recipe);
+      for (let j = 0 ; j < keys.length; j++) {
+        const item = recipe[keys[j]];
+        if (typeof item == 'function') {
+          recipe[keys[j]] = await item(db);
+        }
+      }
+    }
+
+    return recipes;
+  };
+};
 
 const generateSpringList = async db => {
   const ret = [];
@@ -304,6 +324,7 @@ const data = [
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
         speed: 100,
+        power: 5,
         icon: baseUrl + 'Miner_MK1.png'
       },
       { name: 'Miner Mk.2',
@@ -312,6 +333,7 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
         icon: baseUrl + 'Miner_MK1.png',
         speed: 200,
+        power: 5,
         hidden: true
       },
       { name: 'Smelter Mk.1',
@@ -401,8 +423,189 @@ const data = [
     ]
   },
   {
+    key: 'player_unlock',
+    value: [
+      { name: 'Hard Drive: Alternative Reinforced Iron Plate' }
+    ]
+  },
+  {
     key: 'spring',
     value: generateSpringList
+  },
+  {
+    key: 'recipe',
+    value: [
+      {
+        name: 'Iron Ingot',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Ore'),
+          quantity: 1
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
+        item_id: getTableEntryIdByName('item', 'Iron Ingot'),
+        time: 2,
+        power: 4,
+        quantity: 1
+      },
+      {
+        name: 'Copper Ingot',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Copper Ore'),
+          quantity: 1
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
+        item_id: getTableEntryIdByName('item', 'Copper Ingot'),
+        time: 2,
+        power: 4,
+        quantity: 1
+      },
+      {
+        name: 'Iron Plate',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Ingot'),
+          quantity: 12
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Iron Plate'),
+        time: 4,
+        power: 4,
+        quantity: 1
+      },
+      {
+        name: 'Iron Rod',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Ingot'),
+          quantity: 1
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Iron Rod'),
+        time: 4,
+        power: 4,
+        quantity: 1
+      },
+      {
+        name: 'Wire',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Copper Ingot'),
+          quantity: 1
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Wire'),
+        time: 4,
+        power: 4,
+        quantity: 3
+      },
+      {
+        name: 'Cable',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Wire'),
+          quantity: 2
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Cable'),
+        time: 4,
+        power: 4,
+        quantity: 1
+      },
+      {
+        name: 'Screw',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Rod'),
+          quantity: 1
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Screw'),
+        time: 4,
+        power: 4,
+        quantity: 6
+      },
+      { // Find out better naming
+        name: 'Alternate Screw',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Ingot'),
+          quantity: 2
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Screw'),
+        time: 8,
+        power: 4,
+        quantity: 12,
+        hidden: true
+      },
+      {
+        name: 'Concrete',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Limestone Ore'),
+          quantity: 3
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Concrete'),
+        time: 4,
+        power: 4,
+        quantity: 1
+      },
+      {
+        name: 'Reinforced Iron Plate',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Plate'),
+          quantity: 4
+        }, {
+          item_id: getTableEntryIdByName('item', 'Screw'),
+          quantity: 24
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+        time: 12,
+        power: 15,
+        quantity: 1,
+      },
+      {
+        name: 'Alternative Reinforced Iron Plate',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Plate'),
+          quantity: 10
+        }, {
+          item_id: getTableEntryIdByName('item', 'Screw'),
+          quantity: 24
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+        time: 24,
+        power: 15,
+        quantity: 3,
+        hidden: true
+      },
+      {
+        name: 'Rotor',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Rod'),
+          quantity: 3
+        }, {
+          item_id: getTableEntryIdByName('item', 'Screw'),
+          quantity: 22
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+        time: 10,
+        power: 15,
+        quantity: 1,
+      },
+      {
+        name: 'Modular Frame',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+          quantity: 3
+        }, {
+          item_id: getTableEntryIdByName('item', 'Iron Rod'),
+          quantity: 6
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+        time: 15,
+        power: 15,
+        quantity: 1,
+      }
+    ]
   }
 ];
 
@@ -432,10 +635,8 @@ schemaBuilder.connect().then(async db => {
         row.id = index;
 
         const blockingPromises = Object.keys(row).map( async k => {
-
           if (typeof row[k] == 'function') {
-            const resource = await row[k](db);
-            row[k] = resource;
+            row[k] = await row[k](db);
           }
           return Promise.resolve();
         });
@@ -448,7 +649,7 @@ schemaBuilder.connect().then(async db => {
 
     await Promise.all(valuePromiseRows);
     await db.insertOrReplace().into(table).values(rows).exec();
-    console.log('Done with', key, rows);
+    console.log('Loaded ' + rows.length + ' into ' +  key);
   }
   return Promise.all(promiseList);
 }).then(async () => {
