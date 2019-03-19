@@ -11,6 +11,8 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
@@ -82,7 +84,6 @@ const getKeys = (obj) => Object.keys(obj).filter(function (elem) {
 const round = (num) => Math.round(num * 100) / 100;
 
 class App extends Component {
-
   constructor(props) {
     super(props);
 
@@ -1233,9 +1234,20 @@ class App extends Component {
         >
           {/*<div className={classes.toolbar}/>*/}
           <List>
-            {this.generateMachineButtons()}
+            {
+            // <div key={'machine-list-panel=' + (++id)}><Divider/>
+            //     <ListItem id={machineGroupName + (++id)} onClick={(event) => this.handleMenuClick(event)}>
+            //       <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
+            //       <ListItemText primary={machineGroupName} />
+            //     </ListItem>
+            //     <Menu id={machineGroupName + (++id)} anchorEl={anchorEl} open={(anchorEl && anchorEl.id.includes(machineGroupName)) || false} onClose={() => this.handleMenuClose()}>
+            //       {machine.map(each_machine =>
+            //         <MenuItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>{each_machine.name}</MenuItem>
+            //       )}
+            //     </Menu>
+            //   </div>
+            }
           </List>
-          <Divider/>
           <List>
             <ListItem button key='Help'>
               <ListItemIcon className={classes.icons}><HelpIcon/></ListItemIcon>
