@@ -6,7 +6,7 @@ const commonPaths = require('./common-paths');
 
 const config = {
   entry: {
-    main: ['./src/index.js']
+    main: ['babel-polyfill', './src/index.js']
   },
   output: {
     filename: '[name].js',

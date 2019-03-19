@@ -178,6 +178,10 @@ class App extends Component {
     }
   }
 
+  clickFunction = () => {
+    return 20;
+  };
+
   addEdgeToGraph(edgeData) {
     this.inputEdges[edgeData.to.id][edgeData.from.id] = {};
     this.outputEdges[edgeData.from.id][edgeData.to.id] = {};
