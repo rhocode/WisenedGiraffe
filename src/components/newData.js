@@ -659,7 +659,6 @@ const createDatabase = () => {
 
     return await p;
   };
-  console.log("mount3");
   return createDB();
 };
 

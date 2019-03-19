@@ -11,14 +11,27 @@ import Divider from '@material-ui/core/Divider';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
 import AddBoxIcon from '@material-ui/icons/AddBox';
-import HelpIcon from '@material-ui/icons/Help';
 import InfoIcon from '@material-ui/icons/Info';
+import ShareIcon from '@material-ui/icons/Share';
+import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
+import InputIcon from '@material-ui/icons/Input';
+import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
+import DeleteIcon from '@material-ui/icons/Delete';
+import * as d3 from 'd3';
+
 import jsxToString from 'jsx-to-string';
 
 import data from './data';
 import createDatabase from './newData';
 import GraphSvg from './GraphSvg';
+import SidebarButton from './SidebarButton';
+import FabPopup from './FabPopup';
 
 /* global d3 */
 
@@ -37,7 +50,7 @@ const styles = theme => ({
     width: drawerWidth,
     flexShrink: 0,
     display: 'flex',
-    paddingTop: 64
+    paddingTop: 64,
   },
   drawerPaper: {
     width: drawerWidth,
@@ -52,6 +65,9 @@ const styles = theme => ({
   logo: {
     width: drawerWidth,
   },
+  grow: {
+    flexGrow: 1,
+  },
   icons: {
     marginRight: 0
   },
@@ -62,6 +78,21 @@ const styles = theme => ({
   },
   pathText: {
     display: 'inline-block'
+  },
+  paper: {
+    margin: theme.spacing.unit * 2,
+    display: 'flex',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: theme.spacing.unit * 2,
+    right: theme.spacing.unit * 2,
+  },
+  button: {
+    flex: '0 0 100%',
+  },
+  label: {
+    paddingLeft: 10,
   }
 });
 
@@ -99,13 +130,12 @@ class App extends Component {
       shiftNodeDrag: false,
       selectedText: null,
       anchorEl: null,
+      modalOpen : false,
     };
 
     this.nodes = {};
     this.inputEdges = {};
     this.outputEdges = {};
-
-    this.generateData();
   }
 
 
@@ -967,72 +997,72 @@ class App extends Component {
     createDatabase().then((db) => {
       this.setState({db, loaded: true})
     }).then(() => {
-      this.generateMeme(window.d3);
-
-      /**** MAIN ****/
-      var bodyEl = document.getElementById('mainRender');
-
-      var width = bodyEl.clientWidth;
-
-      var xLoc = width / 2 - 25,
-        yLoc = 100;
-
-      // // initial node data
-      // var nodes = [
-      //   this.generateNodeDef(xLoc, yLoc, null, 0, null, "Debug Node 1"),
-      //   this.generateNodeDef(xLoc, yLoc + 200, null, 1, null, "Debug Node 1")
-      // ];
-      // var edges = [{source: nodes[1], target: nodes[0]}];
-
-      /** MAIN SVG **/
-      const svg = d3.select('#mainRender');
-
-      this.graph = new this.GraphCreator(svg);
-      // this.graph = new this.GraphCreator(svg, nodes, edges);
-      this.graph.setIdCt(0);
-      this.graph.updateGraph();
-      const machine1 = {
-        'name': 'Smelter Mk.1: Iron Ingot',
-        'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png',
-        'base_type': 'SMELTER_NODE',
-        'produces': {
-          'name': 'Iron Ingot',
-          'resource_name': 'IRON_INGOT',
-          'in': [{'resource': 'IRON_ORE', 'quantity': 1}],
-          'machine': 'SMELTER_NODE',
-          'output_quantity': 1,
-          'time': 2,
-          'power': 4
-        }
-      };
-      this.addNode(this.graphCreatorInstance, machine1, 0, 200);
-      const machine2 = {
-        'name': 'Miner Mk.1: Impure Iron',
-        'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png',
-        'base_type': 'MINER_NODE',
-        'produces': {
-          'name': 'Iron Ore',
-          'resource_name': 'IRON_ORE',
-          'in': [{'resource': 'IRON', 'quantity': 1, 'raw': true, 'purity': 'IMPURE'}],
-          'machine': 'MINER_NODE',
-          'output_quantity': 1,
-          'time': 2,
-          'power': 5
-        },
-        'mining_data': {
-          'name': 'Impure Iron',
-          'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png',
-          'produces': 'IRON_ORE',
-          'quality': 'IMPURE'
-        }
-      };
-      this.addNode(this.graphCreatorInstance, machine2, 0, 0);
-      this.graph.updateGraph();
-      this.addEdge(this.graphCreatorInstance, {
-        'from': d3.select('#graph-node-1').datum(),
-        'to': d3.select('#graph-node-0').datum()
-      });
-      this.graph.updateGraph();
+      // this.generateMeme(window.d3);
+      //
+      // /**** MAIN ****/
+      // var bodyEl = document.getElementById('mainRender');
+      //
+      // var width = bodyEl.clientWidth;
+      //
+      // var xLoc = width / 2 - 25,
+      //   yLoc = 100;
+      //
+      // // // initial node data
+      // // var nodes = [
+      // //   this.generateNodeDef(xLoc, yLoc, null, 0, null, "Debug Node 1"),
+      // //   this.generateNodeDef(xLoc, yLoc + 200, null, 1, null, "Debug Node 1")
+      // // ];
+      // // var edges = [{source: nodes[1], target: nodes[0]}];
+      //
+      // /** MAIN SVG **/
+      // const svg = d3.select('#mainRender');
+      //
+      // this.graph = new this.GraphCreator(svg);
+      // // this.graph = new this.GraphCreator(svg, nodes, edges);
+      // this.graph.setIdCt(0);
+      // this.graph.updateGraph();
+      // const machine1 = {
+      //   'name': 'Smelter Mk.1: Iron Ingot',
+      //   'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png',
+      //   'base_type': 'SMELTER_NODE',
+      //   'produces': {
+      //     'name': 'Iron Ingot',
+      //     'resource_name': 'IRON_INGOT',
+      //     'in': [{'resource': 'IRON_ORE', 'quantity': 1}],
+      //     'machine': 'SMELTER_NODE',
+      //     'output_quantity': 1,
+      //     'time': 2,
+      //     'power': 4
+      //   }
+      // };
+      // this.addNode(this.graphCreatorInstance, machine1, 0, 200);
+      // const machine2 = {
+      //   'name': 'Miner Mk.1: Impure Iron',
+      //   'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png',
+      //   'base_type': 'MINER_NODE',
+      //   'produces': {
+      //     'name': 'Iron Ore',
+      //     'resource_name': 'IRON_ORE',
+      //     'in': [{'resource': 'IRON', 'quantity': 1, 'raw': true, 'purity': 'IMPURE'}],
+      //     'machine': 'MINER_NODE',
+      //     'output_quantity': 1,
+      //     'time': 2,
+      //     'power': 5
+      //   },
+      //   'mining_data': {
+      //     'name': 'Impure Iron',
+      //     'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png',
+      //     'produces': 'IRON_ORE',
+      //     'quality': 'IMPURE'
+      //   }
+      // };
+      // this.addNode(this.graphCreatorInstance, machine2, 0, 0);
+      // this.graph.updateGraph();
+      // this.addEdge(this.graphCreatorInstance, {
+      //   'from': d3.select('#graph-node-1').datum(),
+      //   'to': d3.select('#graph-node-0').datum()
+      // });
+      // this.graph.updateGraph();
     });
   }
 
@@ -1118,112 +1148,132 @@ class App extends Component {
     );
   }
 
-  generateMachinesList() {
-    const s = this.structures.MACHINES;
-    const m = this.structures.MACHINE_NODE_TYPES.MINER;
-    const n = this.structures.MACHINE_NODE_TYPES;
-    const ores = this.generateOresList();
-    const returnObj = Object.keys(s).map(function (a) {
-      if (s[a].hidden) return null;
-
-      if (a == m) {
-        const marks = s[a].types;
-        return Object.keys(marks).map(function (b) {
-          if (marks[b].hidden) return null;
-          const oresMap = ores.map(ore => {
-
-            const recipies = n.get[a];
-
-            const rec = recipies.filter(elem => {
-              return elem.in[0].purity == ore.quality && elem.resource_name == ore.produces;
-            })[0];
-            return Object.assign({}, marks[b], {produces: rec}, {mining_data: ore}, {name: marks[b].name + ': ' + ore.name});
-          });
-          return oresMap;
-        });
-      } else {
-        const marks = s[a].types;
-        return Object.keys(marks).map(function (b) {
-          if (marks[b].hidden) return null;
-          const recipies = n.get[a];
-          return recipies.map(recipie => {
-            if (recipie.hidden) return null;
-            return Object.assign({}, marks[b], {produces: recipie}, {name: marks[b].name + ': ' + recipie.name});
-          }).filter(elem => elem != null);
-        });
-      }
-    });
-    const adamHack = returnObj.flat().filter(item => item != null);
-    const returnMap = {};
-    const st = this.structures.MACHINE_NODE_TYPES;
-
-    adamHack.map(elem => {
-      returnMap[elem[0].base_type] = {
-        name: st.getFriendlyName[elem[0].base_type],
-        data: elem
-      };
-    });
-    return returnMap;
-  }
-
-  generateData() {
-    this.structures = data;
-    this.mutateItemData();
-    this.mutateMachineData();
-  }
-
-  mutateMachineData() {
-    getKeys(this.structures.MACHINES).map(key => {
-      getKeys(this.structures.MACHINES[key].types).map(subType => {
-        this.structures.MACHINES[key].types[subType].base_type = key;
-      });
-    });
-  }
-
-  mutateItemData() {
-    this.structures.MACHINE_NODE_TYPES.get = {};
-
-    const machineRecipies = this.structures.MACHINE_NODE_TYPES.get;
-
-    const items = this.structures.ITEMS;
-    const itemKeys = getKeys(this.structures.ITEMS);
-
-    itemKeys.map(element => {
-      const item = items.get[items[element]];
-      item.crafting.map((elem) => {
-        if (machineRecipies[elem.machine] == null) {
-          machineRecipies[elem.machine] = [];
-        }
-        machineRecipies[elem.machine].push(Object.assign({}, {name: item.name, resource_name: element}, elem));
-      });
-    });
-
-    const s = this.structures.RESOURCES;
-
-    getKeys(s).map(function (a) {
-      const types = s.get[s[a]].types;
-      Object.keys(types).map(function (resource_map) {
-
-        // For some reason, this doesn't work quite properly.
-        types[resource_map].produces = s.get[s[a]].produces;
-      });
-    });
-  }
+  // generateMachinesList() {
+  //   const s = this.structures.MACHINES;
+  //   const m = this.structures.MACHINE_NODE_TYPES.MINER;
+  //   const n = this.structures.MACHINE_NODE_TYPES;
+  //   const ores = this.generateOresList();
+  //   const returnObj = Object.keys(s).map(function (a) {
+  //     if (s[a].hidden) return null;
+  //
+  //     if (a == m) {
+  //       const marks = s[a].types;
+  //       return Object.keys(marks).map(function (b) {
+  //         if (marks[b].hidden) return null;
+  //         const oresMap = ores.map(ore => {
+  //
+  //           const recipies = n.get[a];
+  //
+  //           const rec = recipies.filter(elem => {
+  //             return elem.in[0].purity == ore.quality && elem.resource_name == ore.produces;
+  //           })[0];
+  //           return Object.assign({}, marks[b], {produces: rec}, {mining_data: ore}, {name: marks[b].name + ': ' + ore.name});
+  //         });
+  //         return oresMap;
+  //       });
+  //     } else {
+  //       const marks = s[a].types;
+  //       return Object.keys(marks).map(function (b) {
+  //         if (marks[b].hidden) return null;
+  //         const recipies = n.get[a];
+  //         return recipies.map(recipie => {
+  //           if (recipie.hidden) return null;
+  //           return Object.assign({}, marks[b], {produces: recipie}, {name: marks[b].name + ': ' + recipie.name});
+  //         }).filter(elem => elem != null);
+  //       });
+  //     }
+  //   });
+  //   const adamHack = returnObj.flat().filter(item => item != null);
+  //   const returnMap = {};
+  //   const st = this.structures.MACHINE_NODE_TYPES;
+  //
+  //   adamHack.map(elem => {
+  //     returnMap[elem[0].base_type] = {
+  //       name: st.getFriendlyName[elem[0].base_type],
+  //       data: elem
+  //     };
+  //   });
+  //   return returnMap;
+  // }
+  //
+  // generateData() {
+  //   this.structures = data;
+  //   this.mutateItemData();
+  //   this.mutateMachineData();
+  // }
+  //
+  // mutateMachineData() {
+  //   getKeys(this.structures.MACHINES).map(key => {
+  //     getKeys(this.structures.MACHINES[key].types).map(subType => {
+  //       this.structures.MACHINES[key].types[subType].base_type = key;
+  //     });
+  //   });
+  // }
+  //
+  // mutateItemData() {
+  //   this.structures.MACHINE_NODE_TYPES.get = {};
+  //
+  //   const machineRecipies = this.structures.MACHINE_NODE_TYPES.get;
+  //
+  //   const items = this.structures.ITEMS;
+  //   const itemKeys = getKeys(this.structures.ITEMS);
+  //
+  //   itemKeys.map(element => {
+  //     const item = items.get[items[element]];
+  //     item.crafting.map((elem) => {
+  //       if (machineRecipies[elem.machine] == null) {
+  //         machineRecipies[elem.machine] = [];
+  //       }
+  //       machineRecipies[elem.machine].push(Object.assign({}, {name: item.name, resource_name: element}, elem));
+  //     });
+  //   });
+  //
+  //   const s = this.structures.RESOURCES;
+  //
+  //   getKeys(s).map(function (a) {
+  //     const types = s.get[s[a]].types;
+  //     Object.keys(types).map(function (resource_map) {
+  //
+  //       // For some reason, this doesn't work quite properly.
+  //       types[resource_map].produces = s.get[s[a]].produces;
+  //     });
+  //   });
+  // }
 
   render() {
     const {classes} = this.props;
+
     return <div className={classes.root}>
       <CssBaseline/>
       <MuiThemeProvider theme={theme}>
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
-            <Typography variant="h6" color="inherit" noWrap>
-              <img className={classes.logo}
-                src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
-                title="logo"/>
-            </Typography>
+            <img className={classes.logo}
+              src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
+              title="logo"/>
+            <div className={classes.grow}/>
+            <Button color='inherit'><SettingsInputComponentIcon/><div className={classes.label}>Optimize</div></Button>
+            <Button color='inherit'><OfflineBoltIcon/><div className={classes.label}>Analyze</div></Button>
+            <Button color='inherit'><DeleteIcon/><div className={classes.label}>Clear</div></Button>
+            <Button color='inherit'><InputIcon/><div className={classes.label}>Load</div></Button>
+            <Button color='inherit'><ShareIcon/><div className={classes.label}>Share</div></Button>
           </Toolbar>
         </AppBar>
+
+
+        <FabPopup title='Help' classes={classes} contents={
+          <React.Fragment>
+            <Typography variant="h5">Graph Basics</Typography>
+            <ul>
+              <li>Use the left menu to add nodes to the graph.</li>
+              <li>Click once on a node to select it.</li>
+              <li>Select a node and press DELETE to delete it.</li>
+              <li>Hold down shift - click and drag from a node to direct it to another node.</li>
+            </ul>
+          </React.Fragment>
+        }/>
+
+
         <Drawer
           className={classes.drawer}
           variant="permanent"
@@ -1232,12 +1282,25 @@ class App extends Component {
           }}
         >
           <List>
+            <SidebarButton label={'Constructor'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'Assembler'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
           </List>
+
+          <Divider/>
           <List>
-            <ListItem button key='Help'>
-              <ListItemIcon className={classes.icons}><HelpIcon/></ListItemIcon>
-              <ListItemText primary='Help'/>
-            </ListItem>
             <ListItem button key='About'>
               <ListItemIcon className={classes.icons}><InfoIcon/></ListItemIcon>
               <ListItemText primary='About'/>
@@ -1245,11 +1308,13 @@ class App extends Component {
           </List>
         </Drawer>
         <main className={classes.content}>
-          <GraphSvg />
+          {this.state.loaded ? <GraphSvg /> : <div />}
         </main>
       </MuiThemeProvider>
     </div>;
+
   }
+
 }
 
 App.propTypes = {
