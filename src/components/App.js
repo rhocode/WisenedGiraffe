@@ -107,16 +107,16 @@ class App extends Component {
         <List>
           {
             // <div key={'machine-list-panel=' + (++id)}><Divider/>
-              //     <ListItem id={machineGroupName + (++id)} onClick={(event) => this.handleMenuClick(event)}>
-                //       <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
-                //       <ListItemText primary={machineGroupName} />
-                //     </ListItem>
-              //     <Menu id={machineGroupName + (++id)} anchorEl={anchorEl} open={(anchorEl && anchorEl.id.includes(machineGroupName)) || false} onClose={() => this.handleMenuClose()}>
-                //       {machine.map(each_machine =>
-                //         <MenuItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>{each_machine.name}</MenuItem>
-                //       )}
-                //     </Menu>
-                //   </div>
+            //     <ListItem id={machineGroupName + (++id)} onClick={(event) => this.handleMenuClick(event)}>
+            //       <ListItemIcon className={classes.icons} ><AddBoxIcon/></ListItemIcon>
+            //       <ListItemText primary={machineGroupName} />
+            //     </ListItem>
+            //     <Menu id={machineGroupName + (++id)} anchorEl={anchorEl} open={(anchorEl && anchorEl.id.includes(machineGroupName)) || false} onClose={() => this.handleMenuClose()}>
+            //       {machine.map(each_machine =>
+            //         <MenuItem button key={each_machine.name} onClick={() => this.addNode(this.graphCreatorInstance, each_machine)}>{each_machine.name}</MenuItem>
+            //       )}
+            //     </Menu>
+            //   </div>
           }
         </List>
         <List>
