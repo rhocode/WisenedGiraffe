@@ -3,8 +3,9 @@ import {svgKeyDown, svgKeyUp} from './keyboardEvents';
 import {svgMouseDown, svgMouseUp, dragmove} from './mouseEvents';
 import {zoomed} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
-import {circleMouseDown, circleMouseUp} from './nodeActions';
+import {circleMouseDown, circleMouseUp, nodeNaming} from './nodeActions';
 import constants from './constants';
+import {calculatePathTooltipPosition, insertEdgeLabel, pathMouseDown} from './edgeActions';
 
 // import * as d3 from 'd3';
 
@@ -19,64 +20,68 @@ class GraphSvg extends Component {
     this.shiftNodeDrag = false;
     this.idct = 0;
 
-    this.circles = [];
+    this.circles = null;
+    this.paths = null;
 
     this.mouseDownNode = null;
+    this.mouseDownLink = null;
   }
 
   updateGraph() {
     console.log('UpdateGraph');
     const graphSvg = this;
-    // thisGraph.paths = thisGraph.paths.data(thisGraph.edges, function (d) {
-    //   return String(d.source.id) + '+' + String(d.target.id);
+
+    // Bind the path data
+    graphSvg.paths = graphSvg.paths.data(graphSvg.edges, function (d) {
+      return String(d.source.id) + '+' + String(d.target.id);
+    });
+
+    const paths = graphSvg.paths;
+
+    // update existing paths
+    paths.selectAll('path').classed(constants.selectedClass, function (d) {
+      return d === graphSvg.selectedEdge;
+    }).attr('d', function (d) {
+      return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
+    });
+
+    // paths.select('.edge-label').each(function(d) {
+    //   thisGraph.calculateLabelPosition(d3.select(this.parentElement), d3.select(this));
     // });
-    //
-    // var paths = thisGraph.paths;
-    //
-    // // update existing paths
-    // paths.selectAll('path').classed(consts.selectedClass, function (d) {
-    //   return d === state.selectedEdge;
-    // }).attr('d', function (d) {
-    //   return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
-    // });
-    //
-    // // paths.select('.edge-label').each(function(d) {
-    // //   thisGraph.calculateLabelPosition(d3.select(this.parentElement), d3.select(this));
-    // // });
-    //
-    // paths.select('foreignObject.path-tooltip').each(function (d) {
-    //   calculatePathTooltipPosition(d3.select(this), this);
-    // });
-    //
-    // // add new paths
-    // const pathObject = paths.enter().append('g');
-    //
-    // pathObject.append('path').style('marker-end', 'url(#end-arrow)').classed('link real-link', true).attr('d', function (d) {
-    //   return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
-    // }).attr('id', function (d) {
-    //   return 'path-' + thisGraph.nodeNaming(d);
-    // });
-    //
-    // pathObject.each(function (d) {
-    //   thisGraph.insertEdgeLabel(d3.select(this));
-    // });
-    //
-    // // Add a copy of the path to the front, but make it invisible
-    // pathObject.append('path').classed('link hidden-hitbox', true).attr('d', function (d) {
-    //   return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
-    // }).on('mouseover', function (d) {
-    //   d3.select('#path-' + thisGraph.nodeNaming(d)).classed('tooltip', true);
-    // }).on('mouseout', function (d) {
-    //   d3.select('#path-' + thisGraph.nodeNaming(d)).classed('tooltip', false);
-    // }).on('mousedown', function (d) {
-    //   thisGraph.pathMouseDown.call(thisGraph, d3, d3.select('#path-' + thisGraph.nodeNaming(d)), d);
-    // }).on('mouseup', function (d) {
-    //   state.mouseDownLink = null;
-    // });
-    //
-    //
-    // // remove old links
-    // paths.exit().remove();
+
+    paths.select('foreignObject.path-tooltip').each(function () {
+      calculatePathTooltipPosition(d3.select(this), this);
+    });
+
+    // add new paths
+    const pathObject = paths.enter().append('g');
+
+    pathObject.append('path').style('marker-end', 'url(#path-end-arrow)').classed('link real-link', true).attr('d', function (d) {
+      return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
+    }).attr('id', function (d) {
+      return 'path-' + nodeNaming(d);
+    });
+
+    pathObject.each(function () {
+      insertEdgeLabel.call(graphSvg, d3.select(this));
+    });
+
+    // Add a copy of the path to the front, but make it invisible
+    pathObject.append('path').classed('link hidden-hitbox', true).attr('d', function (d) {
+      return 'M' + d.source.x + ',' + d.source.y + 'L' + d.target.x + ',' + d.target.y;
+    }).on('mouseover', function (d) {
+      d3.select('#path-' + nodeNaming(d)).classed('tooltip', true);
+    }).on('mouseout', function (d) {
+      d3.select('#path-' + nodeNaming(d)).classed('tooltip', false);
+    }).on('mousedown', function (d) {
+      pathMouseDown.call(graphSvg, d3, d3.select('#path-' + nodeNaming(d)), d);
+    }).on('mouseup', function () {
+      graphSvg.mouseDownLink = null;
+    });
+
+
+    // remove old links
+    paths.exit().remove();
 
     // update existing nodes
     graphSvg.circles = graphSvg.circles.data(graphSvg.nodes, function (d) {
@@ -84,7 +89,7 @@ class GraphSvg extends Component {
     });
 
     graphSvg.circles.attr('transform', function (d) {
-      console.log("TRANSLATED?", d.x, d.y);
+      console.log('TRANSLATED?', d.x, d.y);
       return 'translate(' + d.x + ',' + d.y + ')';
     });
 

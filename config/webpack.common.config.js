@@ -83,7 +83,11 @@ const config = {
       favicon: commonPaths.favicon,
       inject: true
     })
-  ]
+  ],
+  resolve: {
+    alias: {
+    }
+  }
 };
 
 module.exports = config;

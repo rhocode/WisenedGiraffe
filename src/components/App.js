@@ -8,15 +8,6 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
-import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
-import AddBoxIcon from '@material-ui/icons/AddBox';
 import InfoIcon from '@material-ui/icons/Info';
 import ShareIcon from '@material-ui/icons/Share';
 import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
@@ -29,12 +20,12 @@ import jsxToString from 'jsx-to-string';
 
 import data from './data';
 import createDatabase from './newData';
-import GraphSvg from './GraphSvg/index';
+import GraphSvg from './GraphSvg';
 import SidebarButton from './SidebarButton';
 import FabPopup from './FabPopup';
 import ToolbarPopup from './ToolbarPopup';
 import SidebarPopup from './SidebarPopup';
-import {addNode} from "./GraphSvg/nodeActions";
+import {addNode} from './GraphSvg/nodeActions';
 
 /* global d3 */
 
@@ -141,6 +132,7 @@ class App extends Component {
       this.setState({db, loaded: true});
     }).then(() => {
       addNode(this.graphSvg, {}, 0,0);
+      addNode(this.graphSvg, {}, 0,200);
       //
       //
       // const svg = d3.select('#mainRender');

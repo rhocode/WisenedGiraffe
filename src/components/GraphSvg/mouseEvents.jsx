@@ -17,6 +17,7 @@ export const svgMouseUp = function (d3) {
     this.dragLine.classed('hidden', true);
   } else if (this.graphMouseDown) {
     // SVG was clicked, deselecting nodes and edges.
+    console.log(this.selectedEdge, this.selectedNode);
     removeSelectFromNode.call(this);
     removeSelectFromEdge.call(this);
   }

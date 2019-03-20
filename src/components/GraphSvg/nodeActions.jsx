@@ -1,5 +1,5 @@
 import constants from './constants';
-import {removeEdge, removeSelectFromEdge} from './edgeActions';
+import {addEdge, removeEdge, removeSelectFromEdge} from './edgeActions';
 
 export const insertNodeTitle = (gEl) => {
   // const title = gEl.datum().name;
@@ -34,7 +34,7 @@ export const addNode = (graphRef, machine, x = null, y = null) => {
   var width = bodyEl.clientWidth,
     height = bodyEl.clientHeight;
   console.log('Called addNode');
-  const d = generateNodeDef(x || width / 2, y || height / 2, machine, graphRef.idct++, {});
+  const d = generateNodeDef(x || width / 2, y || height / 2, graphRef.idct++, {});
   graphRef.nodes.push(d);
   console.log(graphRef);
   addNodeToGraph(graphRef, d);
@@ -91,7 +91,7 @@ export const circleMouseUp = function(d3, d3node, d) {
   if (mouseDownNode !== d) {
     // Create edge and add it to the graph.
     //TODO: Add edge!!
-    // globalAccessor.addEdge(thisGraph, {from: mouseDownNode, to: d});
+    addEdge(this, {from: mouseDownNode, to: d});
   } else {
     // we're in the same node
     if (this.justDragged) {
