@@ -39,26 +39,28 @@ body{
   width: 30px;
   opacity: 0.4;
 }
+
 #toolbox input:hover{
   opacity: 1;
   cursor: pointer;
 }
 
-#hidden-file-upload{
-  display: none;
-}
-
-#download-input{
-  margin: 0 0.5em;
-}
+//#hidden-file-upload{
+//  display: none;
+//}
+//
+//#download-input{
+//  margin: 0 0.5em;
+//}
 
 .conceptG text{
   pointer-events: none;
 }
 
-marker{
-  fill: #333;
-}
+// Not needed?
+//marker{
+//  fill: #333;
+//}
 
 g.conceptG circle{
   fill: #FFE0B2;
@@ -78,46 +80,11 @@ g.selected:hover circle{
   fill: #E65100;
 }
 
-path.link {
-  fill: none;
-  stroke: #4CAF50;
-  stroke-width: 6px;
-  cursor: default;
-}
 
-#end-arrow:hover {
-  fill: #4CAF50;
-}
 
-#end-arrow.selected {
-  fill: #039BE5;
-}
-
-#end-arrow {
-  fill: #4CAF50;
-}
-
-path.link:hover{
-  stroke: #81C784;
-}
-
-path.link.selected {
-  stroke: #388E3C;
-}
 
 g.connect-node circle{
   fill: #BEFFFF;
-}
-
-path.link.hidden{
-  stroke-width: 0;
-}
-
-
-
-path.hidden-hitbox{
-  stroke-width: 12;
-  stroke-opacity: 0;
 }
 
 div.full-div {
@@ -125,25 +92,8 @@ div.full-div {
   flex: 1;
 }
 
-div.tooltip {
-
-}
-
 #mainRender {
   flex: 1;
-}
-
-path.link.selected {
-  stroke: #039BE5;
-}
-
-path.hidden-hitbox{
-  stroke-width: 12;
-  stroke-opacity: 0;
-}
-
-path.tooltip {
-  stroke: #A5D6A7;
 }
 
 .path-tooltip-div {
@@ -171,3 +121,42 @@ svg#mainRender {
 tspan.node-label {
   color: white;
 }
+
+//=======
+// new css
+
+// Path end arrow
+.path-end-arrow:hover {
+  fill: #4CAF50;
+}
+.path-end-arrow.selected {
+  fill: #039BE5;
+}
+.path-end-arrow {
+  fill: #4CAF50;
+}
+
+// Path Link properties
+path.link {
+  fill: none;
+  stroke: #4CAF50;
+  stroke-width: 6px;
+  cursor: default;
+}
+path.link:hover{
+  stroke: #81C784;
+}
+path.link.selected {
+  stroke: #039BE5;
+}
+path.hidden-hitbox{
+  stroke-width: 12;
+  stroke-opacity: 0;
+}
+
+//Draggable link properties
+path.link.hidden{
+  stroke-width: 0;
+}
+
+
