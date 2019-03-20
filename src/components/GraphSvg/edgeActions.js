@@ -72,3 +72,74 @@ export const removeEdge = function(graphRef, l) {
 export const removeEdgeFromGraph = function(edgeData) {
 
 };
+
+// export const calculatePathTooltipPosition = function (link_label, d3) {
+//   link_label.attr('x', function (d) {
+//     const node = d3.select(link_label.node().parentElement).selectAll('path').node();
+//     var pathLength = node.getTotalLength();
+//     d.point = node.getPointAtLength(pathLength / 2);
+//     return d.point.x - (d3.select(this).attr('width') / 2);
+//   }).attr('y', function (d) {
+//     return d.point.y - (d3.select(this).attr('height') / 2);
+//   });
+// };
+
+
+// GraphCreator.prototype.calculateLabelPosition = function (link_label, text) {
+//   text.attr('x', function (d) {
+//     var node = d3.select(link_label.node().parentElement).selectAll('path').node();
+//     var pathLength = node.getTotalLength();
+//     d.point = node.getPointAtLength(pathLength / 2);
+//     return d.point.x;
+//   }).attr('y', function (d) {
+//     return d.point.y;
+//   });
+// };
+
+// GraphCreator.prototype.insertEdgeLabel = function (gEl) {
+//   // var link_label = gEl.append('g').attr('class', 'textLabel');
+//   //
+//   // const text =  link_label.append('text')
+//   //   .style('text-anchor', 'middle')
+//   //   .style('dominant-baseline', 'central')
+//   //   .attr('class', 'edge-label').text("WHAT");
+//   //
+//   // this.calculateLabelPosition(link_label, text);
+//
+//   const thisGraph = this;
+//   const {classes} = globalAccessor.props;
+//
+//   var div_label = gEl.append('foreignObject').attr({
+//     'width': '200px',
+//     'height': '200px',
+//     'class': 'path-tooltip'
+//   });
+//
+//   div_label.append('xhtml:div').attr({
+//     'class': 'path-tooltip-div'
+//   })
+//     .append('div')
+//     .attr({
+//       'class': 'tooltip'
+//     }).append('p')
+//     .attr('class', 'lead')
+//     .attr('id', function (d) {
+//       return thisGraph.nodeNaming(d);
+//     }).html(function (d) {
+//       /*eslint-disable react/no-unknown-property*/
+//       return jsxToString(<div>
+//         <div><img class={classes.pathIcon}
+//           src="https://i.imgur.com/oBmfK3w.png" title="logo"/>
+//         <div class={classes.pathText}>Hello there!</div>
+//         </div>
+//       </div>);
+//     /*eslint-enable  react/no-unknown-property*/
+//     }).attr('dummy_attr', function (d) {
+//       const node = d3.select(this).node();
+//       d3.select(d3.select(this).node().parentElement.parentElement.parentElement)
+//         .attr('width', node.clientWidth + 0.5).attr('height', node.clientHeight + 0.5);
+//       return 'meep';
+//     });
+//
+//   this.calculatePathTooltipPosition(div_label);
+// };

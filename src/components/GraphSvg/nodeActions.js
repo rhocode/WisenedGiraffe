@@ -21,6 +21,10 @@ export const insertNodeTitle = (gEl) => {
   // globalAccessor.addResourceIcon(el);
 };
 
+export const nodeNaming = function (d) {
+  return d.source.id + '-' + d.target.id;
+};
+
 export const generateNodeDef = (x, y, id, data) => {
   return {id, x, y, data};
 };

@@ -45,7 +45,7 @@ class GraphSvg extends Component {
     // // });
     //
     // paths.select('foreignObject.path-tooltip').each(function (d) {
-    //   thisGraph.calculatePathTooltipPosition(d3.select(this));
+    //   calculatePathTooltipPosition(d3.select(this), this);
     // });
     //
     // // add new paths
@@ -183,7 +183,7 @@ class GraphSvg extends Component {
 
     //key functions
     d3.select(window).on('keydown', function () {
-      svgKeyDown.call(graphSvgRef);
+      svgKeyDown.call(graphSvgRef, d3);
     }).on('keyup', function () {
       svgKeyUp.call(graphSvgRef);
     });
