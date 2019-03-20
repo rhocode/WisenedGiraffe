@@ -27,9 +27,12 @@ const config = {
       //   exclude: /node_modules/
       // },
       {
-        test: /\.js$/,
+        test: /\.(js|jsx)$/,
         loader: 'babel-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/,
+        resolve: {
+          extensions: ['.js', '.jsx'],
+        },
       },
       {
         test: /\.s?css$/,

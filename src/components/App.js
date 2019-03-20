@@ -29,6 +29,8 @@ import jsxToString from 'jsx-to-string';
 import data from './data';
 import SidebarButton from './SidebarButton';
 import FabPopup from './FabPopup';
+import ToolbarPopup from './ToolbarPopup';
+import SidebarPopup from './SidebarPopup';
 
 /* global d3 */
 
@@ -133,11 +135,11 @@ class App extends Component {
               src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
               title="logo"/>
             <div className={classes.grow}></div>
-            <Button color='inherit'><SettingsInputComponentIcon/><div className={classes.label}>Optimize</div></Button>
-            <Button color='inherit'><OfflineBoltIcon/><div className={classes.label}>Analyze</div></Button>
-            <Button color='inherit'><DeleteIcon/><div className={classes.label}>Clear</div></Button>
-            <Button color='inherit'><InputIcon/><div className={classes.label}>Load</div></Button>
-            <Button color='inherit'><ShareIcon/><div className={classes.label}>Share</div></Button>
+            <ToolbarPopup classes={classes} Icon={OfflineBoltIcon} title='Analyze' label='Analyze' contents='' />
+            <ToolbarPopup classes={classes} Icon={SettingsInputComponentIcon} title='Optimize' label='Optimize' contents='' />
+            <ToolbarPopup classes={classes} Icon={DeleteIcon} title='Clear' label='Clear' contents='' />
+            <ToolbarPopup classes={classes} Icon={InputIcon} title='Load' label='Load' contents='' />
+            <ToolbarPopup classes={classes} Icon={ShareIcon} title='Share' label='Share' contents='' />
           </Toolbar>
         </AppBar>
 
@@ -146,10 +148,10 @@ class App extends Component {
           <React.Fragment>
             <Typography variant="h5">Graph Basics</Typography>
             <ul>
-              <li>Use the left menu to add nodes to the graph.</li>
-              <li>Click once on a node to select it.</li>
-              <li>Click twice on a node and press DELETE to delete it.</li>
-              <li>Hold down shift - click and drag from a node to direct it to another node.</li>
+              <li><Typography variant="body1">Use the left menu to add nodes to the graph.</Typography></li>
+              <li><Typography variant="body1">Click once on a node to select it.</Typography></li>
+              <li><Typography variant="body1">Click twice on a node and press DELETE to delete it.</Typography></li>
+              <li><Typography variant="body1">Hold down shift - click and drag from a node to direct it to another node.</Typography></li>
             </ul>
           </React.Fragment>
         }/>
@@ -181,11 +183,10 @@ class App extends Component {
           </List>
             
           <Divider/>
+
+
           <List>
-            <ListItem button key='About'>
-              <ListItemIcon className={classes.icons}><InfoIcon/></ListItemIcon>
-              <ListItemText primary='About'/>
-            </ListItem>
+            <SidebarPopup classes={classes} Icon={InfoIcon} label='About' title='About' contents='' />
           </List>
         </Drawer>
         <main className={classes.content}>
