@@ -131,8 +131,8 @@ class App extends Component {
     createDatabase().then((db) => {
       this.setState({db, loaded: true});
     }).then(() => {
-      addNode(this.graphSvg, {}, 0,0);
-      addNode(this.graphSvg, {}, 0,200);
+      // addNode(this.graphSvg, {}, 0,0);
+      // addNode(this.graphSvg, {}, 0,200);
       //
       //
       // const svg = d3.select('#mainRender');

@@ -17,7 +17,6 @@ export const svgMouseUp = function (d3) {
     this.dragLine.classed('hidden', true);
   } else if (this.graphMouseDown) {
     // SVG was clicked, deselecting nodes and edges.
-    console.log(this.selectedEdge, this.selectedNode);
     removeSelectFromNode.call(this);
     removeSelectFromEdge.call(this);
   }
@@ -29,8 +28,6 @@ export const dragmove = function(d, d3) {
     this.dragLine.attr('d', 'M' + d.x + ',' + d.y + 'L' +
       d3.mouse(this.graph.node())[0] + ',' + d3.mouse(this.graph.node())[1]);
   } else {
-    console.log(d);
-    console.log(d3.event.dx);
     d.x += d3.event.dx;
     d.y += d3.event.dy;
     this.updateGraph();
