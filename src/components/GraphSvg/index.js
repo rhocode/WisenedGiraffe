@@ -274,6 +274,10 @@ class GraphSvg extends Component {
         {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
+        {'id': id++, 'x': 0, 'y': 0},
+        {'id': id++, 'x': 0, 'y': 0},
+        {'id': id++, 'x': 0, 'y': 0},
+        {'id': id++, 'x': 0, 'y': 0},
       ],
       'links': [
         {'source':  0, 'target':  1},
@@ -283,7 +287,10 @@ class GraphSvg extends Component {
         {'source':  1, 'target':  5},
         {'source':  4, 'target':  6},
         {'source':  6, 'target':  7},
-        {'source':  7, 'target':  8}
+        {'source':  7, 'target':  8},
+        {'source':  8, 'target':  9},
+        {'source':  9, 'target':  10},
+        {'source':  10, 'target':  11}
       ]
     };
 
@@ -299,7 +306,7 @@ class GraphSvg extends Component {
       .force('charge_force', d3.forceManyBody().strength(1))
       // .force('center_force', d3.forceCenter(width / 2, height / 2))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('links', d3.forceLink(graph.links).id(function (d) { console.log(d.id); return d.id; }).distance(150).strength(0.5))
+      .force('links', d3.forceLink(graph.links).id(function (d) { console.log(d.id); return d.id; }).distance(150).strength(0.8))
       .force('collide', d3.forceCollide().radius(120))
     ;
 
@@ -315,14 +322,15 @@ class GraphSvg extends Component {
     //Create deffinition for the arrow markers showing relationship directions
     g.append('defs').append('marker')
       .attr('id', 'arrow')
-      .attr('viewBox', '0 -3 10 10')
+      .attr('viewBox', '0 -5 10 10')
       .attr('refX', 40)
       .attr('refY', 0)
-      .attr('markerWidth', 8)
-      .attr('markerHeight', 8)
+      .attr('markerWidth', 20)
+      .attr('markerHeight', 20)
       .attr('orient', 'auto')
       .append('svg:path')
       .attr('d', 'M0,-5L10,0L0,5');
+
 
     var link = g.append('g')
       .attr('class', 'links')
@@ -386,6 +394,8 @@ class GraphSvg extends Component {
     node.on('dblclick', function (d) {
       d3.event.stopImmediatePropagation();
       console.log('DOUBLE CLICKED ME!!', d);
+      // d.x = d.fx;
+      // d.y = d.fy;
       d.fx = null;
       d.fy = null;
     });
