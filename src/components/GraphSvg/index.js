@@ -274,10 +274,6 @@ class GraphSvg extends Component {
         {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0}
       ],
       'links': [
         {'source':  0, 'target':  1},
@@ -300,10 +296,11 @@ class GraphSvg extends Component {
       .nodes(graph.nodes);
 
     simulation
-      .force('charge_force', d3.forceManyBody().strength(-120))
-      .force('center_force', d3.forceCenter(width / 2, height / 2))
-      .force('links', d3.forceLink(graph.links).id(function (d) { console.log(d.id); return d.id; }).distance(200).strength(1))
-      .force('collide', d3.forceCollide().radius(2))
+      .force('charge_force', d3.forceManyBody().strength(1))
+      // .force('center_force', d3.forceCenter(width / 2, height / 2))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('links', d3.forceLink(graph.links).id(function (d) { console.log(d.id); return d.id; }).distance(150).strength(0.5))
+      .force('collide', d3.forceCollide().radius(120))
     ;
 
     simulation
@@ -313,11 +310,13 @@ class GraphSvg extends Component {
     const g = inSvg.append('g')
       .attr('class', 'everything');
 
+    inSvg.on('dblclick.zoom', null);
+
     //Create deffinition for the arrow markers showing relationship directions
     g.append('defs').append('marker')
       .attr('id', 'arrow')
       .attr('viewBox', '0 -3 10 10')
-      .attr('refX', 20)
+      .attr('refX', 40)
       .attr('refY', 0)
       .attr('markerWidth', 8)
       .attr('markerHeight', 8)
@@ -339,7 +338,7 @@ class GraphSvg extends Component {
       .data(graph.nodes)
       .enter()
       .append('circle')
-      .attr('r', 10)
+      .attr('r', 60)
       .attr('fill', function(d) {
         if (d.sourceOnly) return d3.color('#0000FF');
 
@@ -368,17 +367,12 @@ class GraphSvg extends Component {
       .style('font-size', '0.7em')
       .text(function (d) { return d.lotid; });
 
-    // node.on('click', function (d) {
-    //   d3.event.stopImmediatePropagation();
-    //   self.onNodeClicked.emit(d.id);
-    // });
-
-    node.on('dblclick', function (d) {
+    node.on('click', function (d) {
       d3.event.stopImmediatePropagation();
-      console.log('DOUBLE CLICKED ME!!', d);
-      d.fx = null;
-      d.fy = null;
+      // self.onNodeClicked.emit(d.id);
     });
+
+
 
     node.append('title')
       .text(function (d) { return d.lotid; });
@@ -388,6 +382,13 @@ class GraphSvg extends Component {
       .on('zoom', zoom_actions);
 
     zoom_handler(inSvg);
+
+    node.on('dblclick', function (d) {
+      d3.event.stopImmediatePropagation();
+      console.log('DOUBLE CLICKED ME!!', d);
+      d.fx = null;
+      d.fy = null;
+    });
 
     //Drag functions
     //d is the node
@@ -404,7 +405,7 @@ class GraphSvg extends Component {
     }
 
     function drag_end(d) {
-      if (!d3.event.active) simulation.alphaTarget(0);
+      // if (!d3.event.active) simulation.alphaTarget(0);
       // d.fx = null;
       // d.fy = null;
     }
@@ -416,12 +417,13 @@ class GraphSvg extends Component {
 
     function ticked() {
       //update circle positions each tick of the simulation
+      const k = 60 * simulation.alpha();
 
-      const k = 6 * simulation.alpha();
-
-      graph.links.forEach(function(d, i) {
-        d.source.y -= k;
-        d.target.y += k;
+      graph.links.forEach(function(d) {
+        if (!d.source.fy && !d.target.fy) {
+          d.source.y -= k;
+          d.target.y += k;
+        }
       });
 
       node
@@ -434,9 +436,6 @@ class GraphSvg extends Component {
         .attr('y1', function(d) { return d.source.y; })
         .attr('x2', function(d) { return d.target.x; })
         .attr('y2', function(d) { return d.target.y; });
-
-      d.source.y -= k;
-      d.target.y += k;
 
       text
         .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; });
