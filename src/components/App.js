@@ -18,7 +18,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 import jsxToString from 'jsx-to-string';
 
-import data from './data';
 import createDatabase from './newData';
 import GraphSvg from './GraphSvg';
 import SidebarButton from './SidebarButton';
@@ -125,12 +124,74 @@ class App extends Component {
   //   });
   // }
 
+  getRefkeyTable(table) {
+    const db = this.state.db;
+    const tableRef = db.getSchema().table(table);
+    return new Promise(resolve => db.select()
+      .from(tableRef).exec().then(results => resolve(results)));
+  }
+
+
+  generateRecursiveStructure(startingTable) {
+    const db = this.state.db;
+    const starting = db.getSchema().table(startingTable);
+    const globalStructure = {};
+    this.globalStructure = this.globalStructure || globalStructure;
+
+    return db.select().from(starting).exec().then(async results => {
+      if (results.length > 0) {
+        globalStructure[startingTable] = results;
+
+        const refKeysToProcess = Object.keys(results[0]).filter(str => str.endsWith('_id'));
+
+        while(refKeysToProcess.length > 0) {
+          const refKey = refKeysToProcess.pop();
+          const tableName = refKey.slice(0, -3);
+          if (!globalStructure[tableName]) {
+            globalStructure[tableName] = await this.getRefkeyTable(tableName);
+            Object.keys(globalStructure[tableName]).filter(str => str.endsWith('_id'))
+              .forEach(name => {
+                if (!globalStructure[name.slice(0, -3)]) {
+                  refKeysToProcess.push(name);
+                }
+              });
+          }
+        }
+
+        Object.keys(globalStructure).forEach(key => {
+          const rows = globalStructure[key];
+          rows.forEach(row => {
+            Object.keys(row).filter(str => str.endsWith('_id')).forEach(rowKey => {
+              const refId = row[rowKey];
+              const tableName = rowKey.slice(0, -3);
+              const associatedData = globalStructure[tableName];
+              delete row[rowKey];
+
+              const possibleData = associatedData.filter(elem => elem.id === refId);
+              if (possibleData.length === 1) {
+                row[tableName] = possibleData[0];
+              } else {
+                throw new Error('Unrecognized Id ' + refId + ' in ' + rowKey + ' within ' + key);
+              }
+            });
+          });
+        });
+      }
+
+      return globalStructure;
+    });
+  }
 
 
   componentDidMount() {
     createDatabase().then((db) => {
       this.setState({db, loaded: true});
     }).then(() => {
+      return this.generateRecursiveStructure('recipe').then(recipes => { this.setState({recipes}, () => {
+        return this.generateRecursiveStructure('machine_node').then(machine_node => { this.setState({machine_node});});
+      }); });
+
+      // this.generateRecursiveStructure('recipe').then(recipe => {console.log(recipe); this.setState({recipe})});
       // addNode(this.graphSvg, {}, 0,0);
       // addNode(this.graphSvg, {}, 0,200);
       //
@@ -186,6 +247,21 @@ class App extends Component {
     });
   }
 
+  generateNodeList() {
+    const recipesByMachineClass = {};
+    console.log(this.state);
+    this.state.recipes && this.state.recipes.recipe.forEach(recipe => {
+      console.log(recipe.machine_class.name);
+      const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
+      thisList.push(recipe);
+      recipesByMachineClass[recipe.machine_class.name] = thisList;
+    });
+    console.log(recipesByMachineClass);
+    return Object.keys(recipesByMachineClass).map(key =>
+      <SidebarButton label={key} key={key} items={recipesByMachineClass[key]} />
+    );
+  }
+
   render() {
     const {classes} = this.props;
 
@@ -228,21 +304,7 @@ class App extends Component {
           }}
         >
           <List>
-            <SidebarButton label={'Constructor'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'Assembler'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
-            <SidebarButton label={'sidebar button'} items={['menu item 1', 'menu 2']} />
+            {this.generateNodeList()}
           </List>
             
           <Divider/>

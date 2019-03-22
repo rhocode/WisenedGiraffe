@@ -1,10 +1,14 @@
 import React from 'react';
-import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import AddBoxIcon from '@material-ui/icons/AddBox';
+import Popper from '@material-ui/core/Popper';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
+
 import { withStyles } from '@material-ui/core';
+import MenuList from '@material-ui/core/MenuList';
+import Grow from '@material-ui/core/Grow';
 
 const styles = theme => ({
   root: {
@@ -20,6 +24,9 @@ const styles = theme => ({
   },
   label: {
     paddingLeft: 10,
+  },
+  popper: {
+    zIndex: 1
   }
 });
 
@@ -47,8 +54,11 @@ class SidebarButton extends React.Component {
     const { auth, anchorEl } = this.state;
     const open = Boolean(anchorEl);
     const label = this.props.label;
-    const listItems = this.props.items.map((link) =>
-      <MenuItem onClick={this.handleClose} key={link}>{link}</MenuItem>
+    const listItems = this.props.items.map((link) => {
+
+      return <MenuItem onClick={this.handleClose} key={link.id}>{link.name}</MenuItem>;
+    }
+
     );
 
     return (
@@ -65,15 +75,32 @@ class SidebarButton extends React.Component {
               {label}
             </div>
           </Button>
+          <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition disablePortal>
+            {({ TransitionProps, placement }) => (
+              <Grow
+                {...TransitionProps}
+                id="menu-list-grow"
+                style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+              >
+                <Paper>
+                  <ClickAwayListener onClickAway={this.handleClose}>
+                    <MenuList>
+                      {listItems}
+                    </MenuList>
+                  </ClickAwayListener>
+                </Paper>
+              </Grow>
+            )}
+          </Popper>
         </Paper>
-        <Menu
-          id="menu-appbar"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={this.handleClose}
-        >
-          {listItems}
-        </Menu>
+        {/*<Menu*/}
+        {/*id="menu-appbar"*/}
+        {/*anchorEl={anchorEl}*/}
+        {/*open={open}*/}
+        {/*onClose={this.handleClose}*/}
+        {/*>*/}
+        {/*{listItems}*/}
+        {/*</Menu>*/}
       </React.Fragment>
     );
   }
