@@ -435,9 +435,6 @@ class GraphSvg extends Component {
         .attr('x2', function(d) { return d.target.x; })
         .attr('y2', function(d) { return d.target.y; });
 
-      d.source.y -= k;
-      d.target.y += k;
-
       text
         .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; });
     }
