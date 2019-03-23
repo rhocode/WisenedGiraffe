@@ -1,6 +1,6 @@
 import lf from 'lovefield';
 /** @namespace lf.Type */
-const schemaBuilder = lf.schema.create('test', 4);
+const schemaBuilder = lf.schema.create('test', 5);
 
 schemaBuilder.createTable('node_type')
   .addColumn('id', lf.Type.INTEGER)

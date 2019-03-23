@@ -34,6 +34,10 @@ p{
   fill: #FF9800;
 }
 
+.selected-node .graphMachineNode  {
+  fill: #E65100;
+}
+
 .graphNodeGrabbedClass {
   cursor: grabbing !important;
 }
@@ -102,17 +106,17 @@ g.conceptG circle{
   stroke-width: 1px;
 }
 
-g.conceptG:hover circle {
-  fill: #FF9800;
-}
-
-g.selected circle{
-  fill: #E65100;
-}
-
-g.selected:hover circle{
-  fill: #E65100;
-}
+//g.conceptG:hover circle {
+//  fill: #FF9800;
+//}
+//
+//g.selected circle{
+//  fill: #E65100;
+//}
+//
+//g.selected:hover circle{
+//  fill: #E65100;
+//}
 
 
 

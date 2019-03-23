@@ -46,12 +46,10 @@ export const drag_start = function (d, simulation, graphSvg) {
       simulation.alphaTarget(0.3).restart();
     graphSvg.setState({wasFixed: d.fx !== null && d.fy != null});
   }
-
 };
 
 //make sure you can't drag the circle outside the box
 export const drag_drag = (d, graphSvg) => {
-
   if (graphSvg.state && graphSvg.state.shiftHeld) {
     //ignore drag...it's probably not important.
     graphSvg.dragLine.classed('hidden', false).attr('d', 'M' + d.x + ',' + d.y + 'L' +
@@ -64,14 +62,10 @@ export const drag_drag = (d, graphSvg) => {
 };
 
 export const drag_end = (d, graphSvg, simulation) => {
-  // if (!d3.event.active) simulation.alphaTarget(0);
-  // Uncomment below if you want it to "bounce" back?
-  // d.fx = null;
-  // d.fy = null;
-
   if (graphSvg.state && graphSvg.state.shiftHeld) {
     if (graphSvg.state.mouseOverNode) {
-      console.log(graphSvg.graphData.nodes[0])
+      const source = graphSvg.state.mouseDragSource;
+      const target = graphSvg.state.mouseOverNode;
       addEdgeAndRestartSimulation.call(this, graphSvg,   graphSvg.state.mouseDragSource, graphSvg.state.mouseOverNode , simulation);
     }
     graphSvg.dragLine.classed('hidden', true).attr('d', 'M0,0L0,0');
@@ -84,13 +78,21 @@ export const drag_end = (d, graphSvg, simulation) => {
       d.fy = null;
     }
   }
+  console.log(d.x, d.y, d.fx, d.fy);
   graphSvg.setState({shiftHeld: false, wasMoved: false, wasFixed: false});
   d3.select(this).classed(constants.graphNodeGrabbedClass, false);
 };
 
 export const node_clicked = function(d, graphSvg) {
+  // unselect currently selected node
+  d3.select('.' + constants.selectedNodeClass)
+    .classed(constants.selectedNodeClass, false);
+
+  d3.select(this).classed(constants.graphNodeHoverClass, true)
+    .classed(constants.graphNodeGrabbedClass, false)
+    .classed(constants.selectedNodeClass, true);
   console.log(graphSvg.state);
-  console.log('clicked');
+
 };
 
 export const node_mouse_over = function(d, graphSvg) {
@@ -105,10 +107,8 @@ export const node_mouse_out = function(d, graphSvg) {
 };
 
 export const node_mouse_down = function(d, graphSvg) {
-  console.log("mouseDOWN!!!");
   if (d3.event.shiftKey) {
     // d3.event.stopImmediatePropagation();
-    console.log(this);
     graphSvg.setState({shiftHeld: true, sourceId: d3.select(this).datum().id});
   } else {
     d3.select(this).classed(constants.graphNodeGrabbedClass, true);

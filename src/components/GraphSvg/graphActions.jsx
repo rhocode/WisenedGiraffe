@@ -12,6 +12,26 @@ import {
 } from './mouseEvents';
 
 //v2
+
+export const initSimulation = () => {
+  const bodyEl = document.getElementById('mainRender');
+
+  const width = bodyEl.clientWidth;
+  const height = bodyEl.clientHeight;
+
+  return d3.forceSimulation()
+    .force('link', d3.forceLink().id(function(d) {
+      return d.id;
+    }).distance(100).strength(1))
+    .force('charge', d3.forceManyBody())
+    .force('center', d3.forceCenter(width / 2, height / 2))
+    .force('collision', d3.forceCollide().radius(function(d) {
+      return 100;
+    }))
+    .force('y', d3.forceY())
+    .force('x', d3.forceX());
+};
+
 export const updateGraph = function(simulation, graphNodesGroup, graphLinksGroup) {
   const t = this;
   console.log(this);
@@ -19,25 +39,29 @@ export const updateGraph = function(simulation, graphNodesGroup, graphLinksGroup
   let links  = this.graphData.links;
 
   const drag =  d3.drag()
+    .clickDistance(10)
     .on('start', (d) => {
       console.log('DragStart');
       drag_start.call(this, d, simulation, t);
     }).on('drag', (d) => {
+      console.log('DragDrag');
       drag_drag.call(this, d, t);
     }).on('end', function(d) {
+      console.log('DragEnd');
       d3.event.sourceEvent.stopImmediatePropagation();
       drag_end.call(this, d, t, simulation);
     });
 
   let graphNodesData =
     graphNodesGroup
-      .selectAll('g')
+      .selectAll('.' + 'node-data-class')
       .data(nodes, d => d.id);
 
   let graphNodesEnter =
     graphNodesData
       .enter()
       .append('g')
+      .classed('node-data-class', true)
       .attr('id', d => d.id || null)
       // .on('contextmenu', (d, i)  => {
       //   t.remove(d);
@@ -78,9 +102,10 @@ export const updateGraph = function(simulation, graphNodesGroup, graphLinksGroup
       .attr('cursor', 'pointer')
       .attr('r', d => 50);
 
+  insertNodeLevel(graphNodesEnter);
   addOverclockArc(graphNodesEnter, 'overclock', 55, 330);
   addNodeImage(graphNodesEnter);
-  insertNodeLevel(graphNodesEnter);
+
 
   // merge
   graphNodesData =
@@ -89,12 +114,13 @@ export const updateGraph = function(simulation, graphNodesGroup, graphLinksGroup
   // links
   let graphLinksData =
     graphLinksGroup
-      .selectAll('g')
+      .selectAll('.' + 'link-data-class')
       .data(links);
   let graphLinksEnter =
     graphLinksData
       .enter()
-      .append('g');
+      .append('g')
+      .classed('link-data-class', true);
 
   let graphLinksExit =
     graphLinksData
@@ -111,8 +137,6 @@ export const updateGraph = function(simulation, graphNodesGroup, graphLinksGroup
   // merge
   graphLinksData =
     graphLinksEnter.merge(graphLinksData);
-
-
 
   simulation
     .nodes(nodes)
