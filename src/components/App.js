@@ -352,7 +352,7 @@ class App extends Component {
   generateSpringList() {
     this.generateContainerList();
     const springByClass = {};
-    this.state.purity_type && this.state.spring && this.state.spring.spring.forEach(spring => {
+    this.state.spring && this.state.spring.spring.forEach(spring => {
       const thisList = springByClass[spring.spring_type.name] || [];
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
@@ -362,10 +362,7 @@ class App extends Component {
         const returnDivList = [];
         if (['Miner'].includes(key)) {
           springByClass[key].forEach(resource => {
-            this.state.purity_type.purity_type.map(purity => {
-              console.log(resource, purity);
-              returnDivList.push(<div key={resource.id + purity.name}/>);
-            });
+            console.log(resource);
           });
         }
         return returnDivList;

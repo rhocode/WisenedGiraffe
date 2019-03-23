@@ -73,7 +73,8 @@ schemaBuilder.createTable('spring')
   .addColumn('item_id', lf.Type.INTEGER)
   .addColumn('icon', lf.Type.STRING)
   .addNullable(['item_id', 'icon'])
-  .addColumn('hidden', lf.Type.BOOLEAN);
+  .addColumn('hidden', lf.Type.BOOLEAN)
+  .addColumn('purities', lf.Type.OBJECT);
 
 schemaBuilder.createTable('item')
   .addColumn('id', lf.Type.INTEGER)
@@ -119,15 +120,15 @@ const getTableEntryIdByName = (table, name) => {
   };
 };
 
-// const getTableEntries = (table, db) => {
-//   const tableRef = db.getSchema().table(table);
-//   return new Promise((resolve) => {
-//     db.select().from(tableRef).exec()
-//       .then((rows) => {
-//         resolve(rows);
-//       });
-//   });
-// };
+const getTableEntries = (table, db) => {
+  const tableRef = db.getSchema().table(table);
+  return new Promise((resolve) => {
+    db.select().from(tableRef).exec()
+      .then((rows) => {
+        resolve(rows);
+      });
+  });
+};
 
 const baseUrl = 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/';
 
@@ -155,14 +156,15 @@ const generateSpringList = async db => {
   const machine_type_container = await getTableEntryIdByName('machine_class', 'Container')(db);
   const spring_type_miner = await getTableEntryIdByName('spring_type', 'Miner')(db);
   const spring_type_container = await getTableEntryIdByName('spring_type', 'Container')(db);
-
+  const purity_types = await getTableEntries('purity_type', db);
   for (let i = 0; i < types.length; i++) {
     const ore = await getTableEntryIdByName('item', types[i])(db);
 
     const structure = {
       item_id: ore,
       machine_class_id: machine_type_miner,
-      spring_type_id: spring_type_miner
+      spring_type_id: spring_type_miner,
+      purities: purity_types
     };
     ret.push(structure);
   }
@@ -178,6 +180,14 @@ const generateSpringList = async db => {
 };
 
 const data = [
+  {
+    key: 'purity_type',
+    value: [
+      {name: 'Impure', quantity: 30},
+      {name: 'Normal', quantity: 60},
+      {name: 'Pure', quantity: 120}
+    ]
+  },
   { key: 'item',
     value: [
       {
@@ -407,14 +417,6 @@ const data = [
         speed: 100,
         hidden: true
       }
-    ]
-  },
-  {
-    key: 'purity_type',
-    value: [
-      {name: 'Impure', quantity: 30},
-      {name: 'Normal', quantity: 60},
-      {name: 'Pure', quantity: 120}
     ]
   },
   {
