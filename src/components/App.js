@@ -25,6 +25,7 @@ import FabPopup from './FabPopup';
 import ToolbarPopup from './ToolbarPopup';
 import SidebarPopup from './SidebarPopup';
 import {addNode} from './GraphSvg/nodeActions';
+import NestedSidebarButton from './NestedSidebarButton';
 
 /* global d3 */
 
@@ -350,23 +351,38 @@ class App extends Component {
   }
 
   generateSpringList() {
-    this.generateContainerList();
     const springByClass = {};
     this.state.spring && this.state.spring.spring.forEach(spring => {
       const thisList = springByClass[spring.spring_type.name] || [];
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
-    return Object.keys(springByClass)
-      .map(key => {
-        const returnDivList = [];
-        if (['Miner'].includes(key)) {
-          springByClass[key].forEach(resource => {
-            console.log(resource);
-          });
-        }
-        return returnDivList;
-      });
+    return (
+      <NestedSidebarButton label='Miner' listItems={springByClass}/>
+      // <React.Fragment key={label}>
+      //   <Paper className={classes.paper}>
+      //     <Button
+      //       aria-owns={open ? 'menu-appbar' : null}
+      //       aria-haspopup="true"
+      //       onClick={open ? this.handleClose : this.handleMenu}
+      //       className={classes.button}
+      //     >
+      //       <AddBoxIcon/>
+      //       <div className={classes.label}>Miner</div>
+      //     </Button>
+      //     {Object.keys(springByClass).map(key => {
+      //       const returnDivList = [];
+      //       if (['Miner'].includes(key)) {
+      //         springByClass[key].forEach(resource => {
+      //           console.log(resource);
+      //           returnDivList.push();
+      //         });
+      //       }
+      //       return returnDivList;
+      //     })}
+      //   </Paper>
+      // </React.Fragment>
+    );
   }
 
   render() {
