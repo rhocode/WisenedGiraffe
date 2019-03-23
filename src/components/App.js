@@ -86,7 +86,7 @@ const styles = theme => ({
   },
   label: {
     paddingLeft: 10,
-  }
+  },
 });
 
 const theme = createMuiTheme({
@@ -315,7 +315,6 @@ class App extends Component {
 
   generateNodeList() {
     const recipesByMachineClass = {};
-
     this.state.recipes && this.state.recipes.recipe.forEach(recipe => {
       const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
       thisList.push(recipe);
