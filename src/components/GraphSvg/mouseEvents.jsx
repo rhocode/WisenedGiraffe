@@ -33,3 +33,26 @@ export const dragmove = function(d, d3) {
     this.updateGraph();
   }
 };
+
+// V2 functions
+export const drag_start = (d, simulation, d3) => {
+  if (!d3.event.active)
+    simulation.alphaTarget(0.3).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+};
+
+//make sure you can't drag the circle outside the box
+export const drag_drag = (d, d3) => {
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+};
+
+export const drag_end = (d) => {
+  // if (!d3.event.active) simulation.alphaTarget(0);
+  // Uncomment below if you want it to "bounce" back?
+  // d.fx = null;
+  // d.fy = null;
+  d.x = d.fx;
+  d.y = d.fy;
+};

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {svgKeyDown, svgKeyUp} from './keyboardEvents';
-import {svgMouseDown, svgMouseUp, dragmove} from './mouseEvents';
-import {zoomed} from './graphActions';
+import {svgMouseDown, svgMouseUp, dragmove, drag_start, drag_drag, drag_end} from './mouseEvents';
+import {zoom_actions, zoomed} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
 import {circleMouseDown, circleMouseUp, nodeNaming} from './nodeActions';
 import constants from './constants';
@@ -238,33 +238,13 @@ class GraphSvg extends Component {
     svg.call(dragSvg).on('dblclick.zoom', null);
 
     const width = window.innerWidth, height = window.innerHeight;
-
-
-    // this.force = d3.layout.force()
-    //   .charge(-120)
-    //   .linkDistance(30)
-    //   .size([width, height]);
-    //
-    // this.force
-    //   .nodes(this.nodes)
-    //   .links(this.edges)
-    //   .on('tick', this.tickGraph)
-    //   .start();
-
-    // Resize listener
-    // window.addEventListener('resize', resize);
-    //
-    // function resize() {
-    //   var width = window.innerWidth, height = window.innerHeight;
-    //   svg.attr("width", width).attr("height", height);
-    //   force.size([width, height]).resume();
-    // }
   }
 
-  createGraphV2(inSvg) {
+  createGraphV2(inputSvg) {
     let id = 0;
-    const graph = {
+    this.graphData = {
       'nodes': [
+        {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
@@ -297,53 +277,56 @@ class GraphSvg extends Component {
       height = bodyEl.clientHeight;
 
     var simulation = d3.forceSimulation()
-      .nodes(graph.nodes);
+      .nodes(this.graphData.nodes);
 
     simulation
-      .force('charge_force', d3.forceManyBody().strength(1))
-      // .force('center_force', d3.forceCenter(width / 2, height / 2))
+      .force('link', d3.forceLink().id(function(d) {
+        return d.id;
+      }).distance(100).strength(1))
+      .force('charge', d3.forceManyBody())
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('links', d3.forceLink(graph.links).id(function (d) { console.log(d.id); return d.id; }).distance(150).strength(0.8))
-      .force('collide', d3.forceCollide().radius(120))
-    ;
+      .force('collision', d3.forceCollide().radius(function(d) {
+        return 100;
+      }))
+      .force('y', d3.forceY())
+      .force('x', d3.forceX());
+
+    simulation.force('link')
+      .links(this.graphData.links);
 
     simulation
       .on('tick', ticked);
 
     //add encompassing group for the zoom
-    const g = inSvg.append('g')
-      .attr('class', 'everything');
-
-    inSvg.on('dblclick.zoom', null);
+    const graphObjects = inputSvg.append('g')
+      .attr('class', 'objects');
 
     //Create deffinition for the arrow markers showing relationship directions
-    g.append('defs').append('marker')
-      .attr('id', 'arrow')
-      .attr('viewBox', '0 -5 10 10')
-      .attr('refX', 40)
-      .attr('refY', 0)
-      .attr('markerWidth', 20)
-      .attr('markerHeight', 20)
-      .attr('orient', 'auto')
-      .append('svg:path')
-      .attr('d', 'M0,-5L10,0L0,5');
 
+    const defs = graphObjects.append('defs');
+    appendMarkerAttributes(defs.append('svg:marker')
+      .attr('id', 'default-path-arrow')
+      .attr('refX', 35));
 
-    var link = g.append('g')
+    appendMarkerAttributes(defs.append('svg:marker')
+      .attr('id', 'dragged-end-arrow')
+      .attr('refX', 35));
+
+    var link = graphObjects.append('g')
       .attr('class', 'links')
       .selectAll('line')
-      .data(graph.links)
+      .data(this.graphData.links)
       .enter().append('line')
       .attr('stroke', function(d) { return d3.color('#000000'); })
-      .attr('marker-end', 'url(#arrow)');
+      .attr('marker-end', 'url(#default-path-arrow)');
 
-    var node = g.append('g')
+    var node = graphObjects.append('g')
       .attr('class', 'nodes')
       .selectAll('circle')
-      .data(graph.nodes)
+      .data(this.graphData.nodes)
       .enter()
       .append('circle')
-      .attr('r', 60)
+      .attr('r', 50)
       .attr('fill', function(d) {
         if (d.sourceOnly) return d3.color('#0000FF');
 
@@ -354,106 +337,54 @@ class GraphSvg extends Component {
         return d3.color('#FF8D2F');
       });
 
-    //add drag capabilities
-    var drag_handler = d3.drag()
-      .on('start', drag_start)
-      .on('drag', drag_drag)
-      .on('end', drag_end);
-
-    drag_handler(node);
-
-    var text = g.append('g').attr('class', 'labels').selectAll('g')
-      .data(graph.nodes)
-      .enter().append('g')
-      .append('text')
-      .attr('x', 14)
-      .attr('y', '.31em')
-      .style('font-family', 'sans-serif')
-      .style('font-size', '0.7em')
-      .text(function (d) { return d.lotid; });
-
     node.on('click', function (d) {
       d3.event.stopImmediatePropagation();
       // self.onNodeClicked.emit(d.id);
     });
-
-
-
-    node.append('title')
-      .text(function (d) { return d.lotid; });
-
-    //add zoom capabilities
-    var zoom_handler = d3.zoom()
-      .on('zoom', zoom_actions);
-
-    zoom_handler(inSvg);
-
     node.on('dblclick', function (d) {
       d3.event.stopImmediatePropagation();
-      console.log('DOUBLE CLICKED ME!!', d);
-      d.x = d.fx;
-      d.y = d.fy;
       d.fx = null;
       d.fy = null;
     });
 
-    //Drag functions
-    //d is the node
-    function drag_start(d) {
-      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
+    //add drag capabilities
+    this.drag_handler = d3.drag()
+      .on('start', (d) => {
+        drag_start.call(this, d, simulation, d3);
+      }).on('drag', (d) => {
+        drag_drag.call(this, d, d3);
+      }).on('end', (d) => {
+        drag_end.call(this, d);
+      });
+    this.drag_handler(node);
 
-    //make sure you can't drag the circle outside the box
-    function drag_drag(d) {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
-    }
-
-    function drag_end(d) {
-      // if (!d3.event.active) simulation.alphaTarget(0);
-      // d.fx = null;
-      // d.fy = null;
-    }
-
-    //Zoom functions
-    function zoom_actions(){
-      g.attr('transform', d3.event.transform);
-    }
+    //add zoom capabilities
+    var zoom_handler = d3.zoom()
+      .on('zoom', () => zoom_actions(graphObjects));
+    zoom_handler(inputSvg);
+    inputSvg.on('dblclick.zoom', null);
 
     function ticked() {
       //update circle positions each tick of the simulation
-      const k = 60 * simulation.alpha();
-
-      graph.links.forEach(function(d) {
-        if (!d.source.fy && !d.target.fy) {
-          d.source.y -= k;
-          d.target.y += k;
-        }
-      });
+      const k = 150 * simulation.alpha();
 
       node
         .attr('cx', function(d) { return d.x; })
-        .attr('dummy', function(d) {
-          if (d.id == 12) {
-            d.vx = 0;
-            d.vy = 0;
-            console.log(d);
-          }
-        })
         .attr('cy', function(d) { return d.y; });
-
 
       //update link positions
       link
         .attr('x1', function(d) { return d.source.x; })
         .attr('y1', function(d) { return d.source.y; })
         .attr('x2', function(d) { return d.target.x; })
-        .attr('y2', function(d) { return d.target.y; });
+        .attr('y2', function(d) { return d.target.y; })
+        .each(function(d) {
+          d.source.vy -= k;
+          d.target.vy += k;
+        });
 
-      text
-        .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; });
+      // text
+      //   .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; });
     }
   }
 
