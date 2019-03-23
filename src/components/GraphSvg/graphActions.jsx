@@ -1,6 +1,6 @@
 import constants from './constants';
 import * as d3 from 'd3';
-import {addOverclockArc, insertNodeTitlev2, wheelZoomCalculation} from "./nodeActions";
+import {addOverclockArc, insertNodeLevel, wheelZoomCalculation, addNodeImage} from './nodeActions';
 import {
   drag_drag,
   drag_end,
@@ -9,140 +9,134 @@ import {
   node_mouse_out,
   node_mouse_over,
   node_mouse_up
-} from "./mouseEvents";
+} from './mouseEvents';
 
 //v2
-export const updateGraph = function() {
-  //
-  // //
-  // // this.link = this.links.enter().append('g')
-  // //   .attr('class', 'parent-line-object')
-  // //   .append('line') // graphLinksEnter
-  // //   .attr('class', 'line-object')
-  // //   .attr('stroke', function(d) { return d3.color('#000000'); })
-  // //   .attr('marker-end', 'url(#default-path-arrow)');
-  // //
-  // // this.links
-  // //   .exit()
-  // //   .remove();
-  // // this.links = this.link.merge(this.links);
-  //
-  //
-  //
-  //
-  //
-  // this.node = graphLinksGroup.append('g');
-  // this.node.append('circle')
-  // .attr('r', 50)
-  // .classed(constants.graphNodeClass, true);
-  //
-  //
-  //
-  //
-  //
-  // //Add nodes
-  // simulation
-  // .nodes(this.graphData.nodes);
-  //
-  // //Add links
-  // simulation
-  //
-  // simulation.force('link')
-  // .links(this.graphData.links);
-  //
-  // simulation
-  // .on('tick', () => handleTick.call(this, this.node, this.links, simulation));
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  // addOverclockArc(this.node, 'overclock', 55, 385);
-  //
-  // this.node.append('svg:image')
-  // .attr('class', function (d) {
-  //   if (d.machine && d.machine.icon) {
-  //     return 'machine-icon';
-  //   }
-  //   return 'dev-icon';
-  // })
-  // .attr('xlink:href', function (d) {
-  //   // if (d.machine && d.machine.icon) {
-  //   //   return d.machine.icon;
-  //   // }
-  //   return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png';
-  //   // return 'https://i.imgur.com/oBmfK3w.png';
-  // })
-  // .attr('x', function (d) {
-  //   return -50;
-  // })
-  // .attr('y', function (d) {
-  //   return -50;
-  // })
-  // .attr('height', 100)
-  // .attr('width', 100);
-  //
-  //
-  // insertNodeTitlev2(this.node);
-  //
-  // const graphSvgClass = this;
-  // this.node.on('mouseover', function (d) {
-  //   node_mouse_over.call(this, d, graphSvgClass);
-  // }).on('mouseout', function (d) {
-  //   node_mouse_out.call(this, d, graphSvgClass);
-  // }).on('mousedown', function (d) {
-  //   node_mouse_down.call(this, d, graphSvgClass);
-  // }).on('mouseup', function (d) {
-  //   node_mouse_up.call(this, d, graphSvgClass);
-  // });
-  //
-  // //add drag capabilities
-  // this.drag_handler = d3.drag()
-  // // .clickDistance(10)
-  // .on('start', (d) => {
-  //   console.log('DragStart');
-  //   drag_start.call(this, d, simulation, graphSvgClass);
-  // }).on('drag', (d) => {
-  //   drag_drag.call(this, d, graphSvgClass);
-  // }).on('end', function(d) {
-  //   d3.event.sourceEvent.stopImmediatePropagation();
-  //   drag_end.call(this, d, graphSvgClass, simulation);
-  // });
-  // this.drag_handler(this.node);
-  //
-  //
-  // this.node.on('click', function (d) {
-  //   d3.event.stopImmediatePropagation();
-  //   node_clicked.call(this, d, graphSvgClass);
-  //   // self.onNodeClicked.emit(d.id);
-  // });
-  //
-  // this.node.on('dblclick', function (d) {
-  //   d3.event.stopImmediatePropagation();
-  //   d.fx = null;
-  //   d.fy = null;
-  // });
-  //
-  // this.node.on('wheel.zoom', function(d) {
-  //   wheelZoomCalculation.call(this, d);
-  // });
-}
+export const updateGraph = function(simulation, graphNodesGroup, graphLinksGroup) {
+  const t = this;
+  console.log(this);
+  let nodes = this.graphData.nodes;
+  let links  = this.graphData.links;
+
+  const drag =  d3.drag()
+    .on('start', (d) => {
+      console.log('DragStart');
+      drag_start.call(this, d, simulation, t);
+    }).on('drag', (d) => {
+      drag_drag.call(this, d, t);
+    }).on('end', function(d) {
+      d3.event.sourceEvent.stopImmediatePropagation();
+      drag_end.call(this, d, t, simulation);
+    });
+
+  let graphNodesData =
+    graphNodesGroup
+      .selectAll('g')
+      .data(nodes, d => d.id);
+
+  let graphNodesEnter =
+    graphNodesData
+      .enter()
+      .append('g')
+      .attr('id', d => d.id || null)
+      // .on('contextmenu', (d, i)  => {
+      //   t.remove(d);
+      //   d3.event.preventDefault();
+      // })
+      // .on('mouseover', d => console.log(`d.id: ${d.id}`))
+      // .on('click', d => t.handleNodeClicked(d))
+      .on('wheel.zoom', function(d) {
+        wheelZoomCalculation.call(this, d);
+      })
+      .on('click', function (d) {
+        d3.event.stopImmediatePropagation();
+        node_clicked.call(this, d, t);
+        // self.onNodeClicked.emit(d.id);
+      }).on('dblclick', function (d) {
+        d3.event.stopImmediatePropagation();
+        d.fx = null;
+        d.fy = null;
+      }).on('mouseover', function (d) {
+        node_mouse_over.call(this, d, t);
+      }).on('mouseout', function (d) {
+        node_mouse_out.call(this, d, t);
+      }).on('mousedown', function (d) {
+        node_mouse_down.call(this, d, t);
+      }).on('mouseup', function (d) {
+        node_mouse_up.call(this, d, t);
+      }).call(drag);
+
+  let graphNodesExit =
+    graphNodesData
+      .exit()
+      .remove();
+
+  let graphNodeCircles =
+    graphNodesEnter
+      .append('circle')
+      .classed(constants.graphNodeClass, true)
+      .attr('cursor', 'pointer')
+      .attr('r', d => 50);
+
+  addOverclockArc(graphNodesEnter, 'overclock', 55, 330);
+  addNodeImage(graphNodesEnter);
+  insertNodeLevel(graphNodesEnter);
+
+  // merge
+  graphNodesData =
+    graphNodesEnter.merge(graphNodesData);
+
+  // links
+  let graphLinksData =
+    graphLinksGroup
+      .selectAll('g')
+      .data(links);
+  let graphLinksEnter =
+    graphLinksData
+      .enter()
+      .append('g');
+
+  let graphLinksExit =
+    graphLinksData
+      .exit()
+      .remove();
+
+  let graphNodeLinks =
+    graphLinksEnter
+      .append('line')
+      .classed(constants.lineObjectClass, true)
+      .attr('stroke', function(d) { return d3.color('#000000'); })
+      .attr('marker-end', 'url(#default-path-arrow)');
+
+  // merge
+  graphLinksData =
+    graphLinksEnter.merge(graphLinksData);
+
+
+
+  simulation
+    .nodes(nodes)
+    .on('tick', () => {
+      handleTick.call(this, graphNodesData, graphLinksData, simulation);
+    })
+    .on('end', () => {
+      console.log('Simulation Ended!');
+    });
+
+  simulation
+    .force('link')
+    .links(links);
+};
 
 
 export const zoom_actions = (graphObjects) => {
   graphObjects.attr('transform', d3.event.transform);
 };
 
-export const handleTick = function(node, link, simulation) {
+export const handleTick = function(graphNodesData, graphLinksData, simulation) {
   //update circle positions each tick of the simulation
   const k = 150 * simulation.alpha();
-  console.log("Handling tick", node, link, simulation);
-  node
+  graphNodesData
     .attr('transform', function (d) {
       return 'translate(' + d.x + ',' + d.y + ')';
     })
@@ -150,7 +144,7 @@ export const handleTick = function(node, link, simulation) {
     .attr('cy', function(d) { return d.y; });
 
   //update link positions
-  link
+  graphLinksData.selectAll('line')
     .attr('x1', function(d) { return d.source.x; })
     .attr('y1', function(d) { return d.source.y; })
     .attr('x2', function(d) { return d.target.x; })
@@ -159,9 +153,6 @@ export const handleTick = function(node, link, simulation) {
       d.source.vy -= k;
       d.target.vy += k;
     });
-
-  // text
-  //   .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; });
 };
 
 

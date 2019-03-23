@@ -2,13 +2,14 @@ import constants from './constants';
 import {addEdge, removeEdge, removeSelectFromEdge} from './edgeActions';
 import * as d3 from 'd3';
 
-const overClockCalculation = (d, percentage_metric, offset, endOffset) => {
+const overClockCalculation = (d, percentage_metric, offset, endOffsetRaw) => {
+  const endOffset = endOffsetRaw + offset;
   const percentage = d[percentage_metric];
   const arc = d3.arc()
     .innerRadius(50)
     .outerRadius(50);
 
-  const m = (endOffset - offset) / 100;
+  const m = (endOffset - offset) / 250;
   const b = offset;
 
   const start = b / 180 * Math.PI;
@@ -38,22 +39,51 @@ export const editOverclockArc = (parent, percentage_metric, offset, endOffset) =
     });
 };
 
+export const addNodeImage = (parent) => {
+  parent.append('svg:image')
+    .attr('class', function (d) {
+      if (d.machine && d.machine.icon) {
+        return 'machine-icon';
+      }
+      return 'dev-icon';
+    })
+    .attr('xlink:href', function (d) {
+    // if (d.machine && d.machine.icon) {
+    //   return d.machine.icon;
+    // }
+      return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png';
+    // return 'https://i.imgur.com/oBmfK3w.png';
+    })
+    .attr('x', function (d) {
+      return -50;
+    })
+    .attr('y', function (d) {
+      return -50;
+    })
+    .attr('height', 100)
+    .attr('width', 100);
+};
+
 export const wheelZoomCalculation = function(d) {
   d3.event.stopImmediatePropagation();
 
-  const roughEstimate = -1 * Math.round(d3.event.deltaY / 200);
+  let roughEstimate = -1;
+
+  if (d3.event.deltaY < 0) {
+    roughEstimate = 1;
+  }
 
   d.overclock = (d.overclock + (roughEstimate));
   if (d.overclock < 0) {
-    d.overclock = 100 + d.overclock;
-  } else if (d.overclock > 100) {
-    d.overclock = d.overclock - 101;
+    d.overclock = 251 + d.overclock;
+  } else if (d.overclock > 250) {
+    d.overclock = d.overclock - 251;
   }
   console.log(d.overclock);
-  editOverclockArc(d3.select(this), 'overclock', 55, 385);
+  editOverclockArc(d3.select(this), 'overclock', 55, 330);
 };
 
-export const insertNodeTitlev2 = (gEl) => {
+export const insertNodeLevel = (gEl) => {
   // const title = gEl.datum().name;
   const title = 'V';
   const words = title.split(/-/g);

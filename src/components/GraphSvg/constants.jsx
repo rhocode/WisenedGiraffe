@@ -1,4 +1,5 @@
 const constants = {
+  lineObjectClass: 'line-object',
   selectedClass: 'selected',
   connectableClass: 'potential-connectable-node',
   graphNodeClass: 'graphMachineNode',

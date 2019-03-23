@@ -8,7 +8,7 @@ import {
   circleMouseDown,
   circleMouseUp,
   nodeNaming,
-  insertNodeTitlev2,
+  insertNodeLevel,
   addOverclockArc,
   wheelZoomCalculation
 } from './nodeActions';
@@ -312,7 +312,7 @@ class GraphSvg extends Component {
       .attr('refX', 7));
 
     //The dragged line
-    this.dragLine = graphObjects.append('svg:path')
+    this.dragLine = graphObjects.append('g').append('svg:path')
       .attr('class', 'link dragline line-object hidden')
       .attr('d', 'M0,0L0,0')
       .attr('stroke', function(d) { return d3.color('#000000'); })

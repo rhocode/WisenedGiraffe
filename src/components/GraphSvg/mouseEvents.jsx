@@ -105,6 +105,7 @@ export const node_mouse_out = function(d, graphSvg) {
 };
 
 export const node_mouse_down = function(d, graphSvg) {
+  console.log("mouseDOWN!!!");
   if (d3.event.shiftKey) {
     // d3.event.stopImmediatePropagation();
     console.log(this);
