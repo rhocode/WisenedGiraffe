@@ -60,11 +60,13 @@ class SidebarButton extends React.Component {
   }
 
   handleMenu = event => {
+    if (event.currentTarget === this.state.lastTarget)
+      return;
     this.setState({ anchorEl: event.currentTarget });
   };
 
   handleClose = () => {
-    this.setState({ anchorEl: null });
+    this.setState({ anchorEl: null, lastTarget: this.state.anchorEl}, () => new Promise(resolve => setTimeout(resolve, 100)).then(()=> this.setState({lastTarget: null})) );
   };
 
   render() {
@@ -102,7 +104,7 @@ class SidebarButton extends React.Component {
           <Button
             aria-owns={open ? 'menu-appbar' : null}
             aria-haspopup="true"
-            onClick={this.handleMenu}
+            onClick={open ? this.handleClose : this.handleMenu}
             className={classes.button}
           >
             <AddBoxIcon/>
