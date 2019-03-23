@@ -27,13 +27,28 @@ const styles = theme => ({
     paddingLeft: 10,
   },
   popper: {
-    zIndex: 1
+    zIndex: 1200,
+    left: '13px !important',
   },
   itemListIcon: {
     height: 24,
     width: 24,
     paddingRight: 10,
-    paddingLeft: 10,
+  },
+  tooltip: {
+  },
+  tooltipIcon: {
+    height: 40,
+    display: 'inline-block',
+    paddingLeft: 10
+  },
+  tooltipIconFirst: {
+    height: 40,
+    display: 'inline-block',
+  },
+  tooltipText: {
+    fontSize: 18,
+    display: 'inline-block',
   },
 });
 
@@ -56,26 +71,24 @@ class SidebarButton extends React.Component {
     this.setState({ anchorEl: null });
   };
 
-  generateInputs(inputs) {
-    var output = ''
-    for (var input in inputs) {
-      for (const [key, value] of input.entries()) {
-        output += key + ':' + value + ' ';
-      }
-    }
-    return output;
-  }
-
   render() {
     const { classes } = this.props;
-    console.log(this.props)
     const { auth, anchorEl } = this.state;
     const open = Boolean(anchorEl);
     const label = this.props.label;
     const listItems = this.props.items.map((link) => {
-      console.log(link);
+
       return (
-        <Tooltip key={link.id} title={this.generateInputs(link.inputs)}>
+        <Tooltip key={link.id} className={classes.tooltip} placement="right" title={
+          link.inputs.map((element, index) => {
+            return (
+              <React.Fragment key={element.item.id}>
+                <img src={element.item.icon} className={index===0 ? classes.tooltipIconFirst : classes.tooltipIcon}/>
+                <div className={classes.tooltipText}>{element.quantity}</div>
+              </React.Fragment>
+            );
+          })
+        }>
           <MenuItem onClick={this.handleClose}>
             <img src={link.item.icon} className={classes.itemListIcon} />
             {link.name}
@@ -101,7 +114,7 @@ class SidebarButton extends React.Component {
               {label}
             </div>
           </Button>
-          <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition disablePortal>
+          <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition placement="right-start">
             {({ TransitionProps, placement }) => (
               <Grow
                 {...TransitionProps}

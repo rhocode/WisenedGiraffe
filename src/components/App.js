@@ -158,6 +158,31 @@ class App extends Component {
           }
         }
 
+        const recursiveFind = (element, functionToApply) => {
+          if (Array.isArray(element)) {
+            element.forEach((elem, index) => {
+              const shouldChangeThis = recursiveFind(elem, functionToApply);
+              if (shouldChangeThis) {
+                console.error("Why are we doing this to an array?")
+                element[index] = functionToApply(elem);
+              }
+            });
+            return false;
+          } else if (typeof element === 'object') {
+            Object.keys(element).forEach(key => {
+              const elem = element[key];
+
+              const shouldChangeThis = recursiveFind(elem, functionToApply);
+              if (shouldChangeThis) {
+                functionToApply(elem, key, element);
+              }
+            });
+            return false;
+          } else {
+            return true;
+          }
+        };
+
         Object.keys(globalStructure).forEach(key => {
           const rows = globalStructure[key];
           rows.forEach(row => {
@@ -173,6 +198,47 @@ class App extends Component {
               } else {
                 throw new Error('Unrecognized Id ' + refId + ' in ' + rowKey + ' within ' + key);
               }
+            });
+          });
+        });
+
+        Object.keys(globalStructure).forEach(key => {
+          const rows = globalStructure[key];
+          rows.forEach(row => {
+            Object.keys(row).filter(str => str.endsWith('_id')).forEach(rowKey => {
+              const refId = row[rowKey];
+              const tableName = rowKey.slice(0, -3);
+              const associatedData = globalStructure[tableName];
+              delete row[rowKey];
+
+              const possibleData = associatedData.filter(elem => elem.id === refId);
+              if (possibleData.length === 1) {
+                row[tableName] = possibleData[0];
+              } else {
+                throw new Error('Unrecognized Id ' + refId + ' in ' + rowKey + ' within ' + key);
+              }
+            });
+            Object.keys(row).filter(str => !str.endsWith('_id')).forEach(rowKey => {
+              const rowValue = row[rowKey];
+
+              const replaceTable = (id, id_name, object) => {
+                if (!id_name.endsWith('_id')) {
+                  return;
+                }
+
+                const refId = id;
+                const tableName = id_name.slice(0, -3);
+                const associatedData = globalStructure[tableName];
+                delete object[id_name];
+
+                const possibleData = associatedData.filter(elem => elem.id === refId);
+                if (possibleData.length === 1) {
+                  object[tableName] = possibleData[0];
+                } else {
+                  throw new Error('Unrecognized Id ' + refId + ' in table ' + id_name + ' within ' + object);
+                }
+              };
+              recursiveFind(rowValue, replaceTable);
             });
           });
         });
@@ -249,16 +315,11 @@ class App extends Component {
 
   generateNodeList() {
     const recipesByMachineClass = {};
-    if (!this.state.recipes) return <div />;
-    console.log(this.state);
     this.state.recipes && this.state.recipes.recipe.forEach(recipe => {
-      console.log(recipe.machine_class.name);
       const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
       thisList.push(recipe);
       recipesByMachineClass[recipe.machine_class.name] = thisList;
     });
-    const items = this.state.recipes.item;
-    console.log(recipesByMachineClass, items);
     return Object.keys(recipesByMachineClass).map(key =>
       <SidebarButton label={key} key={key} items={recipesByMachineClass[key]} />
     );
