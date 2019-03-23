@@ -33,7 +33,7 @@ const styles = theme => ({
   itemListIcon: {
     height: 24,
     width: 24,
-    paddingRight: 10,
+    paddingRight: 15,
   },
 });
 
