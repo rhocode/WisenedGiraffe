@@ -10,12 +10,70 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
     <script src="//d3js.org/d3.v3.js" charset="utf-8"></script>
     <script
-            src="//code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
-            crossorigin="anonymous"></script>
+        src="//code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
+        crossorigin="anonymous"></script>
+    <style>
+        @keyframes spinner360 {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loader-spinner:empty {
+            box-sizing: border-box;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6em;
+            height: 6em;
+            margin-top: -1em;
+            margin-left: -3em;
+            border-radius: 50%;
+            border: 1em solid #DDDDDD;
+            border-top-color: #FF9800;
+            border-bottom-color: #FF9800;
+            animation: spinner360 1s ease infinite;
+        }
+        .loader-spinner:empty + .align-loading{           
+            display: flex;
+        }
+        .loader-spinner + .align-loading {
+            display: none;
+        }
+        .align-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+        }
+        .align-loading-text {
+            margin-top: 15em;
+            max-width: 50%;
+        }
+    </style>
 </head>
 <body>
-<div id="app" class="full-div"></div>
+    <div id="app" class="full-div loader-spinner"></div>
+    <div class="align-loading">
+        <div class="loading-text align-loading-text">
+            <script>
+                var loading = [
+                    'Loading...',
+                    'Burning Coal...',
+                    'Deleting Steam Keys...',
+                    'Exploiting Resources...',
+                    'Petting Lizard Doggo...',
+                    'Adding Pipes...',
+                    'Adding Mana...',
+                    'Spilling Coffee...',
+                    'Becoming A Goat...',
+                    'Charging Batteries...'
+                ]
+                document.write(loading[Math.floor(Math.random() * loading.length)])
+            </script>
+        </div>
+    </div>
 </body>
 
 </html>

@@ -78,7 +78,6 @@ class InnerNestedSidebarButton extends React.Component {
                   <MenuList>
                     {
                       listItems.map((item) => {
-                        console.log(item.name);
                         return(
                           <MenuItem key={label+item.name}><img src={machineIcon} className={classes.itemListIcon}/>{item.name}</MenuItem>
                         );

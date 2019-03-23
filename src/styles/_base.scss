@@ -5,14 +5,6 @@ body{
   height: 100vh;
   width: 100vw;
   font-family: 'Roboto Mono', monospace;
-}
-
-p{
-  overflow: overlay;
-  position: relative;
-}
-
-body{
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -23,6 +15,10 @@ body{
   display: flex;
 }
 
+p{
+  overflow: overlay;
+  position: relative;
+}
 
 .graphMachineNode {
   fill: #FFE0B2;
