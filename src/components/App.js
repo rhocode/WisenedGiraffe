@@ -221,9 +221,13 @@ class App extends Component {
             });
             Object.keys(row).filter(str => !str.endsWith('_id')).forEach(rowKey => {
               const rowValue = row[rowKey];
-
+              console.log(rowValue);
               const replaceTable = (id, id_name, object) => {
                 if (!id_name.endsWith('_id')) {
+                  if (object[id_name].startsWith('http')) {
+                    const img = new Image();
+                    img.src = object[id_name];
+                  }
                   return;
                 }
 
