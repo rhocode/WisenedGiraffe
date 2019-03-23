@@ -1,7 +1,9 @@
 const constants = {
   selectedClass: 'selected',
   connectableClass: 'potential-connectable-node',
-  graphNodeClass: 'graph-svg-node', //formly circleGClass
+  graphNodeClass: 'graphMachineNode',
+  graphNodeHoverClass: 'graphNodeHoverClass',
+  graphNodeGrabbedClass: 'graphNodeGrabbedClass',
   graphNodeIdBase: 'graph-svg-node-',
   svgGraphClass: 'graph-svg',
   activeEditId: 'active-editing',

@@ -1,6 +1,27 @@
 import constants from './constants';
 import {addEdge, removeEdge, removeSelectFromEdge} from './edgeActions';
 
+export const insertNodeTitlev2 = (gEl) => {
+  // const title = gEl.datum().name;
+  const title = 'V';
+  const words = title.split(/-/g);
+  const nwords = words.length;
+  const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
+  el.append('circle').attr('r', 13).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
+  for (let i = 0; i < words.length; i++) {
+    const backgroundText = el.append('text')
+    .attr('fill', 'white')
+    .attr('stroke', 'white')
+    .attr('stroke-width', 1)
+    .text(words[i]).attr('x', 32).attr('dy', -32);
+
+    // if (i > 0) backgroundText.attr('x', 0).attr('dy', 15 * i);
+    const tspan = el.append('text').attr('fill', 'black').text(words[i]).attr('x', 32).attr('dy', -32);
+    // if (i > 0) tspan.attr('x', 0).attr('dy', 15 * i);
+  }
+
+};
+
 export const insertNodeTitle = (gEl) => {
   // const title = gEl.datum().name;
   //

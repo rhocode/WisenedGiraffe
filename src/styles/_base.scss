@@ -4,6 +4,7 @@ body{
   overflow:hidden;
   height: 100vh;
   width: 100vw;
+  font-family: 'Roboto Mono', monospace;
 }
 
 p{
@@ -21,6 +22,36 @@ body{
   background-color: rgb(248, 248, 248);
   display: flex;
 }
+
+
+.graphMachineNode {
+  fill: #FFE0B2;
+  stroke: #FFCC80;
+  stroke-width: 1px;
+}
+
+.graphNodeHoverClass {
+  cursor: grab
+}
+
+.graphNodeHoverClass .graphMachineNode{
+  fill: #FF9800;
+}
+
+.graphNodeGrabbedClass {
+  cursor: grabbing !important;
+}
+
+//
+//.graphMachineNode circle{
+//  fill: #E65100;
+//}
+//
+//.graphMachineNode:hover circle{
+//  fill: #E65100;
+//}
+
+
 
 #toolbox{
   position: absolute;
