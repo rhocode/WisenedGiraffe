@@ -26,6 +26,8 @@ schemaBuilder.createTable('machine_class')
   .addColumn('id', lf.Type.INTEGER)
   .addPrimaryKey(['id'])
   .addColumn('name', lf.Type.STRING)
+  .addColumn('icon', lf.Type.STRING)
+  .addNullable(['icon'])
   .addColumn('hidden', lf.Type.BOOLEAN)
   .addColumn('plural', lf.Type.STRING);
 
@@ -293,14 +295,14 @@ const data = [
   {
     key: 'machine_class',
     value: [
-      {name: 'Constructor', plural: 'Constructors'},
-      {name: 'Miner', plural: 'Miners'},
-      {name: 'Assembler', plural: 'Assemblers'},
-      {name: 'Smelter', plural: 'Smelters'},
-      {name: 'Coal Generator', plural: 'Coal Generators'},
-      {name: 'Manufacturer', plural: 'Manufacturer'},
-      {name: 'Container', plural: 'Containers'},
-      {name: 'Logistic', plural: 'Logistics'},
+      {name: 'Constructor', plural: 'Constructors', icon: baseUrl + 'Constructor.png'},
+      {name: 'Miner', plural: 'Miners', icon: baseUrl + 'Miner_MK1.png'},
+      {name: 'Assembler', plural: 'Assemblers', icon: baseUrl + 'Assembler.png'},
+      {name: 'Smelter', plural: 'Smelters', icon: baseUrl + 'Smelter.png'},
+      {name: 'Coal Generator', plural: 'Coal Generators', icon: baseUrl + 'Coal Generator.png'},
+      {name: 'Manufacturer', plural: 'Manufacturer', icon: baseUrl + 'Manufacturer.png'},
+      {name: 'Container', plural: 'Containers', icon: baseUrl + 'Storage_Container_MK1.png'},
+      {name: 'Logistic', plural: 'Logistics', icon: baseUrl + 'Splitter.png'},
     ]
   },
   { key: 'machine_node',
@@ -331,7 +333,7 @@ const data = [
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
-        icon: baseUrl + 'Miner_MK1.png',
+        icon: baseUrl + 'Miner_MK2.png',
         speed: 200,
         power: 5,
         hidden: true
@@ -585,7 +587,7 @@ const data = [
           quantity: 22
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
-        item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+        item_id: getTableEntryIdByName('item', 'Rotor'),
         time: 10,
         power: 15,
         quantity: 1,
@@ -600,7 +602,7 @@ const data = [
           quantity: 6
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
-        item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+        item_id: getTableEntryIdByName('item', 'Modular Frame'),
         time: 15,
         power: 15,
         quantity: 1,
