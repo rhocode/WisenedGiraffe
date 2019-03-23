@@ -26,7 +26,7 @@ class Loader extends React.Component {
 
   componentDidUpdate(previousProps, previousState) {
     console.log(previousProps);
-    if (this.props.ready == true && previousProps.ready == false) {
+    if (this.props.ready === true && !previousProps.ready) {
       this.props.parentState.setState({isReady: true}, () => {console.log('ready');});
     }
   }

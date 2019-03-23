@@ -3,6 +3,15 @@ import Fab from '@material-ui/core/Fab';
 import HelpIcon from '@material-ui/icons/Help';
 
 import PopupDialog from './PopupDialog';
+import { withStyles } from '@material-ui/core';
+
+const styles = theme => ({
+  fab: {
+    position: 'absolute',
+    bottom: theme.spacing.unit * 2,
+    right: theme.spacing.unit * 2,
+  },
+});
 
 class FabPopup extends React.Component {
 
@@ -25,4 +34,4 @@ class FabPopup extends React.Component {
   }
 }
 
-export default FabPopup;
+export default withStyles(styles) (FabPopup);
