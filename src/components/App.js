@@ -338,11 +338,19 @@ class App extends Component {
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
-    return Object.keys(springByClass).map(key =>
-      this.state.purity_type.purity_type.map(purity => {
-        console.log(key, springByClass[key], purity); return null;
-      })
-    );
+    return Object.keys(springByClass).map(key => {
+      const returnDivList = [];
+      if (key in ['Miner']) {
+        this.state.purity_type.purity_type.map(purity => {
+          console.log(key, springByClass[key], purity);
+          returnDivList.push(<div/>);
+        });
+      } else {
+        // this is the container
+        console.log(key, springByClass[key]);
+        returnDivList.push(<div/>);
+      }
+    });
   }
 
   render() {
