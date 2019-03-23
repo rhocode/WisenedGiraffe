@@ -314,28 +314,52 @@ class GraphSvg extends Component {
 
     var link = graphObjects.append('g')
       .attr('class', 'links')
-      .selectAll('line')
+      .selectAll('.line-objects')
       .data(this.graphData.links)
       .enter().append('line')
       .attr('stroke', function(d) { return d3.color('#000000'); })
       .attr('marker-end', 'url(#default-path-arrow)');
 
-    var node = graphObjects.append('g')
+    const node_parent = graphObjects.append('g')
       .attr('class', 'nodes')
-      .selectAll('circle')
+      .selectAll('.circle-objects')
       .data(this.graphData.nodes)
-      .enter()
-      .append('circle')
+      .enter();
+
+
+    const node = node_parent.append('g');
+    node.append('circle')
       .attr('r', 50)
       .attr('fill', function(d) {
         if (d.sourceOnly) return d3.color('#0000FF');
-
         return d3.color('#FFFF2F'); })
       .style('stroke', function(d) {
         if (d.sourceOnly) return d3.color('#000080');
 
         return d3.color('#FF8D2F');
       });
+
+    node.append('svg:image')
+      .attr('class', function (d) {
+        if (d.machine && d.machine.icon) {
+          return 'machine-icon';
+        }
+        return 'dev-icon';
+      })
+      .attr('xlink:href', function (d) {
+        // if (d.machine && d.machine.icon) {
+        //   return d.machine.icon;
+        // }
+        return 'https://i.imgur.com/oBmfK3w.png';
+      })
+      .attr('x', function (d) {
+        return -50;
+      })
+      .attr('y', function (d) {
+        return -50;
+      })
+      .attr('height', 100)
+      .attr('width', 100);
 
     node.on('click', function (d) {
       d3.event.stopImmediatePropagation();
@@ -369,6 +393,9 @@ class GraphSvg extends Component {
       const k = 150 * simulation.alpha();
 
       node
+        .attr('transform', function (d) {
+          return 'translate(' + d.x + ',' + d.y + ')';
+        })
         .attr('cx', function(d) { return d.x; })
         .attr('cy', function(d) { return d.y; });
 
