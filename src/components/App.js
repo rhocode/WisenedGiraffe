@@ -131,7 +131,6 @@ class App extends Component {
       .from(tableRef).exec().then(results => resolve(results)));
   }
 
-
   generateRecursiveStructure(startingTable) {
     const db = this.state.db;
     const starting = db.getSchema().table(startingTable);
@@ -163,7 +162,7 @@ class App extends Component {
             element.forEach((elem, index) => {
               const shouldChangeThis = recursiveFind(elem, functionToApply);
               if (shouldChangeThis) {
-                console.error("Why are we doing this to an array?")
+                console.error('Why are we doing this to an array?');
                 element[index] = functionToApply(elem);
               }
             });
@@ -254,7 +253,14 @@ class App extends Component {
       this.setState({db, loaded: true});
     }).then(() => {
       return this.generateRecursiveStructure('recipe').then(recipes => { this.setState({recipes}, () => {
-        return this.generateRecursiveStructure('machine_node').then(machine_node => { this.setState({machine_node});});
+        return this.generateRecursiveStructure('machine_node').then(machine_node => { this.setState({machine_node},  () => {
+          return this.generateRecursiveStructure('spring').then(spring => { this.setState({spring}, () => {
+            return this.generateRecursiveStructure('purity_type').then(purity_type => { this.setState({purity_type});});
+            // console.log(this.state);
+
+            // return this.generateRecursiveStructure('spring').then(spring => { this.setState({spring})});
+          }   );});
+        }  );});
       }); });
 
       // this.generateRecursiveStructure('recipe').then(recipe => {console.log(recipe); this.setState({recipe})});
@@ -325,6 +331,20 @@ class App extends Component {
     );
   }
 
+  generateSpringList() {
+    const springByClass = {};
+    this.state.purity_type && this.state.spring && this.state.spring.spring.forEach(spring => {
+      const thisList = springByClass[spring.spring_type.name] || [];
+      thisList.push(spring);
+      springByClass[spring.spring_type.name] = thisList;
+    });
+    return Object.keys(springByClass).map(key =>
+      this.state.purity_type.purity_type.map(purity => {
+        console.log(key, springByClass[key], purity); return null;
+      })
+    );
+  }
+
   render() {
     const {classes} = this.props;
 
@@ -368,6 +388,7 @@ class App extends Component {
         >
           <List>
             {this.generateNodeList()}
+            {this.generateSpringList()}
           </List>
             
           <Divider/>
