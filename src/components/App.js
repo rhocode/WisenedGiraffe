@@ -331,26 +331,45 @@ class App extends Component {
     );
   }
 
-  generateSpringList() {
+  generateContainerList() {
     const springByClass = {};
     this.state.purity_type && this.state.spring && this.state.spring.spring.forEach(spring => {
       const thisList = springByClass[spring.spring_type.name] || [];
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
-    return Object.keys(springByClass).map(key => {
-      const returnDivList = [];
-      if (key in ['Miner']) {
-        this.state.purity_type.purity_type.map(purity => {
-          console.log(key, springByClass[key], purity);
+    return Object.keys(springByClass)
+      .map(key => {
+        const returnDivList = [];
+        if (!['Miner'].includes(key)) {
+          console.log(key, springByClass[key]);
           returnDivList.push(<div/>);
-        });
-      } else {
-        // this is the container
-        console.log(key, springByClass[key]);
-        returnDivList.push(<div/>);
-      }
+        }
+        return returnDivList;
+      });
+  }
+
+  generateSpringList() {
+    this.generateContainerList();
+    const springByClass = {};
+    this.state.purity_type && this.state.spring && this.state.spring.spring.forEach(spring => {
+      const thisList = springByClass[spring.spring_type.name] || [];
+      thisList.push(spring);
+      springByClass[spring.spring_type.name] = thisList;
     });
+    return Object.keys(springByClass)
+      .map(key => {
+        const returnDivList = [];
+        if (['Miner'].includes(key)) {
+          springByClass[key].forEach(resource => {
+            this.state.purity_type.purity_type.map(purity => {
+              console.log(resource, purity);
+              returnDivList.push(<div key={resource.id + purity.name}/>);
+            });
+          });
+        }
+        return returnDivList;
+      });
   }
 
   render() {
