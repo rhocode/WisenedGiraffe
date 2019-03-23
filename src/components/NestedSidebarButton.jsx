@@ -52,7 +52,7 @@ const styles = theme => ({
   },
 });
 
-class SidebarButton extends React.Component {
+class NestedSidebarButton extends React.Component {
 
   constructor(props) {
     super(props);
@@ -75,22 +75,7 @@ class SidebarButton extends React.Component {
     const listItems = this.props.items.map((link) => {
 
       return (
-        <Tooltip key={link.id} className={classes.tooltip} placement="right" title={
-          link.inputs.map((element, index) => {
-            return (
-              <React.Fragment key={element.item.id}>
-                <img src={element.item.icon} className={index===0 ? classes.tooltipIconFirst : classes.tooltipIcon}/>
-                <div className={classes.tooltipText}>{element.quantity}</div>
-              </React.Fragment>
-            );
-          })
-        }>
-          <MenuItem onClick={this.handleClose}>
-            <img src={link.item.icon} className={classes.itemListIcon} />
-            {link.name}
-            <div className={classes.grow}/>
-          </MenuItem>
-        </Tooltip>
+        <div key={link.id}></div>
       );
     }
 
@@ -133,4 +118,4 @@ class SidebarButton extends React.Component {
   }
 }
 
-export default withStyles(styles) (SidebarButton);
+export default withStyles(styles) (NestedSidebarButton);
