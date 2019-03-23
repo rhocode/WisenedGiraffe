@@ -3,6 +3,7 @@ const constants = {
   connectableClass: 'potential-connectable-node',
   graphNodeClass: 'graphMachineNode',
   graphNodeHoverClass: 'graphNodeHoverClass',
+  overclockedArcClass: 'overclockedArcClass',
   graphNodeGrabbedClass: 'graphNodeGrabbedClass',
   graphNodeIdBase: 'graph-svg-node-',
   svgGraphClass: 'graph-svg',

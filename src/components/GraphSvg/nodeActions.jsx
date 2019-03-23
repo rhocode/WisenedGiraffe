@@ -1,5 +1,42 @@
 import constants from './constants';
 import {addEdge, removeEdge, removeSelectFromEdge} from './edgeActions';
+import * as d3 from 'd3';
+
+const overClockCalculation = (d, percentage_metric, offset, endOffset) => {
+  const percentage = d[percentage_metric];
+  const arc = d3.arc()
+    .innerRadius(50)
+    .outerRadius(50);
+
+  const m = (endOffset - offset) / 100;
+  const b = offset;
+
+  const start = b / 180 * Math.PI;
+  const end = (m * percentage + b )/ 180 * Math.PI;
+  return arc({startAngle:start, endAngle: end});
+};
+
+export const addOverclockArc = (parent, percentage_metric, offset, endOffset) => {
+  parent.append('path')
+    .attr('class', constants.overclockedArcClass)
+    .attr('fill', 'none')
+    .attr('stroke-width', 4)
+    .attr('stroke', 'darkslategray')
+    .attr('d', function(d) {
+      return overClockCalculation(d, percentage_metric, offset, endOffset);
+    });
+};
+
+export const editOverclockArc = (parent, percentage_metric, offset, endOffset) => {
+  parent.select('.' + constants.overclockedArcClass)
+  // .attr('class', constants.overclockedArcClass)
+  // .attr('fill', 'none')
+  // .attr('stroke-width', 4)
+  // .attr('stroke', 'darkslategray')
+    .attr('d', function(d) {
+      return overClockCalculation(d, percentage_metric, offset, endOffset);
+    });
+};
 
 export const insertNodeTitlev2 = (gEl) => {
   // const title = gEl.datum().name;
@@ -10,10 +47,10 @@ export const insertNodeTitlev2 = (gEl) => {
   el.append('circle').attr('r', 13).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
   for (let i = 0; i < words.length; i++) {
     const backgroundText = el.append('text')
-    .attr('fill', 'white')
-    .attr('stroke', 'white')
-    .attr('stroke-width', 1)
-    .text(words[i]).attr('x', 32).attr('dy', -32);
+      .attr('fill', 'white')
+      .attr('stroke', 'white')
+      .attr('stroke-width', 1)
+      .text(words[i]).attr('x', 32).attr('dy', -32);
 
     // if (i > 0) backgroundText.attr('x', 0).attr('dy', 15 * i);
     const tspan = el.append('text').attr('fill', 'black').text(words[i]).attr('x', 32).attr('dy', -32);

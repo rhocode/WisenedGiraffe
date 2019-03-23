@@ -3,7 +3,14 @@ import {svgKeyDown, svgKeyUp} from './keyboardEvents';
 import {svgMouseDown, svgMouseUp, dragmove, drag_start, drag_drag, drag_end} from './mouseEvents';
 import {zoom_actions, zoomed} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
-import {circleMouseDown, circleMouseUp, nodeNaming, insertNodeTitlev2} from './nodeActions';
+import {
+  circleMouseDown,
+  circleMouseUp,
+  nodeNaming,
+  insertNodeTitlev2,
+  addOverclockArc,
+  editOverclockArc
+} from './nodeActions';
 import constants from './constants';
 import {calculatePathTooltipPosition, insertEdgeLabel, pathMouseDown} from './edgeActions';
 
@@ -244,18 +251,18 @@ class GraphSvg extends Component {
     let id = 0;
     this.graphData = {
       'nodes': [
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0}
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 98},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50}
       ],
       'links': [
         {'source':  0, 'target':  1},
@@ -331,14 +338,8 @@ class GraphSvg extends Component {
     node.append('circle')
       .attr('r', 50)
       .classed(constants.graphNodeClass, true);
-    // .attr('fill', function(d) {
-    //   if (d.sourceOnly) return d3.color('#0000FF');
-    //   return d3.color('#FFFF2F'); })
-    // .style('stroke', function(d) {
-    //   if (d.sourceOnly) return d3.color('#000080');
-    //
-    //   return d3.color('#FF8D2F');
-    // });
+
+    addOverclockArc(node, 'overclock', 55, 385);
 
     node.append('svg:image')
       .attr('class', function (d) {
@@ -363,6 +364,7 @@ class GraphSvg extends Component {
       .attr('height', 100)
       .attr('width', 100);
 
+
     insertNodeTitlev2(node);
 
     node.on('mouseover', function () {
@@ -374,8 +376,10 @@ class GraphSvg extends Component {
       console.log('mouseout');
       d3.select(this).classed(constants.graphNodeHoverClass, false);
     }).on('mousedown', function (d) {
+      console.log('MouseDown');
       d3.select(this).classed(constants.graphNodeGrabbedClass, true);
     }).on('mouseup', function (d) {
+      console.log('MouseUp');
       d3.select(this).classed(constants.graphNodeGrabbedClass, false);
       // circleMouseUp.call(graphSvg, d3, d3.select(this), d);
     });
@@ -390,15 +394,32 @@ class GraphSvg extends Component {
       d.fy = null;
     });
 
+    node.on('wheel.zoom', function(d) {
+      d3.event.stopImmediatePropagation();
+
+      const roughEstimate = -1 * Math.round(d3.event.deltaY / 200);
+
+      d.overclock = (d.overclock + (roughEstimate));
+      if (d.overclock < 0) {
+        d.overclock = 100 + d.overclock;
+      } else if (d.overclock > 100) {
+        d.overclock = d.overclock - 101;
+      }
+      console.log(d.overclock);
+      editOverclockArc(d3.select(this), 'overclock', 55, 385)
+    });
 
     const thisRef = this;
     //add drag capabilities
     this.drag_handler = d3.drag()
       .on('start', (d) => {
+        console.log('DragStart');
         drag_start.call(this, d, simulation, d3);
       }).on('drag', (d) => {
+        console.log('DragDrag');
         drag_drag.call(this, d, d3);
       }).on('end', function(d) {
+        console.log('DragEnd');
         d3.select(this).classed(constants.graphNodeGrabbedClass, false);
         drag_end.call(thisRef, d);
       });
