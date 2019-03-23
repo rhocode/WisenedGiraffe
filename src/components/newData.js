@@ -1,6 +1,6 @@
 import lf from 'lovefield';
 /** @namespace lf.Type */
-const schemaBuilder = lf.schema.create('test', 3);
+const schemaBuilder = lf.schema.create('test', 4);
 
 schemaBuilder.createTable('node_type')
   .addColumn('id', lf.Type.INTEGER)
@@ -200,7 +200,7 @@ const data = [
       },
       {
         name: 'Copper Ingot',
-        icon: baseUrl + 'Copper_ingot.png'
+        icon: baseUrl + 'Copper_Ingot.png'
       },
       {
         name: 'Iron Plate',

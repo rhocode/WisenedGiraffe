@@ -275,9 +275,7 @@ class GraphSvg extends Component {
         {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
         {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
-        {'id': id++, 'x': 0, 'y': 0},
+        {'id': id++, 'x': 0, 'y': 0}
       ],
       'links': [
         {'source':  0, 'target':  1},
@@ -290,7 +288,6 @@ class GraphSvg extends Component {
         {'source':  7, 'target':  8},
         {'source':  8, 'target':  9},
         {'source':  9, 'target':  10},
-        {'source':  10, 'target':  11}
       ]
     };
 
@@ -394,8 +391,8 @@ class GraphSvg extends Component {
     node.on('dblclick', function (d) {
       d3.event.stopImmediatePropagation();
       console.log('DOUBLE CLICKED ME!!', d);
-      // d.x = d.fx;
-      // d.y = d.fy;
+      d.x = d.fx;
+      d.y = d.fy;
       d.fx = null;
       d.fy = null;
     });
@@ -438,7 +435,15 @@ class GraphSvg extends Component {
 
       node
         .attr('cx', function(d) { return d.x; })
+        .attr('dummy', function(d) {
+          if (d.id == 12) {
+            d.vx = 0;
+            d.vy = 0;
+            console.log(d);
+          }
+        })
         .attr('cy', function(d) { return d.y; });
+
 
       //update link positions
       link
