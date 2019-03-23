@@ -1,4 +1,18 @@
 import constants from './constants';
+import * as d3 from "d3";
+
+//v2
+export const zoom_actions = (graphObjects) => {
+  graphObjects.attr('transform', d3.event.transform);
+};
+
+
+
+
+
+
+
+//v1
 
 export const zoomed = function (d3) {
   this.justScaleTransGraph = true;
