@@ -389,9 +389,6 @@ class App extends Component {
 
   render() {
     const {classes} = this.props;
-    if (!this.state.isReady) {
-      return <div>hello sir, it is i, sir loader</div>;
-    }
 
     return <div className={classes.root}>
       <CssBaseline/>

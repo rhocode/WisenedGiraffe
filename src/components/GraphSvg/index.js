@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {svgKeyDown, svgKeyUp} from './keyboardEvents';
-import {svgMouseDown, svgMouseUp, dragmove, drag_start, drag_drag, drag_end} from './mouseEvents';
-import {zoom_actions, zoomed} from './graphActions';
+import {svgMouseDown, svgMouseUp, dragmove, drag_start, drag_drag, drag_end,
+  node_mouse_up, node_mouse_down, node_mouse_out, node_mouse_over, node_clicked} from './mouseEvents';
+import {zoom_actions, zoomed, handleTick, updateGraph} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
 import {
   circleMouseDown,
@@ -9,7 +10,7 @@ import {
   nodeNaming,
   insertNodeTitlev2,
   addOverclockArc,
-  editOverclockArc
+  wheelZoomCalculation
 } from './nodeActions';
 import constants from './constants';
 import {calculatePathTooltipPosition, insertEdgeLabel, pathMouseDown} from './edgeActions';
@@ -254,39 +255,82 @@ class GraphSvg extends Component {
         {'id': id++, 'x': 0, 'y': 0, 'overclock': 98},
         {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
         {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50}
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50}
       ],
       'links': [
         {'source':  0, 'target':  1},
-        {'source':  1, 'target':  2},
-        {'source':  2, 'target':  3},
-        {'source':  0, 'target':  4},
-        {'source':  1, 'target':  5},
-        {'source':  4, 'target':  6},
-        {'source':  6, 'target':  7},
-        {'source':  7, 'target':  8},
-        {'source':  8, 'target':  9},
-        {'source':  9, 'target':  10},
+        // {'source':  1, 'target':  2},
+        // {'source':  2, 'target':  3},
+        // {'source':  0, 'target':  4},
+        // {'source':  1, 'target':  5},
+        // {'source':  4, 'target':  6},
+        // {'source':  6, 'target':  7},
+        // {'source':  7, 'target':  8},
+        // {'source':  8, 'target':  9},
+        // {'source':  9, 'target':  10},
       ]
     };
 
-    var bodyEl = document.getElementById('mainRender');
 
-    var width = bodyEl.clientWidth,
-      height = bodyEl.clientHeight;
+    //add encompassing group for the zoom
+    this.svgGroup = inputSvg.append('g')
+      .attr('class', 'objects')
+      .attr('id', 'svgGroup');
 
-    var simulation = d3.forceSimulation()
-      .nodes(this.graphData.nodes);
+    const graphObjects = this.svgGroup;
 
-    simulation
+    const graphLinksGroup =graphObjects.append('g') //graphLinksData
+      .attr('class', 'links');
+
+    const graphNodesGroup = graphObjects
+      .append('g')
+      .attr('class', 'nodes');
+
+    //add zoom capabilities
+    const zoom_handler = d3.zoom()
+      .on('zoom', () => zoom_actions(graphObjects));
+    zoom_handler(inputSvg);
+    inputSvg.on('dblclick.zoom', null);
+
+
+    //Create definitions for the arrow markers showing relationship directions
+    const defs = graphObjects.append('defs');
+    appendMarkerAttributes(defs.append('svg:marker')
+      .attr('id', 'default-path-arrow')
+      .attr('refX', 35));
+
+    appendMarkerAttributes(defs.append('svg:marker')
+      .attr('id', 'dragged-end-arrow')
+      .attr('refX', 7));
+
+    //The dragged line
+    this.dragLine = graphObjects.append('svg:path')
+      .attr('class', 'link dragline line-object hidden')
+      .attr('d', 'M0,0L0,0')
+      .attr('stroke', function(d) { return d3.color('#000000'); })
+      .style('marker-end', 'url(#dragged-end-arrow)');
+
+
+    let simulation = this.initSimulation();
+
+    updateGraph.call(this, simulation, graphNodesGroup, graphLinksGroup);
+  }
+
+  initSimulation() {
+    const bodyEl = document.getElementById('mainRender');
+
+    const width = bodyEl.clientWidth;
+    const height = bodyEl.clientHeight;
+
+    const result = d3.forceSimulation()
       .force('link', d3.forceLink().id(function(d) {
         return d.id;
       }).distance(100).strength(1))
@@ -297,165 +341,7 @@ class GraphSvg extends Component {
       }))
       .force('y', d3.forceY())
       .force('x', d3.forceX());
-
-    simulation.force('link')
-      .links(this.graphData.links);
-
-    simulation
-      .on('tick', ticked);
-
-    //add encompassing group for the zoom
-    const graphObjects = inputSvg.append('g')
-      .attr('class', 'objects');
-
-    //Create deffinition for the arrow markers showing relationship directions
-
-    const defs = graphObjects.append('defs');
-    appendMarkerAttributes(defs.append('svg:marker')
-      .attr('id', 'default-path-arrow')
-      .attr('refX', 35));
-
-    appendMarkerAttributes(defs.append('svg:marker')
-      .attr('id', 'dragged-end-arrow')
-      .attr('refX', 35));
-
-    var link = graphObjects.append('g')
-      .attr('class', 'links')
-      .selectAll('.line-objects')
-      .data(this.graphData.links)
-      .enter().append('line')
-      .attr('stroke', function(d) { return d3.color('#000000'); })
-      .attr('marker-end', 'url(#default-path-arrow)');
-
-    const node_parent = graphObjects.append('g')
-      .attr('class', 'nodes')
-      .selectAll('.circle-objects')
-      .data(this.graphData.nodes)
-      .enter();
-
-
-    const node = node_parent.append('g');
-    node.append('circle')
-      .attr('r', 50)
-      .classed(constants.graphNodeClass, true);
-
-    addOverclockArc(node, 'overclock', 55, 385);
-
-    node.append('svg:image')
-      .attr('class', function (d) {
-        if (d.machine && d.machine.icon) {
-          return 'machine-icon';
-        }
-        return 'dev-icon';
-      })
-      .attr('xlink:href', function (d) {
-        // if (d.machine && d.machine.icon) {
-        //   return d.machine.icon;
-        // }
-        return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png';
-        // return 'https://i.imgur.com/oBmfK3w.png';
-      })
-      .attr('x', function (d) {
-        return -50;
-      })
-      .attr('y', function (d) {
-        return -50;
-      })
-      .attr('height', 100)
-      .attr('width', 100);
-
-
-    insertNodeTitlev2(node);
-
-    node.on('mouseover', function () {
-      console.log('mouseover');
-      // if (graphSvg.shiftNodeDrag) {
-      d3.select(this).classed(constants.graphNodeHoverClass, true);
-      // }
-    }).on('mouseout', function () {
-      console.log('mouseout');
-      d3.select(this).classed(constants.graphNodeHoverClass, false);
-    }).on('mousedown', function (d) {
-      console.log('MouseDown');
-      d3.select(this).classed(constants.graphNodeGrabbedClass, true);
-    }).on('mouseup', function (d) {
-      console.log('MouseUp');
-      d3.select(this).classed(constants.graphNodeGrabbedClass, false);
-      // circleMouseUp.call(graphSvg, d3, d3.select(this), d);
-    });
-
-    node.on('click', function (d) {
-      d3.event.stopImmediatePropagation();
-      // self.onNodeClicked.emit(d.id);
-    });
-    node.on('dblclick', function (d) {
-      d3.event.stopImmediatePropagation();
-      d.fx = null;
-      d.fy = null;
-    });
-
-    node.on('wheel.zoom', function(d) {
-      d3.event.stopImmediatePropagation();
-
-      const roughEstimate = -1 * Math.round(d3.event.deltaY / 200);
-
-      d.overclock = (d.overclock + (roughEstimate));
-      if (d.overclock < 0) {
-        d.overclock = 100 + d.overclock;
-      } else if (d.overclock > 100) {
-        d.overclock = d.overclock - 101;
-      }
-      console.log(d.overclock);
-      editOverclockArc(d3.select(this), 'overclock', 55, 385)
-    });
-
-    const thisRef = this;
-    //add drag capabilities
-    this.drag_handler = d3.drag()
-      .on('start', (d) => {
-        console.log('DragStart');
-        drag_start.call(this, d, simulation, d3);
-      }).on('drag', (d) => {
-        console.log('DragDrag');
-        drag_drag.call(this, d, d3);
-      }).on('end', function(d) {
-        console.log('DragEnd');
-        d3.select(this).classed(constants.graphNodeGrabbedClass, false);
-        drag_end.call(thisRef, d);
-      });
-    this.drag_handler(node);
-
-    //add zoom capabilities
-    const zoom_handler = d3.zoom()
-      .on('zoom', () => zoom_actions(graphObjects));
-    zoom_handler(inputSvg);
-    inputSvg.on('dblclick.zoom', null);
-
-    function ticked() {
-      //update circle positions each tick of the simulation
-      const k = 150 * simulation.alpha();
-
-      node
-        .attr('transform', function (d) {
-          return 'translate(' + d.x + ',' + d.y + ')';
-        })
-        .attr('cx', function(d) { return d.x; })
-        .attr('cy', function(d) { return d.y; });
-
-      //update link positions
-      link
-        .attr('x1', function(d) { return d.source.x; })
-        .attr('y1', function(d) { return d.source.y; })
-        .attr('x2', function(d) { return d.target.x; })
-        .attr('y2', function(d) { return d.target.y; })
-        .each(function(d) {
-          d.source.vy -= k;
-          d.target.vy += k;
-        });
-
-      // text
-      //   .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; });
-    }
+    return result;
   }
 
   componentDidMount() {

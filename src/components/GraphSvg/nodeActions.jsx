@@ -38,6 +38,21 @@ export const editOverclockArc = (parent, percentage_metric, offset, endOffset) =
     });
 };
 
+export const wheelZoomCalculation = function(d) {
+  d3.event.stopImmediatePropagation();
+
+  const roughEstimate = -1 * Math.round(d3.event.deltaY / 200);
+
+  d.overclock = (d.overclock + (roughEstimate));
+  if (d.overclock < 0) {
+    d.overclock = 100 + d.overclock;
+  } else if (d.overclock > 100) {
+    d.overclock = d.overclock - 101;
+  }
+  console.log(d.overclock);
+  editOverclockArc(d3.select(this), 'overclock', 55, 385);
+};
+
 export const insertNodeTitlev2 = (gEl) => {
   // const title = gEl.datum().name;
   const title = 'V';

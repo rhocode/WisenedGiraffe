@@ -1,6 +1,50 @@
-import constants from "./constants";
-import {removeSelectFromNode} from "./nodeActions";
+import constants from './constants';
+import {removeSelectFromNode} from './nodeActions';
+import * as d3 from 'd3';
 
+//v2
+export const addEdgeAndRestartSimulation = function(passedThis, source, target, simulation) {
+  const newEdge = {source, target};
+
+  passedThis.graphData.links.push(newEdge);
+
+  passedThis.links = passedThis.svgGroup.append('g') //graphLinksData
+    .attr('class', 'links')
+    .selectAll('.line-objects')
+    .data(passedThis.graphData.links);
+
+  passedThis.link = passedThis.links.enter().append('g')
+    .attr('class', 'parent-line-object')
+    .append('line') // graphLinksEnter
+    .attr('class', 'line-object')
+    .attr('stroke', function(d) { return d3.color('#000000'); })
+    .attr('marker-end', 'url(#default-path-arrow)')
+    .lower().lower().lower();
+
+  passedThis.links
+    .exit()
+    .remove();
+  passedThis.links = passedThis.link.merge(passedThis.links);
+
+  simulation.force('link')
+    .links(passedThis.graphData.links);
+
+
+  // simulation.alpha(0.5).restart();
+  // passedThis.graphData.links.push()
+};
+
+
+
+
+
+
+
+
+
+
+
+//v1
 export const replaceSelectEdge = function (d3Path, edgeData) {
   d3Path.classed(constants.selectedClass, true);
   if (this.selectedEdge) {
