@@ -63,9 +63,6 @@ const styles = theme => ({
   grow: {
     flexGrow: 1,
   },
-  icons: {
-    marginRight: 0
-  },
   pathIcon: {
     height: 15,
     width: 15,
@@ -78,16 +75,8 @@ const styles = theme => ({
     margin: theme.spacing.unit * 2,
     display: 'flex',
   },
-  fab: {
-    position: 'absolute',
-    bottom: theme.spacing.unit * 2,
-    right: theme.spacing.unit * 2,
-  },
   button: {
     flex: '0 0 100%',
-  },
-  label: {
-    paddingLeft: 10,
   },
 });
 

@@ -2,6 +2,13 @@ import React from 'react';
 import Button from '@material-ui/core/Button';
 
 import PopupDialog from './PopupDialog';
+import { withStyles } from '@material-ui/core';
+
+const styles = theme => ({
+  label: {
+    paddingLeft: 10,
+  },
+});
 
 class ToolbarPopup extends React.Component {
   constructor(props) {
@@ -27,4 +34,4 @@ class ToolbarPopup extends React.Component {
   }
 }
 
-export default ToolbarPopup;
+export default withStyles(styles) (ToolbarPopup);

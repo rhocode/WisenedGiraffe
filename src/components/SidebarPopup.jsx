@@ -4,6 +4,13 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 
 import PopupDialog from './PopupDialog';
+import { withStyles } from '@material-ui/core';
+
+const styles = theme => ({
+  icons: {
+    marginRight: 0
+  },
+});
 
 class SidebarPopup extends React.Component {
   constructor(props) {
@@ -26,4 +33,4 @@ class SidebarPopup extends React.Component {
   }
 }
 
-export default SidebarPopup;
+export default withStyles(styles) (SidebarPopup);
