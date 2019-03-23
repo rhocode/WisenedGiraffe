@@ -3,7 +3,7 @@ import {svgKeyDown, svgKeyUp} from './keyboardEvents';
 import {svgMouseDown, svgMouseUp, dragmove, drag_start, drag_drag, drag_end} from './mouseEvents';
 import {zoom_actions, zoomed} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
-import {circleMouseDown, circleMouseUp, nodeNaming} from './nodeActions';
+import {circleMouseDown, circleMouseUp, nodeNaming, insertNodeTitlev2} from './nodeActions';
 import constants from './constants';
 import {calculatePathTooltipPosition, insertEdgeLabel, pathMouseDown} from './edgeActions';
 
@@ -330,14 +330,15 @@ class GraphSvg extends Component {
     const node = node_parent.append('g');
     node.append('circle')
       .attr('r', 50)
-      .attr('fill', function(d) {
-        if (d.sourceOnly) return d3.color('#0000FF');
-        return d3.color('#FFFF2F'); })
-      .style('stroke', function(d) {
-        if (d.sourceOnly) return d3.color('#000080');
-
-        return d3.color('#FF8D2F');
-      });
+      .classed(constants.graphNodeClass, true);
+    // .attr('fill', function(d) {
+    //   if (d.sourceOnly) return d3.color('#0000FF');
+    //   return d3.color('#FFFF2F'); })
+    // .style('stroke', function(d) {
+    //   if (d.sourceOnly) return d3.color('#000080');
+    //
+    //   return d3.color('#FF8D2F');
+    // });
 
     node.append('svg:image')
       .attr('class', function (d) {
@@ -350,7 +351,8 @@ class GraphSvg extends Component {
         // if (d.machine && d.machine.icon) {
         //   return d.machine.icon;
         // }
-        return 'https://i.imgur.com/oBmfK3w.png';
+        return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png';
+        // return 'https://i.imgur.com/oBmfK3w.png';
       })
       .attr('x', function (d) {
         return -50;
@@ -360,6 +362,23 @@ class GraphSvg extends Component {
       })
       .attr('height', 100)
       .attr('width', 100);
+
+    insertNodeTitlev2(node);
+
+    node.on('mouseover', function () {
+      console.log('mouseover');
+      // if (graphSvg.shiftNodeDrag) {
+      d3.select(this).classed(constants.graphNodeHoverClass, true);
+      // }
+    }).on('mouseout', function () {
+      console.log('mouseout');
+      d3.select(this).classed(constants.graphNodeHoverClass, false);
+    }).on('mousedown', function (d) {
+      d3.select(this).classed(constants.graphNodeGrabbedClass, true);
+    }).on('mouseup', function (d) {
+      d3.select(this).classed(constants.graphNodeGrabbedClass, false);
+      // circleMouseUp.call(graphSvg, d3, d3.select(this), d);
+    });
 
     node.on('click', function (d) {
       d3.event.stopImmediatePropagation();
@@ -371,19 +390,22 @@ class GraphSvg extends Component {
       d.fy = null;
     });
 
+
+    const thisRef = this;
     //add drag capabilities
     this.drag_handler = d3.drag()
       .on('start', (d) => {
         drag_start.call(this, d, simulation, d3);
       }).on('drag', (d) => {
         drag_drag.call(this, d, d3);
-      }).on('end', (d) => {
-        drag_end.call(this, d);
+      }).on('end', function(d) {
+        d3.select(this).classed(constants.graphNodeGrabbedClass, false);
+        drag_end.call(thisRef, d);
       });
     this.drag_handler(node);
 
     //add zoom capabilities
-    var zoom_handler = d3.zoom()
+    const zoom_handler = d3.zoom()
       .on('zoom', () => zoom_actions(graphObjects));
     zoom_handler(inputSvg);
     inputSvg.on('dblclick.zoom', null);
