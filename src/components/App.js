@@ -86,7 +86,7 @@ const styles = theme => ({
   },
   label: {
     paddingLeft: 10,
-  }
+  },
 });
 
 const theme = createMuiTheme({
@@ -249,6 +249,7 @@ class App extends Component {
 
   generateNodeList() {
     const recipesByMachineClass = {};
+    if (!this.state.recipes) return <div />;
     console.log(this.state);
     this.state.recipes && this.state.recipes.recipe.forEach(recipe => {
       console.log(recipe.machine_class.name);
@@ -256,7 +257,8 @@ class App extends Component {
       thisList.push(recipe);
       recipesByMachineClass[recipe.machine_class.name] = thisList;
     });
-    console.log(recipesByMachineClass);
+    const items = this.state.recipes.item;
+    console.log(recipesByMachineClass, items);
     return Object.keys(recipesByMachineClass).map(key =>
       <SidebarButton label={key} key={key} items={recipesByMachineClass[key]} />
     );
