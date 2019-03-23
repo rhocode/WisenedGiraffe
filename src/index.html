@@ -14,25 +14,25 @@
         integrity="sha256-3edrmyuQ0w65f8gfBsqowzjJe2iM6n0nKciPUp8y+7E="
         crossorigin="anonymous"></script>
     <style>
-        @keyframes spinner360 {
-            to {
-                transform: rotate(360deg);
+        @keyframes slide {
+            100% {
+                background-position: 100% 100%;
             }
         }
         .loader-spinner:empty {
-            box-sizing: border-box;
             position: absolute;
             top: 50%;
-            left: 50%;
-            width: 6em;
-            height: 6em;
-            margin-top: -3em;
-            margin-left: -3em;
-            border-radius: 50%;
-            border: 1em solid #DDDDDD;
-            border-top-color: #FF9800;
-            border-bottom-color: #FF9800;
-            animation: spinner360 1s ease infinite;
+            height: 2em;
+            width: 100vw;
+            background-size: 200% 200%;
+            background-image: repeating-linear-gradient(
+                -45deg, 
+                #FF9800,
+                #FF9800 1em,
+                #333 1em,
+                #333 2em
+            );
+            animation: slide 16s linear infinite;
         }
         .loader-spinner:empty + .align-loading{
             display: flex;
