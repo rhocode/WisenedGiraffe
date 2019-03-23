@@ -1,5 +1,5 @@
 import React from 'react';
-import Fab from '@material-ui/core/Fab'
+import Fab from '@material-ui/core/Fab';
 import HelpIcon from '@material-ui/icons/Help';
 
 import PopupDialog from './PopupDialog';

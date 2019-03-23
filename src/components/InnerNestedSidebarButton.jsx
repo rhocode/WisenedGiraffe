@@ -1,10 +1,8 @@
 import React from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
-import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Tooltip from '@material-ui/core/Tooltip';
 
 import { withStyles } from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
@@ -12,11 +10,6 @@ import Grow from '@material-ui/core/Grow';
 
 const styles = theme => ({
   root: {
-  },
-  button: {
-    flex: '0 0 100%',
-    justifyContent: 'left',
-    padding: 10,
   },
   paper: {
     margin: theme.spacing.unit * 2,
