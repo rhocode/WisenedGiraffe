@@ -309,7 +309,7 @@ const data = [
       {name: 'Miner', plural: 'Miners', icon: baseUrl + 'Miner_MK1.png'},
       {name: 'Assembler', plural: 'Assemblers', icon: baseUrl + 'Assembler.png'},
       {name: 'Smelter', plural: 'Smelters', icon: baseUrl + 'Smelter.png'},
-      {name: 'Coal Generator', plural: 'Coal Generators', icon: baseUrl + 'Coal Generator.png'},
+      {name: 'Coal Generator', plural: 'Coal Generators', icon: baseUrl + 'Coal_Generator.png'},
       {name: 'Manufacturer', plural: 'Manufacturer', icon: baseUrl + 'Manufacturer.png'},
       {name: 'Container', plural: 'Containers', icon: baseUrl + 'Storage_Container_MK1.png'},
       {name: 'Logistic', plural: 'Logistics', icon: baseUrl + 'Splitter.png'},

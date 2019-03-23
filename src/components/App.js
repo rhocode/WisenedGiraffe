@@ -213,7 +213,7 @@ class App extends Component {
               console.log(rowValue);
               const replaceTable = (id, id_name, object) => {
                 if (!id_name.endsWith('_id')) {
-                  if (object[id_name].startsWith('http')) {
+                  if (typeof object[id_name] === 'string'  && object[id_name].startsWith('http')) {
                     const img = new Image();
                     img.src = object[id_name];
                   }
