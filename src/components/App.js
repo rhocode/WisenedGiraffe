@@ -26,6 +26,7 @@ import ToolbarPopup from './ToolbarPopup';
 import SidebarPopup from './SidebarPopup';
 import {addNode} from './GraphSvg/nodeActions';
 import NestedSidebarButton from './NestedSidebarButton';
+import Loader from './Loader';
 
 /* global d3 */
 
@@ -257,7 +258,7 @@ class App extends Component {
         return this.generateRecursiveStructure('machine_node').then(machine_node => { this.setState({machine_node},  () => {
           return this.generateRecursiveStructure('spring').then(spring => { this.setState({spring}, () => {
             return this.generateRecursiveStructure('purity_type').then(purity_type => { this.setState({purity_type}   , () => {
-              this.setState({isReady: true})
+              this.setState({isLoaded: true});
             });});
             // console.log(this.state);
 
@@ -392,7 +393,7 @@ class App extends Component {
   render() {
     const {classes} = this.props;
     if (!this.state.isReady) {
-      return <div>hello sir, it is i, sir loader</div>;
+      return <Loader ready={this.state.isLoaded} parentState={this} />;
     }
 
     return <div className={classes.root}>
@@ -404,16 +405,16 @@ class App extends Component {
               src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
               title="logo"/>
             <div className={classes.grow}></div>
-            <ToolbarPopup classes={classes} Icon={OfflineBoltIcon} title='Analyze' label='Analyze' contents='' />
-            <ToolbarPopup classes={classes} Icon={SettingsInputComponentIcon} title='Optimize' label='Optimize' contents='' />
-            <ToolbarPopup classes={classes} Icon={DeleteIcon} title='Clear' label='Clear' contents='' />
-            <ToolbarPopup classes={classes} Icon={InputIcon} title='Load' label='Load' contents='' />
-            <ToolbarPopup classes={classes} Icon={ShareIcon} title='Share' label='Share' contents='' />
+            <ToolbarPopup Icon={OfflineBoltIcon} title='Analyze' label='Analyze' contents='' />
+            <ToolbarPopup Icon={SettingsInputComponentIcon} title='Optimize' label='Optimize' contents='' />
+            <ToolbarPopup Icon={DeleteIcon} title='Clear' label='Clear' contents='' />
+            <ToolbarPopup Icon={InputIcon} title='Load' label='Load' contents='' />
+            <ToolbarPopup Icon={ShareIcon} title='Share' label='Share' contents='' />
           </Toolbar>
         </AppBar>
 
         
-        <FabPopup title='Help' classes={classes} contents={
+        <FabPopup title='Help' contents={
           <React.Fragment>
             <Typography variant="h5">Graph Basics</Typography>
             <ul>
@@ -442,7 +443,7 @@ class App extends Component {
 
 
           <List>
-            <SidebarPopup classes={classes} Icon={InfoIcon} label='About' title='About' contents='' />
+            <SidebarPopup Icon={InfoIcon} label='About' title='About' contents='' />
           </List>
         </Drawer>
         <main className={classes.content}>
