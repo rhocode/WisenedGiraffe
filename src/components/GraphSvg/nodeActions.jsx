@@ -3,6 +3,16 @@ import {addEdge, removeEdge, removePath, removeSelectFromEdge} from './edgeActio
 import * as d3 from 'd3';
 import {deselect_path_and_nodes} from './graphActions';
 
+export const add_node = (d, t) => {
+  d.id = d.id || t.id++;
+  d.x = d.x || 0;
+  d.y = d.y || 0;
+  d.overclock = d.overclock || 100;
+
+  t.graphData.nodes.push(d);
+  console.log(JSON.stringify(d));
+  t.updateGraphHelper();
+};
 
 export const delete_node = function (d, t) {
   // unselect currently selected node
@@ -22,6 +32,7 @@ export const delete_node = function (d, t) {
   t.graphData.nodes.splice(t.graphData.nodes.indexOf(selectedNode), 1);
 };
 
+
 export const node_clicked = function (d, t) {
   // unselect currently selected node
   const previouslySelected = t.state.selectedNode;
@@ -30,20 +41,21 @@ export const node_clicked = function (d, t) {
     deselect_path_and_nodes(t);
     t.setState({selectedNode: d});
     d3.select(this).classed(constants.graphNodeHoverClass, true)
-    .classed(constants.graphNodeGrabbedClass, false)
-    .classed(constants.selectedNodeClass, true);
+      .classed(constants.graphNodeGrabbedClass, false)
+      .classed(constants.selectedNodeClass, true);
   }
 };
 
 export const remove_select_from_nodes = function (graphSvg) {
   d3.select('.' + constants.selectedNodeClass)
-  .classed(constants.selectedNodeClass, false)
-  .classed(constants.graphNodeGrabbedClass, false);
+    .classed(constants.selectedNodeClass, false)
+    .classed(constants.graphNodeGrabbedClass, false);
   graphSvg.setState({selectedNode: null});
 };
 
 
 export const node_mouse_over = function (d, graphSvg) {
+
   graphSvg.setState({mouseOverNode: d3.select(this).datum()});
   d3.select(this).classed(constants.graphNodeHoverClass, true);
 };
@@ -76,8 +88,8 @@ const overClockCalculation = (d, percentage_metric, offset, endOffsetRaw) => {
   const endOffset = endOffsetRaw + offset;
   const percentage = d[percentage_metric];
   const arc = d3.arc()
-  .innerRadius(50)
-  .outerRadius(50);
+    .innerRadius(50)
+    .outerRadius(50);
 
   const m = (endOffset - offset) / 250;
   const b = offset;
@@ -87,51 +99,53 @@ const overClockCalculation = (d, percentage_metric, offset, endOffsetRaw) => {
   return arc({startAngle: start, endAngle: end});
 };
 
-export const addOverclockArc = (parent, percentage_metric, offset, endOffset) => {
+export const addEfficiencyArc = (parent, percentage_metric, offset, endOffset) => {
   parent.append('path')
-  .attr('class', constants.overclockedArcClass)
-  .attr('fill', 'none')
-  .attr('stroke-width', 8)
-  .attr('stroke', 'darkslategray')
-  .attr('d', function (d) {
-    return overClockCalculation(d, percentage_metric, offset, endOffset);
-  });
+    .attr('class', constants.overclockedArcClass)
+    .attr('fill', 'none')
+    .attr('stroke-width', 8)
+    .attr('stroke', 'darkslategray')
+    .attr('d', function (d) {
+      return overClockCalculation(d, percentage_metric, offset, endOffset);
+    });
 };
 
-export const editOverclockArc = (parent, percentage_metric, offset, endOffset) => {
+export const editEfficiencyArc = (parent, percentage_metric, offset, endOffset) => {
   parent.select('.' + constants.overclockedArcClass)
   // .attr('class', constants.overclockedArcClass)
   // .attr('fill', 'none')
   // .attr('stroke-width', 4)
   // .attr('stroke', 'darkslategray')
-  .attr('d', function (d) {
-    return overClockCalculation(d, percentage_metric, offset, endOffset);
-  });
+    .attr('d', function (d) {
+      return overClockCalculation(d, percentage_metric, offset, endOffset);
+    });
 };
 
 export const addNodeImage = (parent) => {
   parent.append('svg:image')
-  .attr('class', function (d) {
-    if (d.machine && d.machine.icon) {
-      return 'machine-icon';
-    }
-    return 'dev-icon';
-  })
-  .attr('xlink:href', function (d) {
-    // if (d.machine && d.machine.icon) {
-    //   return d.machine.icon;
-    // }
-    return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png';
-    // return 'https://i.imgur.com/oBmfK3w.png';
-  })
-  .attr('x', function (d) {
-    return -50;
-  })
-  .attr('y', function (d) {
-    return -50;
-  })
-  .attr('height', 100)
-  .attr('width', 100);
+    .attr('class', function (d) {
+      if (d.machine && d.machine.icon) {
+        return 'machine-icon';
+      }
+      return 'dev-icon';
+    })
+    .attr('xlink:href', function (d) {
+      if (d.instance && d.instance.icon) {
+        return d.instance.icon;
+      }
+      if (d.machine && d.machine.icon) {
+        return d.machine.icon;
+      }
+      return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png';
+    })
+    .attr('x', function (d) {
+      return -50;
+    })
+    .attr('y', function (d) {
+      return -50;
+    })
+    .attr('height', 100)
+    .attr('width', 100);
 };
 
 export const wheelZoomCalculation = function (d) {
@@ -149,32 +163,102 @@ export const wheelZoomCalculation = function (d) {
   } else if (d.overclock > 250) {
     d.overclock = d.overclock - 251;
   }
-  editOverclockArc(d3.select(this), 'overclock', 59, 322);
+  updateOverclock(d3.select(this).select('.' + constants.overclockedTextClass));
+  // editEfficiencyArc(d3.select(this), 'overclock', 59, 322);
 };
 
-export const insertNodeLevel = (gEl) => {
-  const title = '250';
-  const words = title.split(/-/g);
-  const nwords = words.length;
-  const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
+export const updateOverclock = function(textElement) {
+  textElement.text(function (d) {
+    return d.overclock;
+  });
+};
+
+export const updateNodeTier = function(textElement) {
+  textElement.text(function (d) {
+    return 'I';
+  });
+};
+
+export const insertComponents = function(parentElement) {
+  const el = parentElement.append('g');
+  // .attr('filter', 'url(#drop-shadow)')
+  // .append('svg:image')
+  el.append('text').attr('class', 'fas fa-sign-in-alt')
+    .attr('x', function (d) {
+      return 56;
+    })
+    .attr('y', function (d) {
+      return -28;
+    })
+    .attr('height', 25)
+    .attr('width', 25)
+    .text('&#xf040;');
+  el.append('text').attr('class', 'fas fa-sign-out-alt')
+    .attr('x', function (d) {
+      return 58;
+    })
+    .attr('y', function (d) {
+      return 3;
+    })
+    .attr('height', 25)
+    .attr('width', 25)
+    .text('&#xf040;');
+};
+
+export const insertNodeTier = (gEl) => {
+  // const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
+  const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', 0);
+  // el.append('circle').attr('r', 17).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
+
+  const backgroundText = el.append('text')
+    .attr('fill', 'white')
+    .attr('class', 'overclockFont')
+    .classed(constants.nodeVersionTextClass, true)
+    .attr('stroke', 'black')
+    .attr('stroke-width', 4)
+    .attr('x', 32).attr('dy', 46)
+    .attr('font-size', 30);
+
+  updateNodeTier(backgroundText);
+
+  const tspan = el.append('text').attr('fill', 'white')
+    .attr('class', 'overclockFont')
+    .classed(constants.nodeVersionTextClass, true)
+    .attr('x', 32).attr('dy', 46)
+    .attr('font-size', 30);
+
+  updateNodeTier(tspan);
+  // updateOverclock(tspan);
+};
+
+export const insertNodeOverclock = (gEl) => {
+  // const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
+  const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', 0);
   el.append('circle').attr('r', 17).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
 
-
-  for (let i = 0; i < words.length; i++) {
-    const backgroundText = el.append('text')
-    .attr('fill', 'white')
-    .attr('stroke', 'white')
-    .attr('stroke-width', 1)
-    .attr('font-size', 15)
-    .attr('font-weight', 'bold')
-    .text(words[i]).attr('x', 32).attr('dy', -32);
-
-    // if (i > 0) backgroundText.attr('x', 0).attr('dy', 15 * i);
-    const tspan = el.append('text').attr('fill', 'black').text(words[i]).attr('x', 32).attr('dy', -32)
+  const tspan = el.append('text').attr('fill', 'black')
     .attr('class', 'overclockFont')
+    .classed(constants.overclockedTextClass, true)
+    .attr('x', 32).attr('dy', -32)
     .attr('font-size', 20);
-    // if (i > 0) tspan.attr('x', 0).attr('dy', 15 * i);
-  }
+
+  updateOverclock(tspan);
+
+  // for (let i = 0; i < words.length; i++) {
+  //   const backgroundText = el.append('text')
+  //     .attr('fill', 'white')
+  //     .attr('stroke', 'white')
+  //     .attr('stroke-width', 1)
+  //     .attr('font-size', 15)
+  //     .attr('font-weight', 'bold')
+  //     .text(words[i]).attr('x', 32).attr('dy', -32);
+  //
+  //   // if (i > 0) backgroundText.attr('x', 0).attr('dy', 15 * i);
+  //   const tspan = el.append('text').attr('fill', 'black').text(words[i]).attr('x', 32).attr('dy', -32)
+  //     .attr('class', 'overclockFont')
+  //     .attr('font-size', 20);
+  //   // if (i > 0) tspan.attr('x', 0).attr('dy', 15 * i);
+  // }
 };
 
 export const insertNodeTitle = (gEl) => {

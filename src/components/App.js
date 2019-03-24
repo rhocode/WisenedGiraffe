@@ -117,9 +117,6 @@ const theme = createMuiTheme({
   }
 });
 
-
-const round = (num) => Math.round(num * 100) / 100;
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -127,19 +124,6 @@ class App extends Component {
       loaded: false
     };
   }
-
-
-  // calculateGraph() {
-  //   console.log('Calculation Run');
-  //   Object.keys(this.inputEdges).forEach((e) => {
-  //     const edge = this.inputEdges[e];
-  //     if (Object.keys(edge) == 0) {
-  //       return;
-  //     }
-  //
-  //     console.log(this.inputEdges[e]);
-  //   });
-  // }
 
   getRefkeyTable(table) {
     const db = this.state.db;
@@ -283,69 +267,12 @@ class App extends Component {
                       this.setState({isLoaded: true});
                     });
                   });
-                  // console.log(this.state);
-
-                  // return this.generateRecursiveStructure('spring').then(spring => { this.setState({spring})});
                 });
               });
             });
           });
         });
       });
-
-      // this.generateRecursiveStructure('recipe').then(recipe => {console.log(recipe); this.setState({recipe})});
-      // addNode(this.graphSvg, {}, 0,0);
-      // addNode(this.graphSvg, {}, 0,200);
-      //
-      //
-      // const svg = d3.select('#mainRender');
-      //
-      // this.graph = new this.GraphCreator(svg);
-      // // this.graph = new this.GraphCreator(svg, nodes, edges);
-      // this.graph.setIdCt(0);
-      // this.graph.updateGraph();
-      // const machine1 = {
-      //   'name': 'Smelter Mk.1: Iron Ingot',
-      //   'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png',
-      //   'base_type': 'SMELTER_NODE',
-      //   'produces': {
-      //     'name': 'Iron Ingot',
-      //     'resource_name': 'IRON_INGOT',
-      //     'in': [{'resource': 'IRON_ORE', 'quantity': 1}],
-      //     'machine': 'SMELTER_NODE',
-      //     'output_quantity': 1,
-      //     'time': 2,
-      //     'power': 4
-      //   }
-      // };
-      // this.addNode(this.graphCreatorInstance, machine1, 0, 200);
-      // const machine2 = {
-      //   'name': 'Miner Mk.1: Impure Iron',
-      //   'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png',
-      //   'base_type': 'MINER_NODE',
-      //   'produces': {
-      //     'name': 'Iron Ore',
-      //     'resource_name': 'IRON_ORE',
-      //     'in': [{'resource': 'IRON', 'quantity': 1, 'raw': true, 'purity': 'IMPURE'}],
-      //     'machine': 'MINER_NODE',
-      //     'output_quantity': 1,
-      //     'time': 2,
-      //     'power': 5
-      //   },
-      //   'mining_data': {
-      //     'name': 'Impure Iron',
-      //     'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png',
-      //     'produces': 'IRON_ORE',
-      //     'quality': 'IMPURE'
-      //   }
-      // };
-      // this.addNode(this.graphCreatorInstance, machine2, 0, 0);
-      // this.graph.updateGraph();
-      // this.addEdge(this.graphCreatorInstance, {
-      //   'from': d3.select('#graph-node-1').datum(),
-      //   'to': d3.select('#graph-node-0').datum()
-      // });
-      // this.graph.updateGraph();
     });
   }
 
@@ -357,7 +284,7 @@ class App extends Component {
       recipesByMachineClass[recipe.machine_class.name] = thisList;
     });
     return Object.keys(recipesByMachineClass).map(key =>
-      <SidebarButton label={key} key={key} items={recipesByMachineClass[key]}/>
+      <SidebarButton appObject={this} label={key} key={key} items={recipesByMachineClass[key]}/>
     );
   }
 
@@ -381,7 +308,7 @@ class App extends Component {
       springByClass[spring.spring_type.name] = thisList;
     });
     return (
-      <NestedSidebarButton label='Miner' listItems={springByClass}/>
+      <NestedSidebarButton label='Miners' listItems={springByClass}/>
     );
   }
 
@@ -392,12 +319,14 @@ class App extends Component {
       return <Loader ready={this.state.isLoaded} parentState={this}/>;
     }
 
+    const t = this;
+
     return <div className={classes.root}>
       <CssBaseline/>
       <MuiThemeProvider theme={theme}>
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
-            <img className={classes.logo}
+            <img alt="wow so satis factory" className={classes.logo}
               src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
               title="logo"/>
             <div className={classes.grow}></div>
@@ -451,7 +380,6 @@ class App extends Component {
           </Toolbar>
         </AppBar>
 
-
         <FabPopup title='Help' contents={
           <React.Fragment>
             <Typography variant="h5">Graph Basics</Typography>
@@ -480,7 +408,6 @@ class App extends Component {
             {this.generateSpringList()}
             {this.generateContainerList()}
           </List>
-
           <Divider/>
           
           <SidebarPanel parentState={this}/>
@@ -498,13 +425,12 @@ class App extends Component {
         </Drawer>
         <main className={classes.content}>
           {this.state.loaded ? <GraphSvg ref={(graphSvg) => {
-            this.graphSvg = graphSvg;
+            t.graphSvg = graphSvg;
           }}/> : <div/>}
         </main>
       </MuiThemeProvider>
     </div>;
   }
-
 }
 
 App.propTypes = {

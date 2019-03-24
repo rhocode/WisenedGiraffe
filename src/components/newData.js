@@ -20,7 +20,8 @@ schemaBuilder.createTable('machine_version')
   .addPrimaryKey(['id'])
   .addColumn('hidden', lf.Type.BOOLEAN)
   .addColumn('color', lf.Type.STRING)
-  .addNullable(['color'])
+  .addColumn('rank', lf.Type.INTEGER)
+  .addNullable(['color', 'rank'])
   .addColumn('name', lf.Type.STRING);
 
 schemaBuilder.createTable('machine_class')
@@ -41,7 +42,9 @@ schemaBuilder.createTable('machine_node')
   .addColumn('name', lf.Type.STRING)
   .addColumn('hidden', lf.Type.BOOLEAN)
   .addColumn('node_type_id', lf.Type.STRING)
-  .addColumn('icon', lf.Type.STRING);
+  .addColumn('icon', lf.Type.STRING)
+  .addColumn('input_slots', lf.Type.INTEGER)
+  .addColumn('output_slots', lf.Type.INTEGER);
 
 
 schemaBuilder.createTable('path_type')
@@ -265,12 +268,12 @@ const data = [
     key: 'machine_version',
     value: [
       {name: 'internal'},
-      {name: 'Mk.1'},
-      {name: 'Mk.2'},
-      {name: 'Mk.3'},
-      {name: 'Mk.4'},
-      {name: 'Mk.5'},
-      {name: 'Mk.6'},
+      {name: 'Mk.1', rank: 0},
+      {name: 'Mk.2', rank: 1},
+      {name: 'Mk.3', rank: 2},
+      {name: 'Mk.4', rank: 3},
+      {name: 'Mk.5', rank: 4},
+      {name: 'Mk.6', rank: 5},
     ]
   },
   {
@@ -335,7 +338,9 @@ const data = [
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
         speed: 100,
-        icon: baseUrl + 'Splitter.png'
+        icon: baseUrl + 'Splitter.png',
+        input_slots: 1,
+        output_slots: 3
       },
       {
         name: 'Merger',
@@ -343,7 +348,9 @@ const data = [
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
         speed: 100,
-        icon: baseUrl + 'Merger.png'
+        icon: baseUrl + 'Merger.png',
+        input_slots: 3,
+        output_slots: 1
       },
       {
         name: 'Miner Mk.1',
@@ -353,6 +360,9 @@ const data = [
         speed: 100,
         power: 5,
         icon: baseUrl + 'Miner_MK1.png'
+        ,
+        input_slots: 0,
+        output_slots: 1
       },
       {
         name: 'Miner Mk.2',
@@ -363,6 +373,9 @@ const data = [
         speed: 200,
         power: 5,
         hidden: true
+        ,
+        input_slots: 0,
+        output_slots: 1
       },
       {
         name: 'Smelter Mk.1',
@@ -371,6 +384,9 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
         speed: 100,
         icon: baseUrl + 'Smelter.png'
+        ,
+        input_slots: 1,
+        output_slots: 1
       },
       {
         name: 'Smelter Mk.2',
@@ -380,6 +396,9 @@ const data = [
         icon: baseUrl + 'Smelter.png',
         speed: 100,
         hidden: true
+        ,
+        input_slots: 1,
+        output_slots: 1
       },
       {
         name: 'Constructor Mk.1',
@@ -388,6 +407,8 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         icon: baseUrl + 'Constructor.png',
         speed: 100,
+        input_slots: 1,
+        output_slots: 1
       },
       {
         name: 'Constructor Mk.2',
@@ -396,7 +417,9 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         icon: baseUrl + 'Constructor.png',
         speed: 100,
-        hidden: true
+        hidden: true,
+        input_slots: 1,
+        output_slots: 1
       },
       {
         name: 'Assembler Mk.1',
@@ -405,6 +428,8 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         icon: baseUrl + 'Assembler.png',
         speed: 100,
+        input_slots: 2,
+        output_slots: 1
       },
       {
         name: 'Assembler Mk.2',
@@ -413,7 +438,9 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         icon: baseUrl + 'Assembler.png',
         speed: 100,
-        hidden: true
+        hidden: true,
+        input_slots: 2,
+        output_slots: 1
       },
       {
         name: 'Manufacturer Mk.1',
@@ -422,7 +449,9 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
         icon: '',
         speed: 100,
-        hidden: true
+        hidden: true,
+        input_slots: 3,
+        output_slots: 1
       },
       {
         name: 'Manufacturer Mk.2',
@@ -431,16 +460,20 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
         icon: '',
         speed: 100,
-        hidden: true
+        hidden: true,
+        input_slots: 3,
+        output_slots: 1
       },
       {
         name: 'Coal Generator',
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Coal Generator'),
-        icon: '',
+        icon: baseUrl + 'Coal_Generator.png',
         speed: 100,
-        hidden: true
+        hidden: true,
+        input_slots: 1,
+        output_slots: 0
       }
     ]
   },

@@ -86,8 +86,26 @@ class SidebarButton extends React.Component {
             );
           })
         }>
-          <MenuItem onClick={this.handleClose}>
-            <img src={link.item.icon} className={classes.itemListIcon}/>
+          <MenuItem onClick={() => {
+
+            const machine_nodes = appObject.state.machine_node.machine_node;
+            machine_nodes.sort((node1, node2) => node1.rank - node2.rank);
+            const upgrades = machine_nodes.filter(node => node.machine_class.id === link.machine_class.id );
+            const instance = upgrades[0];
+
+            appObject.graphSvg.addNode(
+              {
+                data: {recipe: link},
+                machine: link.machine_class,
+                allowedIn: link.inputs.map(dict => dict.item.id),
+                allowedOut: [link.item.id],
+                instance: instance,
+                upgradeTypes: upgrades
+              }
+            );
+            this.handleClose();
+          }}>
+            <img alt="probably some goat image" src={link.item.icon} className={classes.itemListIcon}/>
             {link.name}
             <div className={classes.grow}/>
           </MenuItem>
