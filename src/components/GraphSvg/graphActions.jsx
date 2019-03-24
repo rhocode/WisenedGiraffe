@@ -53,8 +53,6 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     this.nodeIn[incoming].push(elem.source);
   });
 
-  console.log(this.nodeIn, this.nodeOut);
-
   const drag = d3.drag()
     .clickDistance(10)
     .on('start', (d) => {
@@ -122,7 +120,7 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
   addNodeImage(graphNodesEnter);
   insertNodeOverclock(graphNodesEnter);
   insertNodeTier(graphNodesEnter);
-  insertComponents(graphNodesEnter);
+  insertComponents.call(t, graphNodesEnter);
 
 
   // merge

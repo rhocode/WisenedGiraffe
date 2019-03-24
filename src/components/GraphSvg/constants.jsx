@@ -6,6 +6,7 @@ const constants = {
   lineStylingFullClass: 'line-object-combined-styled',
   overclockedTextClass: 'overclockedTextClass',
   nodeVersionTextClass: 'nodeVersionTextClass',
+  nodeRequirementsIconClass: 'nodeRequirementsIconClass',
 
   selectedClass: 'selected',
   selectedNodeClass: 'selected-node',

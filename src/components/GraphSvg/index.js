@@ -78,7 +78,7 @@ class GraphSvg extends Component {
     };
 
     this.graphData.links = [
-      // {'source': getter(0), 'target': getter(1)},
+      {'source': getter(0), 'target': getter(1)},
     ];
 
     //add encompassing group for the zoom
