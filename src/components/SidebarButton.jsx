@@ -71,10 +71,9 @@ class SidebarButton extends React.Component {
   };
 
   render() {
-    const {classes, appObject} = this.props;
-    const {anchorEl} = this.state;
+    const { classes, label } = this.props;
+    const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-    const label = this.props.label;
     const listItems = this.props.items.map((link) => {
       return (
         <Tooltip key={link.id} className={classes.tooltip} placement="right" title={
@@ -125,7 +124,7 @@ class SidebarButton extends React.Component {
           >
             <AddBoxIcon/>
             <div className={classes.label}>
-              {label}
+              {label}s
             </div>
           </Button>
           <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition placement="right-start">
