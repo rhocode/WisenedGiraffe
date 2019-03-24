@@ -251,7 +251,6 @@ class App extends Component {
     });
   }
 
-
   componentDidMount() {
     createDatabase().then((db) => {
       this.setState({db, loaded: true});
@@ -264,7 +263,9 @@ class App extends Component {
                 this.setState({spring}, () => {
                   return this.generateRecursiveStructure('purity_type').then(purity_type => {
                     this.setState({purity_type}, () => {
-                      this.setState({isLoaded: true});
+                      return this.generateRecursiveStructure('player_unlock').then(player_unlock => {
+                        this.setState({player_unlock, isLoaded: true});
+                      });
                     });
                   });
                 });
@@ -300,7 +301,19 @@ class App extends Component {
     );
   }
 
+  generateUnlocksList() {
+    const dataList = [];
+    this.state.player_unlock && this.state.player_unlock.player_unlock.forEach(player_unlock => {
+      const item = this.state.recipes.recipe.filter(elem => elem.player_unlock.id === player_ublock.id)[0];
+      dataList.push({player_unlock, item});
+    });
+    return (
+      <div>hello</div>
+    );
+  }
+
   generateSpringList() {
+    this.generateUnlocksList();
     const springByClass = {};
     this.state.spring && this.state.spring.spring.forEach(spring => {
       const thisList = springByClass[spring.spring_type.name] || [];

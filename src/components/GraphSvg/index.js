@@ -101,7 +101,8 @@ class GraphSvg extends Component {
 
     //add zoom capabilities
     this.zoom_handler = d3.zoom()
-      .on('zoom', () => zoom_actions(graphObjects));
+      .on('zoom', () => zoom_actions(graphObjects))
+      .scaleExtent([0.1, 6])
     this.zoom_handler(inputSvg);
     inputSvg.on('dblclick.zoom', null);
 
@@ -125,8 +126,6 @@ class GraphSvg extends Component {
       .attr('height', '130%')
       .attr('width', '130%')
       .attr('filterUnits', 'userSpaceOnUse');
-      // .attr('x', '-100%')
-      // .attr('y', '100%');
 
     filter.append('feGaussianBlur')
       .attr('in', 'SourceAlpha')
