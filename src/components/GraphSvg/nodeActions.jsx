@@ -192,7 +192,7 @@ export const insertComponents = function(parentElement) {
     })
     .attr('height', 25)
     .attr('width', 25)
-    .text('&#xf040;');
+
   el.append('text').attr('class', 'fas fa-sign-out-alt')
     .attr('x', function (d) {
       return 58;
@@ -202,7 +202,6 @@ export const insertComponents = function(parentElement) {
     })
     .attr('height', 25)
     .attr('width', 25)
-    .text('&#xf040;');
 };
 
 export const insertNodeTier = (gEl) => {

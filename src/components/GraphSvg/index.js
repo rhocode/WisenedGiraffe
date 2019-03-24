@@ -126,8 +126,6 @@ class GraphSvg extends Component {
       .attr('height', '130%')
       .attr('width', '130%')
       .attr('filterUnits', 'userSpaceOnUse');
-      // .attr('x', '-100%')
-      // .attr('y', '100%');
 
     filter.append('feGaussianBlur')
       .attr('in', 'SourceAlpha')
