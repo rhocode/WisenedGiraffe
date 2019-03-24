@@ -7,13 +7,12 @@ import Popper from '@material-ui/core/Popper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Tooltip from '@material-ui/core/Tooltip';
 
-import { withStyles } from '@material-ui/core';
+import {withStyles} from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
 import Grow from '@material-ui/core/Grow';
 
 const styles = theme => ({
-  root: {
-  },
+  root: {},
   button: {
     flex: '0 0 100%',
     justifyContent: 'left',
@@ -35,8 +34,7 @@ const styles = theme => ({
     width: 24,
     paddingRight: 15,
   },
-  tooltip: {
-  },
+  tooltip: {},
   tooltipIcon: {
     height: 40,
     display: 'inline-block',
@@ -56,17 +54,20 @@ class SidebarButton extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {anchorEl : null};
+    this.state = {anchorEl: null};
   }
 
   handleMenu = event => {
     if (event.currentTarget === this.state.lastTarget)
       return;
-    this.setState({ anchorEl: event.currentTarget });
+    this.setState({anchorEl: event.currentTarget});
   };
 
   handleClose = () => {
-    this.setState({ anchorEl: null, lastTarget: this.state.anchorEl}, () => new Promise(resolve => setTimeout(resolve, 100)).then(()=> this.setState({lastTarget: null})) );
+    this.setState({
+      anchorEl: null,
+      lastTarget: this.state.anchorEl
+    }, () => new Promise(resolve => setTimeout(resolve, 100)).then(() => this.setState({lastTarget: null})));
   };
 
   render() {
@@ -74,28 +75,25 @@ class SidebarButton extends React.Component {
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
     const listItems = this.props.items.map((link) => {
-
       return (
         <Tooltip key={link.id} className={classes.tooltip} placement="right" title={
           link.inputs.map((element, index) => {
             return (
               <React.Fragment key={element.item.id}>
-                <img src={element.item.icon} className={index===0 ? classes.tooltipIconFirst : classes.tooltipIcon}/>
+                <img src={element.item.icon} className={index === 0 ? classes.tooltipIconFirst : classes.tooltipIcon}/>
                 <div className={classes.tooltipText}>{element.quantity}</div>
               </React.Fragment>
             );
           })
         }>
           <MenuItem onClick={this.handleClose}>
-            <img src={link.item.icon} className={classes.itemListIcon} />
+            <img src={link.item.icon} className={classes.itemListIcon}/>
             {link.name}
             <div className={classes.grow}/>
           </MenuItem>
         </Tooltip>
       );
-    }
-
-    );
+    });
 
     return (
       <React.Fragment key={label}>
@@ -112,11 +110,11 @@ class SidebarButton extends React.Component {
             </div>
           </Button>
           <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition placement="right-start">
-            {({ TransitionProps, placement }) => (
+            {({TransitionProps, placement}) => (
               <Grow
                 {...TransitionProps}
                 id="menu-list-grow"
-                style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+                style={{transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'}}
               >
                 <Paper>
                   <ClickAwayListener onClickAway={this.handleClose}>
@@ -134,4 +132,4 @@ class SidebarButton extends React.Component {
   }
 }
 
-export default withStyles(styles) (SidebarButton);
+export default withStyles(styles)(SidebarButton);

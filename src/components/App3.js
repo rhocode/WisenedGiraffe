@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 
 export default class App extends Component {
 
@@ -45,7 +45,7 @@ export default class App extends Component {
       thisGraph.circles = svgG.append('g').selectAll('g');
 
       thisGraph.drag = d3.behavior.drag().origin(function (d) {
-        return { x: d.x, y: d.y };
+        return {x: d.x, y: d.y};
       }).on('drag', function (args) {
         thisGraph.state.justDragged = true;
         thisGraph.dragmove.call(thisGraph, args);
@@ -96,12 +96,12 @@ export default class App extends Component {
       d3.select('#download-input').on('click', function () {
         var saveEdges = [];
         thisGraph.edges.forEach(function (val, i) {
-          saveEdges.push({ source: val.source.id, target: val.target.id });
+          saveEdges.push({source: val.source.id, target: val.target.id});
         });
         var blob = new Blob([window.JSON.stringify({
           'nodes': thisGraph.nodes,
           'edges': saveEdges
-        })], { type: 'text/plain;charset=utf-8' });
+        })], {type: 'text/plain;charset=utf-8'});
         saveAs(blob, 'mydag.json');
       });
 
@@ -336,7 +336,7 @@ export default class App extends Component {
 
       if (mouseDownNode !== d) {
         // we're in a different node: create new edge for mousedown edge and add to graph
-        var newEdge = { source: mouseDownNode, target: d };
+        var newEdge = {source: mouseDownNode, target: d};
         var filtRes = thisGraph.paths.filter(function (d) {
           if (d.source === newEdge.target && d.target === newEdge.source) {
             thisGraph.edges.splice(thisGraph.edges.indexOf(d), 1);
@@ -393,7 +393,7 @@ export default class App extends Component {
       } else if (state.graphMouseDown && d3.event.shiftKey) {
         // clicked not dragged from svg
         var xycoords = d3.mouse(thisGraph.svgG.node()),
-          d = { id: thisGraph.idct++, title: 'new concept', x: xycoords[0], y: xycoords[1] };
+          d = {id: thisGraph.idct++, title: 'new concept', x: xycoords[0], y: xycoords[1]};
         thisGraph.nodes.push(d);
         thisGraph.updateGraph();
         // make title of text immediently editable
@@ -424,20 +424,20 @@ export default class App extends Component {
         selectedEdge = state.selectedEdge;
 
       switch (d3.event.keyCode) {
-        case consts.BACKSPACE_KEY:
-        case consts.DELETE_KEY:
-          d3.event.preventDefault();
-          if (selectedNode) {
-            thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
-            thisGraph.spliceLinksForNode(selectedNode);
-            state.selectedNode = null;
-            thisGraph.updateGraph();
-          } else if (selectedEdge) {
-            thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
-            state.selectedEdge = null;
-            thisGraph.updateGraph();
-          }
-          break;
+      case consts.BACKSPACE_KEY:
+      case consts.DELETE_KEY:
+        d3.event.preventDefault();
+        if (selectedNode) {
+          thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
+          thisGraph.spliceLinksForNode(selectedNode);
+          state.selectedNode = null;
+          thisGraph.updateGraph();
+        } else if (selectedEdge) {
+          thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
+          state.selectedEdge = null;
+          thisGraph.updateGraph();
+        }
+        break;
       }
     };
 
@@ -446,17 +446,17 @@ export default class App extends Component {
     };
 
     GraphCreator.prototype.calculateLabelPosition = function (link_label) {
-      link_label.attr('x', function(d) {
+      link_label.attr('x', function (d) {
         var node = d3.select(link_label.node().parentElement).selectAll('path').node();
         var pathLength = node.getTotalLength();
         d.point = node.getPointAtLength(pathLength / 2);
         return d.point.x;
-      }).attr('y', function(d) {
+      }).attr('y', function (d) {
         return d.point.y;
       });
     };
 
-    GraphCreator.prototype.insertEdgeLabel = function(gEl, label) {
+    GraphCreator.prototype.insertEdgeLabel = function (gEl, label) {
       var link_label = gEl.append('text');
       link_label.style('text-anchor', 'middle')
         .style('dominant-baseline', 'central')
@@ -502,7 +502,7 @@ export default class App extends Component {
       });
 
 
-      paths.select('text').each(function(d) {
+      paths.select('text').each(function (d) {
         thisGraph.calculateLabelPosition(d3.select(this));
       });
 
@@ -521,7 +521,7 @@ export default class App extends Component {
         state.mouseDownLink = null;
       });
 
-      pathObject.each(function(d) {
+      pathObject.each(function (d) {
         thisGraph.insertEdgeLabel(d3.select(this), 'Sample Link');
       });
 
@@ -557,7 +557,7 @@ export default class App extends Component {
       newGs.append('circle').attr('r', String(consts.nodeRadius));
 
       newGs.each(function (d) {
-        console.log(d3.select(this).append('text').text("BLAH"));
+        console.log(d3.select(this).append('text').text('BLAH'));
         thisGraph.insertTitleLinebreaks(d3.select(this), d.title);
       });
 
@@ -580,10 +580,10 @@ export default class App extends Component {
 
     /**** MAIN ****/
 
-      // // warn the user when leaving
-      // window.onbeforeunload = function () {
-      //   return 'Make sure to save your graph locally before leaving :-)';
-      // };
+    // // warn the user when leaving
+    // window.onbeforeunload = function () {
+    //   return 'Make sure to save your graph locally before leaving :-)';
+    // };
 
     var docEl = document.documentElement,
       bodyEl = document.getElementsByTagName('body')[0];
@@ -595,8 +595,13 @@ export default class App extends Component {
       yLoc = 100;
 
     // initial node data
-    var nodes = [{ title: 'new concept', id: 0, x: xLoc, y: yLoc }, { title: 'new concept', id: 1, x: xLoc, y: yLoc + 200 }];
-    var edges = [{ source: nodes[1], target: nodes[0] }];
+    var nodes = [{title: 'new concept', id: 0, x: xLoc, y: yLoc}, {
+      title: 'new concept',
+      id: 1,
+      x: xLoc,
+      y: yLoc + 200
+    }];
+    var edges = [{source: nodes[1], target: nodes[0]}];
 
     /** MAIN SVG **/
     var svg = d3.select('body').append('svg').attr('width', width).attr('height', height);
@@ -604,8 +609,9 @@ export default class App extends Component {
     graph.setIdCt(2);
     graph.updateGraph();
   }
+
   render() {
     this.generateMeme(window.d3);
-    return <div />;
+    return <div/>;
   }
 }

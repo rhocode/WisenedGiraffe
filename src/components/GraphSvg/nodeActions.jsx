@@ -1,31 +1,101 @@
 import constants from './constants';
-import {addEdge, removeEdge, removeSelectFromEdge} from './edgeActions';
+import {addEdge, removeEdge, removePath, removeSelectFromEdge} from './edgeActions';
 import * as d3 from 'd3';
+import {deselect_path_and_nodes} from './graphActions';
+
+
+export const delete_node = function (d, t) {
+  // unselect currently selected node
+  const selectedNode = t.state.selectedNode;
+  remove_select_from_nodes(t);
+
+  const toSplice = t.graphData.links.filter(function (l) {
+    console.error(l, selectedNode.id, l.source.id === selectedNode.id || l.target.id === selectedNode.id);
+    return l.source.id === selectedNode.id || l.target.id === selectedNode.id;
+  });
+
+  toSplice.map(function (l) {
+    removePath(l, t);
+  });
+
+  console.log(t.graphData.nodes.indexOf(selectedNode));
+  t.graphData.nodes.splice(t.graphData.nodes.indexOf(selectedNode), 1);
+};
+
+export const node_clicked = function (d, t) {
+  // unselect currently selected node
+  const previouslySelected = t.state.selectedNode;
+  remove_select_from_nodes(t);
+  if (previouslySelected !== d) {
+    deselect_path_and_nodes(t);
+    t.setState({selectedNode: d});
+    d3.select(this).classed(constants.graphNodeHoverClass, true)
+    .classed(constants.graphNodeGrabbedClass, false)
+    .classed(constants.selectedNodeClass, true);
+  }
+};
+
+export const remove_select_from_nodes = function (graphSvg) {
+  d3.select('.' + constants.selectedNodeClass)
+  .classed(constants.selectedNodeClass, false)
+  .classed(constants.graphNodeGrabbedClass, false);
+  graphSvg.setState({selectedNode: null});
+};
+
+
+export const node_mouse_over = function (d, graphSvg) {
+  graphSvg.setState({mouseOverNode: d3.select(this).datum()});
+  d3.select(this).classed(constants.graphNodeHoverClass, true);
+};
+
+export const node_mouse_out = function (d, graphSvg) {
+  graphSvg.setState({mouseOverNode: null});
+  d3.select(this).classed(constants.graphNodeHoverClass, false);
+};
+
+export const node_mouse_down = function (d, graphSvg) {
+  if (d3.event.shiftKey) {
+    // d3.event.stopImmediatePropagation();
+    graphSvg.setState({shiftHeld: true, sourceId: d3.select(this).datum().id});
+  } else {
+    d3.select(this).classed(constants.graphNodeGrabbedClass, true);
+  }
+};
+
+export const node_mouse_up = function (d, graphSvg) {
+  // Only triggered if it's not a drag
+  if (graphSvg.state && graphSvg.state.shiftHeld) {
+  } else {
+    //probably can't get to this case
+  }
+  graphSvg.setState({shiftHeld: false});
+};
+
 
 const overClockCalculation = (d, percentage_metric, offset, endOffsetRaw) => {
   const endOffset = endOffsetRaw + offset;
   const percentage = d[percentage_metric];
   const arc = d3.arc()
-    .innerRadius(50)
-    .outerRadius(50);
+  .innerRadius(50)
+  .outerRadius(50);
 
   const m = (endOffset - offset) / 250;
   const b = offset;
 
   const start = b / 180 * Math.PI;
-  const end = (m * percentage + b )/ 180 * Math.PI;
-  return arc({startAngle:start, endAngle: end});
+  const end = (m * percentage + b) / 180 * Math.PI;
+  return arc({startAngle: start, endAngle: end});
 };
 
 export const addOverclockArc = (parent, percentage_metric, offset, endOffset) => {
   parent.append('path')
-    .attr('class', constants.overclockedArcClass)
-    .attr('fill', 'none')
-    .attr('stroke-width', 4)
-    .attr('stroke', 'darkslategray')
-    .attr('d', function(d) {
-      return overClockCalculation(d, percentage_metric, offset, endOffset);
-    });
+  .attr('class', constants.overclockedArcClass)
+  .attr('fill', 'none')
+  .attr('stroke-width', 8)
+  .attr('stroke', 'darkslategray')
+  .attr('d', function (d) {
+    return overClockCalculation(d, percentage_metric, offset, endOffset);
+  });
 };
 
 export const editOverclockArc = (parent, percentage_metric, offset, endOffset) => {
@@ -34,37 +104,37 @@ export const editOverclockArc = (parent, percentage_metric, offset, endOffset) =
   // .attr('fill', 'none')
   // .attr('stroke-width', 4)
   // .attr('stroke', 'darkslategray')
-    .attr('d', function(d) {
-      return overClockCalculation(d, percentage_metric, offset, endOffset);
-    });
+  .attr('d', function (d) {
+    return overClockCalculation(d, percentage_metric, offset, endOffset);
+  });
 };
 
 export const addNodeImage = (parent) => {
   parent.append('svg:image')
-    .attr('class', function (d) {
-      if (d.machine && d.machine.icon) {
-        return 'machine-icon';
-      }
-      return 'dev-icon';
-    })
-    .attr('xlink:href', function (d) {
+  .attr('class', function (d) {
+    if (d.machine && d.machine.icon) {
+      return 'machine-icon';
+    }
+    return 'dev-icon';
+  })
+  .attr('xlink:href', function (d) {
     // if (d.machine && d.machine.icon) {
     //   return d.machine.icon;
     // }
-      return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png';
+    return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png';
     // return 'https://i.imgur.com/oBmfK3w.png';
-    })
-    .attr('x', function (d) {
-      return -50;
-    })
-    .attr('y', function (d) {
-      return -50;
-    })
-    .attr('height', 100)
-    .attr('width', 100);
+  })
+  .attr('x', function (d) {
+    return -50;
+  })
+  .attr('y', function (d) {
+    return -50;
+  })
+  .attr('height', 100)
+  .attr('width', 100);
 };
 
-export const wheelZoomCalculation = function(d) {
+export const wheelZoomCalculation = function (d) {
   d3.event.stopImmediatePropagation();
 
   let roughEstimate = -1;
@@ -79,29 +149,32 @@ export const wheelZoomCalculation = function(d) {
   } else if (d.overclock > 250) {
     d.overclock = d.overclock - 251;
   }
-  console.log(d.overclock);
-  editOverclockArc(d3.select(this), 'overclock', 55, 330);
+  editOverclockArc(d3.select(this), 'overclock', 59, 322);
 };
 
 export const insertNodeLevel = (gEl) => {
-  // const title = gEl.datum().name;
-  const title = 'V';
+  const title = '250';
   const words = title.split(/-/g);
   const nwords = words.length;
   const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
-  el.append('circle').attr('r', 13).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
+  el.append('circle').attr('r', 17).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
+
+
   for (let i = 0; i < words.length; i++) {
     const backgroundText = el.append('text')
-      .attr('fill', 'white')
-      .attr('stroke', 'white')
-      .attr('stroke-width', 1)
-      .text(words[i]).attr('x', 32).attr('dy', -32);
+    .attr('fill', 'white')
+    .attr('stroke', 'white')
+    .attr('stroke-width', 1)
+    .attr('font-size', 15)
+    .attr('font-weight', 'bold')
+    .text(words[i]).attr('x', 32).attr('dy', -32);
 
     // if (i > 0) backgroundText.attr('x', 0).attr('dy', 15 * i);
-    const tspan = el.append('text').attr('fill', 'black').text(words[i]).attr('x', 32).attr('dy', -32);
+    const tspan = el.append('text').attr('fill', 'black').text(words[i]).attr('x', 32).attr('dy', -32)
+    .attr('class', 'overclockFont')
+    .attr('font-size', 20);
     // if (i > 0) tspan.attr('x', 0).attr('dy', 15 * i);
   }
-
 };
 
 export const insertNodeTitle = (gEl) => {
@@ -139,7 +212,6 @@ export const addNode = (graphRef, machine, x = null, y = null) => {
   console.log('Called addNode');
   const d = generateNodeDef(x || width / 2, y || height / 2, graphRef.idct++, {});
   graphRef.nodes.push(d);
-  console.log(graphRef);
   addNodeToGraph(graphRef, d);
 
   graphRef.updateGraph();
@@ -157,7 +229,7 @@ export const addNodeToGraph = (graphRef, d) => {
   // this.inputEdges[nodeId] = {};
 };
 
-export const removeNodeFromGraph = function(l) {
+export const removeNodeFromGraph = function (l) {
   // const nodeId = l.id;
   // delete this.nodes[nodeId];
   // delete this.inputEdges[nodeId];
@@ -165,7 +237,7 @@ export const removeNodeFromGraph = function(l) {
 };
 
 // mousedown on node
-export const circleMouseDown = function(d3, d3node, d) {
+export const circleMouseDown = function (d3, d3node, d) {
   d3.event.stopPropagation();
   // Select this node
   this.mouseDownNode = d;
@@ -177,7 +249,7 @@ export const circleMouseDown = function(d3, d3node, d) {
 };
 
 // mouseup on nodes
-export const circleMouseUp = function(d3, d3node, d) {
+export const circleMouseUp = function (d3, d3node, d) {
   // reset the states
   this.shiftNodeDrag = false;
   d3node.classed(constants.connectableClass, false);

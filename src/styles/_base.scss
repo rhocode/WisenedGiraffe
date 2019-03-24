@@ -1,7 +1,7 @@
-body{
+body {
   margin: 0;
   padding: 0;
-  overflow:hidden;
+  overflow: hidden;
   height: 100vh;
   width: 100vw;
   font-family: 'Roboto Mono', monospace;
@@ -15,9 +15,30 @@ body{
   display: flex;
 }
 
-p{
-  overflow: overlay;
-  position: relative;
+//p {
+//  overflow: overlay;
+//  position: relative;
+//}
+
+// paths
+
+.line-object-hitbox {
+  stroke-opacity: 0;
+  stroke: black;
+  stroke-width: 15px;
+  cursor: pointer;
+}
+
+
+//
+.overclockFont {
+  font-family: 'Crimson Text', serif;
+  font-weight: bold;
+  shape-rendering: crispEdges;
+}
+
+.overclockedArcClass {
+  shape-rendering: geometricPrecision;
 }
 
 .graphMachineNode {
@@ -27,11 +48,15 @@ p{
 }
 
 .graphNodeHoverClass {
-  cursor: grab
+  cursor: pointer
 }
 
-.graphNodeHoverClass .graphMachineNode{
+.graphNodeHoverClass .graphMachineNode {
   fill: #FF9800;
+}
+
+.selected-node .graphMachineNode {
+  fill: #E65100;
 }
 
 .graphNodeGrabbedClass {
@@ -42,7 +67,7 @@ p{
   stroke-width: 2px;
 }
 
-.line-object.hidden{
+.line-object.hidden {
   stroke-width: 0px;
 }
 
@@ -56,8 +81,7 @@ p{
 //}
 
 
-
-#toolbox{
+#toolbox {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -69,12 +93,12 @@ p{
   z-index: 5;
 }
 
-#toolbox input{
+#toolbox input {
   width: 30px;
   opacity: 0.4;
 }
 
-#toolbox input:hover{
+#toolbox input:hover {
   opacity: 1;
   cursor: pointer;
 }
@@ -87,7 +111,7 @@ p{
 //  margin: 0 0.5em;
 //}
 
-.conceptG text{
+.conceptG text {
   pointer-events: none;
 }
 
@@ -96,28 +120,26 @@ p{
 //  fill: #333;
 //}
 
-g.conceptG circle{
+g.conceptG circle {
   fill: #FFE0B2;
   stroke: #FFCC80;
   stroke-width: 1px;
 }
 
-g.conceptG:hover circle {
-  fill: #FF9800;
-}
-
-g.selected circle{
-  fill: #E65100;
-}
-
-g.selected:hover circle{
-  fill: #E65100;
-}
-
-
+//g.conceptG:hover circle {
+//  fill: #FF9800;
+//}
+//
+//g.selected circle{
+//  fill: #E65100;
+//}
+//
+//g.selected:hover circle{
+//  fill: #E65100;
+//}
 
 
-g.connect-node circle{
+g.connect-node circle {
   fill: #BEFFFF;
 }
 
@@ -141,7 +163,7 @@ div.full-div {
 svg#mainRender {
   height: 100%;
   width: 100%;
-  background-color:#dddddd;
+  background-color: #dddddd;
 }
 
 .lead {
@@ -163,9 +185,11 @@ tspan.node-label {
 .path-end-arrow:hover {
   fill: #4CAF50;
 }
+
 .path-end-arrow.selected {
   fill: #039BE5;
 }
+
 .path-end-arrow {
   fill: #4CAF50;
 }
