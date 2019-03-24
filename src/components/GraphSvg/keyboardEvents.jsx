@@ -10,6 +10,7 @@ export const svgKeyUp = function (d, t) {
 
 export const svgKeyDown = function (d, t) {
   // make sure repeated keyd presses don't register for each keydown
+  if (document.activeElement && document.activeElement.nodeName === 'INPUT') return;
   if (t.state.pressedKey) return;
   t.setState({pressedKey: d3.event.keyCode});
   // this.lastKeyDown = d3.event.keyCode;
@@ -19,15 +20,15 @@ export const svgKeyDown = function (d, t) {
   switch (d3.event.keyCode) {
   case constants.BACKSPACE_KEY:
   case constants.DELETE_KEY:
-    d3.event.preventDefault();
     if (t.state.selectedPath) {
       removePath.call(this, t.state.selectedPath, t);
       t.setState({selectedPath: null});
+      t.updateGraphHelper();
     } else if (t.state.selectedNode) {
       delete_node.call(this, d, t);
       t.setState({selectedNode: null});
+      t.updateGraphHelper();
     }
     break;
   }
-  t.updateGraphHelper();
 };

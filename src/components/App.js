@@ -304,7 +304,8 @@ class App extends Component {
   generateUnlocksList() {
     const dataList = [];
     this.state.player_unlock && this.state.player_unlock.player_unlock.forEach(player_unlock => {
-      const item = this.state.recipes.recipe.filter(elem => elem.player_unlock.id === player_ublock.id)[0];
+      console.log(this.state.recipes.recipe)
+      const item = this.state.recipes.recipe.filter(elem => elem.player_unlock && (elem.player_unlock.id === player_unlock.id) )[0];
       dataList.push({player_unlock, item});
     });
     return (
