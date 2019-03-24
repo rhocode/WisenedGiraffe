@@ -179,29 +179,48 @@ export const updateNodeTier = function(textElement) {
   });
 };
 
-export const insertComponents = function(parentElement) {
-  const el = parentElement.append('g');
-  // .attr('filter', 'url(#drop-shadow)')
-  // .append('svg:image')
-  el.append('text').attr('class', 'fas fa-sign-in-alt')
-    .attr('x', function (d) {
-      return 56;
-    })
-    .attr('y', function (d) {
-      return -28;
-    })
-    .attr('height', 25)
-    .attr('width', 25)
+export const updateComponents = function(elementsToUpdate) {
+  const t = this;
+  elementsToUpdate.each(function(d, i) {
+    const allowedIn = d.allowedIn;
+    const actualIn = t.nodeIn[d.id] || [];
 
-  el.append('text').attr('class', 'fas fa-sign-out-alt')
-    .attr('x', function (d) {
-      return 58;
-    })
-    .attr('y', function (d) {
-      return 3;
-    })
-    .attr('height', 25)
-    .attr('width', 25)
+    const provided = actualIn.map(node => node.allowedOut);
+
+    const element = d3.select(this);
+    element.append('text').attr('class', 'fas fa-sign-in-alt')
+      .attr('x', function (d) {
+        return 56;
+      })
+      .attr('y', function (d) {
+        return -28;
+      })
+      .attr('height', 25)
+      .attr('width', 25);
+
+    const allowedOut = d.allowedIn;
+    const actualOut = t.nodeOut[d.id] || [];
+
+    const provides = actualOut.map(node => node.allowedIn);
+
+    element.append('text').attr('class', 'fas fa-sign-out-alt')
+      .attr('x', function (d) {
+        return 58;
+      })
+      .attr('y', function (d) {
+        return 3;
+      })
+      .attr('height', 25)
+      .attr('width', 25);
+
+    console.log(allowedIn, actualIn, provided, allowedOut, actualOut, provides);
+  });
+};
+
+export const insertComponents = function(parentElement) {
+  const el = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);
+
+  updateComponents.call(this, el);
 };
 
 export const insertNodeTier = (gEl) => {

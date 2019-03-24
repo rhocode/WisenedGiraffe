@@ -25,7 +25,6 @@ const styles = theme => ({
     flexShrink: 0
   },
   textField: {
-    flex: 1,
     paddingBottom: 10,
   },
   button: {
