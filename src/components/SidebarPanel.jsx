@@ -14,6 +14,7 @@ const styles = theme => ({
     padding: 12,
     display: 'flex',
     flexDirection: 'column',
+    flexShrink: 0
   },
   textField: {
     flex: 1,
