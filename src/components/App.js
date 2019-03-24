@@ -14,19 +14,26 @@ import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponen
 import InputIcon from '@material-ui/icons/Input';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
 // import * as d3 from 'd3';
 
 import jsxToString from 'jsx-to-string';
 
+import Loader from './Loader';
 import createDatabase from './newData';
 import GraphSvg from './GraphSvg';
+import {addNode} from './GraphSvg/nodeActions';
+
 import SidebarButton from './SidebarButton';
 import FabPopup from './FabPopup';
 import ToolbarPopup from './ToolbarPopup';
 import SidebarPopup from './SidebarPopup';
-import {addNode} from './GraphSvg/nodeActions';
 import NestedSidebarButton from './NestedSidebarButton';
-import Loader from './Loader';
+import SimpleSidebarButton from './SimpleSidebarButton';
+import SidebarPanel from './SidebarPanel';
+
 
 /* global d3 */
 
@@ -50,6 +57,10 @@ const styles = theme => ({
   drawerPaper: {
     width: drawerWidth,
     position: 'unset'
+  },
+  drawerTitle: {
+    paddingLeft: 15,
+    paddingTop: 5,
   },
   content: {
     display: 'flex',
@@ -77,6 +88,23 @@ const styles = theme => ({
   },
   button: {
     flex: '0 0 100%',
+  },
+  label: {
+    paddingLeft: 10,
+  },
+  inlineDialogButton : {
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
+  dialogButton: {
+    marginTop: 10,
+  },
+  dialogContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  clearButton: {
+    paddingTop: 20,
   },
 });
 
@@ -210,7 +238,6 @@ class App extends Component {
             });
             Object.keys(row).filter(str => !str.endsWith('_id')).forEach(rowKey => {
               const rowValue = row[rowKey];
-              console.log(rowValue);
               const replaceTable = (id, id_name, object) => {
                 if (!id_name.endsWith('_id')) {
                   if (typeof object[id_name] === 'string'  && object[id_name].startsWith('http')) {
@@ -335,15 +362,9 @@ class App extends Component {
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
-    return Object.keys(springByClass)
-      .map(key => {
-        const returnDivList = [];
-        if (!['Miner'].includes(key)) {
-          console.log(key, springByClass[key]);
-          returnDivList.push(<div/>);
-        }
-        return returnDivList;
-      });
+    return (
+      <SimpleSidebarButton label="Container" listItems={springByClass} />
+    );
   }
 
   generateSpringList() {
@@ -355,29 +376,6 @@ class App extends Component {
     });
     return (
       <NestedSidebarButton label='Miner' listItems={springByClass}/>
-      // <React.Fragment key={label}>
-      //   <Paper className={classes.paper}>
-      //     <Button
-      //       aria-owns={open ? 'menu-appbar' : null}
-      //       aria-haspopup="true"
-      //       onClick={open ? this.handleClose : this.handleMenu}
-      //       className={classes.button}
-      //     >
-      //       <AddBoxIcon/>
-      //       <div className={classes.label}>Miner</div>
-      //     </Button>
-      //     {Object.keys(springByClass).map(key => {
-      //       const returnDivList = [];
-      //       if (['Miner'].includes(key)) {
-      //         springByClass[key].forEach(resource => {
-      //           console.log(resource);
-      //           returnDivList.push();
-      //         });
-      //       }
-      //       return returnDivList;
-      //     })}
-      //   </Paper>
-      // </React.Fragment>
     );
   }
 
@@ -398,11 +396,53 @@ class App extends Component {
               src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
               title="logo"/>
             <div className={classes.grow}></div>
-            <ToolbarPopup Icon={OfflineBoltIcon} title='Analyze' label='Analyze' contents='' />
-            <ToolbarPopup Icon={SettingsInputComponentIcon} title='Optimize' label='Optimize' contents='' />
-            <ToolbarPopup Icon={DeleteIcon} title='Clear' label='Clear' contents='' />
-            <ToolbarPopup Icon={InputIcon} title='Load' label='Load' contents='' />
-            <ToolbarPopup Icon={ShareIcon} title='Share' label='Share' contents='' />
+            <Button color="inherit" >
+              <OfflineBoltIcon/>
+              <div className={classes.label}>Analyze</div>
+            </Button>
+            <Button color="inherit" >
+              <SettingsInputComponentIcon/>
+              <div className={classes.label}>Optimize</div>
+            </Button>
+            <ToolbarPopup Icon={DeleteIcon} title='Clear' label='Clear' contents={
+              <React.Fragment>
+                <div className={classes.dialogContainer}>
+                  <Typography variant="h5">Are you sure you want to clear everything?</Typography>
+                  <Button color="secondary" variant="outlined" className={`${classes.dialogButton}`}>
+                    <DeleteIcon />
+                    <div className={classes.label}>Yes, I'm sure!</div>
+                  </Button>
+                </div>
+              </React.Fragment>
+            } />
+            <ToolbarPopup Icon={InputIcon} title='Load' label='Load' contents={
+              <React.Fragment>
+                <TextField label="Share Code">
+                </TextField>
+                <Button color="inherit" className={classes.inlineDialogButton}>
+                  <InputIcon/>
+                  <div className={classes.label}>Load</div>
+                </Button>
+              </React.Fragment>
+            } />
+            <ToolbarPopup Icon={ShareIcon} title='Share' label='Share' contents={
+              <React.Fragment>
+                <div className={classes.dialogContainer}>
+                  <div>
+                    <TextField label="Share Code">
+                    </TextField>
+                    <Button color="inherit" className={classes.inlineDialogButton}>
+                      <FileCopyIcon/>
+                      <div className={classes.label}>Copy</div>
+                    </Button>
+                  </div>
+                  <Button color="inherit" className={classes.dialogButton} fullWidth>
+                    <ShareIcon/>
+                    <div className={classes.label}>Generate Image</div>
+                  </Button>
+                </div>
+              </React.Fragment>
+            } />
           </Toolbar>
         </AppBar>
 
@@ -416,9 +456,10 @@ class App extends Component {
               <li><Typography variant="body1">Click twice on a node and press DELETE to delete it.</Typography></li>
               <li><Typography variant="body1">Hold down shift - click and drag from a node to direct it to another node.</Typography></li>
             </ul>
+            <Typography variant="h5">Saving/Loading</Typography>
+            <Typography variant="body1">TODO</Typography>
           </React.Fragment>
         }/>
-
 
         <Drawer
           className={classes.drawer}
@@ -428,15 +469,25 @@ class App extends Component {
           }}
         >
           <List>
+            <Typography variant="h5" className={classes.drawerTitle}>Nodes</Typography>
             {this.generateNodeList()}
             {this.generateSpringList()}
+            {this.generateContainerList()}
           </List>
             
           <Divider/>
+          
+          <SidebarPanel parentState={this}/>
 
+          <Divider/>
 
           <List>
-            <SidebarPopup Icon={InfoIcon} label='About' title='About' contents='' />
+            <SidebarPopup Icon={InfoIcon} label='About' title='About' contents={
+              <React.Fragment>
+                <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a href="https://github.com/thinkaliker">Adam</a>.</Typography>
+                <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from Coffee Stain Studios' Satisfactory.</Typography>
+              </React.Fragment>
+            } />
           </List>
         </Drawer>
         <main className={classes.content}>

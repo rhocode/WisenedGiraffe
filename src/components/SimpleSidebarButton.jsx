@@ -9,8 +9,6 @@ import { withStyles } from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
 import Grow from '@material-ui/core/Grow';
 
-import InnerNestedSidebarButton from './InnerNestedSidebarButton';
-
 const styles = theme => ({
   root: {
   },
@@ -37,7 +35,7 @@ const styles = theme => ({
   },
 });
 
-class NestedSidebarButton extends React.Component {
+class SimpleSidebarButton extends React.Component {
 
   constructor(props) {
     super(props);
@@ -69,7 +67,7 @@ class NestedSidebarButton extends React.Component {
             className={classes.button}
           >
             <AddBoxIcon/>
-            <div className={classes.label}>Miners</div>
+            <div className={classes.label}>Logistics</div>
           </Button>
           <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition placement="right-start">
             {({ TransitionProps, placement }) => (
@@ -83,9 +81,10 @@ class NestedSidebarButton extends React.Component {
                     <MenuList>
                       {Object.keys(listItems).map(key => {
                         const returnDivList = [];
-                        if (['Miner'].includes(key)) {
+                        if (!['Miner'].includes(key)) {
                           listItems[key].forEach(resource => {
-                            returnDivList.push(<InnerNestedSidebarButton resource={resource}/>);
+                            returnDivList.push(<MenuItem key={resource.machine_class.name+resource.machine_class.id}>
+                              <img src={resource.machine_class.icon} className={classes.itemListIcon} />{resource.machine_class.name}</MenuItem>);
                           });
                         }
                         return returnDivList;
@@ -102,4 +101,4 @@ class NestedSidebarButton extends React.Component {
   }
 }
 
-export default withStyles(styles) (NestedSidebarButton);
+export default withStyles(styles) (SimpleSidebarButton);
