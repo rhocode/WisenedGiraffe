@@ -415,10 +415,11 @@ class App extends Component {
           <Divider/>
 
           <List>
-            <SidebarPopup Icon={InfoIcon} label='About' title='About' contents={
+            <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers' contents={
               <React.Fragment>
                 <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a href="https://github.com/thinkaliker">Adam</a>.</Typography>
-                <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from Coffee Stain Studios' Satisfactory.</Typography>
+                <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain Studios AB, or THQ Nordic AB.</Typography>
+                <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from Coffee Stain Studios AB's Satisfactory.</Typography>
               </React.Fragment>
             } />
           </List>
