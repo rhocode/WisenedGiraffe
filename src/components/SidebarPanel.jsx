@@ -62,7 +62,18 @@ class SidebarPanel extends React.Component {
           <ShuffleIcon/>
           <div className={classes.label}>Rejiggle Graph</div>
         </Button>
-
+        <Button className={classes.button} fullWidth onClick={() => {
+          parentState.graphSvg.resetCamera();
+        }}>
+          <ShuffleIcon/>
+          <div className={classes.label}>Reset Camera</div>
+        </Button>
+        <Button className={classes.button} fullWidth onClick={() => {
+          parentState.graphSvg.unfixNodes();
+        }}>
+          <ShuffleIcon/>
+          <div className={classes.label}>Unfix Nodes</div>
+        </Button>
       </Paper>
     );
   }

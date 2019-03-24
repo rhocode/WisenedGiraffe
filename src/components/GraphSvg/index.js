@@ -34,10 +34,27 @@ class GraphSvg extends Component {
     add_node(nodeData, this);
   }
 
+  resetCamera() {
+    this.inputSvg.transition()
+      .duration(750)
+      .call(this.zoom_handler.transform, d3.zoomIdentity);
+
+    this.updateGraphHelper();
+  }
+
   jiggle() {
     this.graphData.nodes.forEach(node => {
       node.x = 0;
       node.y = 0;
+    });
+
+    this.updateGraphHelper();
+  }
+
+  unfixNodes() {
+    this.graphData.nodes.forEach(node => {
+      node.fx = null;
+      node.fy = null;
     });
 
     this.updateGraphHelper();
@@ -51,7 +68,7 @@ class GraphSvg extends Component {
         {'data':{'recipe':{'name':'Iron Plate','inputs':[{'quantity':12,'item':{'name':'Iron Ingot','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png','hidden':false,'id':4}}],'time':4,'power':4,'quantity':1,'hidden':false,'id':2,'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0},'item':{'name':'Iron Plate','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Plate.png','hidden':false,'id':6}}},'machine':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0},'allowedIn':[4],'allowedOut':[6],'instance':{'name':'Constructor Mk.1','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'input_slots':1,'output_slots':1,'hidden':false,'id':6,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'hidden':false,'id':1},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}},'upgradeTypes':[{'name':'Constructor Mk.1','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'input_slots':1,'output_slots':1,'hidden':false,'id':6,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'hidden':false,'id':1},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}},{'name':'Constructor Mk.2','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'hidden':true,'input_slots':1,'output_slots':1,'id':7,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.2','rank':1,'hidden':false,'id':2},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}}],'id':3,'x':0,'y':0,'overclock':100}
       ],
     };
-
+    this.inputSvg = inputSvg;
     this.graphData.nodes.forEach(elem => {
       elem.id = (this.id++);
     });
@@ -83,9 +100,9 @@ class GraphSvg extends Component {
     });
 
     //add zoom capabilities
-    const zoom_handler = d3.zoom()
+    this.zoom_handler = d3.zoom()
       .on('zoom', () => zoom_actions(graphObjects));
-    zoom_handler(inputSvg);
+    this.zoom_handler(inputSvg);
     inputSvg.on('dblclick.zoom', null);
 
     //Create definitions for the arrow markers showing relationship directions
