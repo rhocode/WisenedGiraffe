@@ -68,8 +68,8 @@
     "jsx-to-string": "^1.4.0",
     "lovefield": "^2.1.12",
     "normalize.css": "^8.0.0",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "react": "^16.8.5",
+    "react-dom": "^16.8.5",
     "storm-react-diagrams": "^5.2.1"
   }
 }
