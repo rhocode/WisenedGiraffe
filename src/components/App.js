@@ -308,7 +308,7 @@ class App extends Component {
       springByClass[spring.spring_type.name] = thisList;
     });
     return (
-      <NestedSidebarButton label='Miners' listItems={springByClass}/>
+      <NestedSidebarButton label='Miners' listItems={springByClass} appObject={this}/>
     );
   }
 

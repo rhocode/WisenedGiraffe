@@ -71,7 +71,7 @@ class SidebarButton extends React.Component {
   };
 
   render() {
-    const { classes, label } = this.props;
+    const { classes, label, appObject } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
     const listItems = this.props.items.map((link) => {
@@ -87,7 +87,6 @@ class SidebarButton extends React.Component {
           })
         }>
           <MenuItem onClick={() => {
-
             const machine_nodes = appObject.state.machine_node.machine_node;
             machine_nodes.sort((node1, node2) => node1.rank - node2.rank);
             const upgrades = machine_nodes.filter(node => node.machine_class.id === link.machine_class.id );

@@ -59,7 +59,6 @@ class NestedSidebarButton extends React.Component {
     const {classes, listItems, label, appObject} = this.props;
     const {anchorEl} = this.state;
     const open = Boolean(anchorEl);
-
     return (
       <React.Fragment key={label}>
         <Paper className={classes.paper}>
