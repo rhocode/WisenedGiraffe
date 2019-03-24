@@ -4,13 +4,12 @@ import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
-import { withStyles } from '@material-ui/core';
+import {withStyles} from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
 import Grow from '@material-ui/core/Grow';
 
 const styles = theme => ({
-  root: {
-  },
+  root: {},
   paper: {
     margin: theme.spacing.unit * 2,
     display: 'flex',
@@ -33,22 +32,26 @@ class InnerNestedSidebarButton extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {anchorEl : null};
+    this.state = {anchorEl: null};
   }
 
   handleMenu = event => {
     if (event.currentTarget === this.state.lastTarget)
       return;
-    this.setState({ anchorEl: event.currentTarget, selectedButton: event.currentTarget.id });
+    this.setState({anchorEl: event.currentTarget, selectedButton: event.currentTarget.id});
   };
 
   handleClose = () => {
-    this.setState({ anchorEl: null, lastTarget: this.state.anchorEl, selectedButton: null}, () => new Promise(resolve => setTimeout(resolve, 100)).then(()=> this.setState({lastTarget: null})) );
+    this.setState({
+      anchorEl: null,
+      lastTarget: this.state.anchorEl,
+      selectedButton: null
+    }, () => new Promise(resolve => setTimeout(resolve, 100)).then(() => this.setState({lastTarget: null})));
   };
 
   render() {
-    const { classes, resource} = this.props;
-    const { anchorEl } = this.state;
+    const {classes, resource} = this.props;
+    const {anchorEl} = this.state;
     const icon = resource.item.icon;
     const label = resource.item.name;
     const listItems = resource.purities;
@@ -56,7 +59,7 @@ class InnerNestedSidebarButton extends React.Component {
     const open = Boolean(anchorEl);
     return (
       <React.Fragment key={label}>
-        <MenuItem 
+        <MenuItem
           aria-owns={open ? 'menu-appbar' : null}
           aria-haspopup="true"
           onClick={open ? this.handleClose : this.handleMenu}
@@ -67,19 +70,21 @@ class InnerNestedSidebarButton extends React.Component {
           {label}
         </MenuItem>
         <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition placement="right-start">
-          {({ TransitionProps, placement }) => (
+          {({TransitionProps, placement}) => (
             <Grow
               {...TransitionProps}
               id="menu-list-grow"
-              style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+              style={{transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'}}
             >
               <Paper>
                 <ClickAwayListener onClickAway={this.handleClose}>
                   <MenuList>
                     {
                       listItems.map((item) => {
-                        return(
-                          <MenuItem key={label+item.name}><img src={machineIcon} className={classes.itemListIcon}/>{item.name}</MenuItem>
+                        return (
+                          <MenuItem key={label + item.name}><img src={machineIcon}
+                                                                 className={classes.itemListIcon}/>{item.name}
+                          </MenuItem>
                         );
                       })
                     }
@@ -94,4 +99,4 @@ class InnerNestedSidebarButton extends React.Component {
   }
 }
 
-export default withStyles(styles) (InnerNestedSidebarButton);
+export default withStyles(styles)(InnerNestedSidebarButton);

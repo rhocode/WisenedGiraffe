@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {withStyles, MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
+import {createMuiTheme, MuiThemeProvider, withStyles} from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -14,9 +14,6 @@ import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponen
 import InputIcon from '@material-ui/icons/Input';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import DeleteIcon from '@material-ui/icons/Delete';
-// import * as d3 from 'd3';
-
-import jsxToString from 'jsx-to-string';
 
 import createDatabase from './newData';
 import GraphSvg from './GraphSvg';
@@ -24,8 +21,8 @@ import SidebarButton from './SidebarButton';
 import FabPopup from './FabPopup';
 import ToolbarPopup from './ToolbarPopup';
 import SidebarPopup from './SidebarPopup';
-import {addNode} from './GraphSvg/nodeActions';
 import NestedSidebarButton from './NestedSidebarButton';
+// import * as d3 from 'd3';
 
 /* global d3 */
 
@@ -144,7 +141,7 @@ class App extends Component {
 
         const refKeysToProcess = Object.keys(results[0]).filter(str => str.endsWith('_id'));
 
-        while(refKeysToProcess.length > 0) {
+        while (refKeysToProcess.length > 0) {
           const refKey = refKeysToProcess.pop();
           const tableName = refKey.slice(0, -3);
           if (!globalStructure[tableName]) {
@@ -253,18 +250,26 @@ class App extends Component {
     createDatabase().then((db) => {
       this.setState({db, loaded: true});
     }).then(() => {
-      return this.generateRecursiveStructure('recipe').then(recipes => { this.setState({recipes}, () => {
-        return this.generateRecursiveStructure('machine_node').then(machine_node => { this.setState({machine_node},  () => {
-          return this.generateRecursiveStructure('spring').then(spring => { this.setState({spring}, () => {
-            return this.generateRecursiveStructure('purity_type').then(purity_type => { this.setState({purity_type}   , () => {
-              this.setState({isReady: true})
-            });});
-            // console.log(this.state);
+      return this.generateRecursiveStructure('recipe').then(recipes => {
+        this.setState({recipes}, () => {
+          return this.generateRecursiveStructure('machine_node').then(machine_node => {
+            this.setState({machine_node}, () => {
+              return this.generateRecursiveStructure('spring').then(spring => {
+                this.setState({spring}, () => {
+                  return this.generateRecursiveStructure('purity_type').then(purity_type => {
+                    this.setState({purity_type}, () => {
+                      this.setState({isReady: true});
+                    });
+                  });
+                  // console.log(this.state);
 
-            // return this.generateRecursiveStructure('spring').then(spring => { this.setState({spring})});
-          }   );});
-        }  );});
-      }); });
+                  // return this.generateRecursiveStructure('spring').then(spring => { this.setState({spring})});
+                });
+              });
+            });
+          });
+        });
+      });
 
       // this.generateRecursiveStructure('recipe').then(recipe => {console.log(recipe); this.setState({recipe})});
       // addNode(this.graphSvg, {}, 0,0);
@@ -330,7 +335,7 @@ class App extends Component {
       recipesByMachineClass[recipe.machine_class.name] = thisList;
     });
     return Object.keys(recipesByMachineClass).map(key =>
-      <SidebarButton label={key} key={key} items={recipesByMachineClass[key]} />
+      <SidebarButton label={key} key={key} items={recipesByMachineClass[key]}/>
     );
   }
 
@@ -399,15 +404,16 @@ class App extends Component {
               src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
               title="logo"/>
             <div className={classes.grow}></div>
-            <ToolbarPopup classes={classes} Icon={OfflineBoltIcon} title='Analyze' label='Analyze' contents='' />
-            <ToolbarPopup classes={classes} Icon={SettingsInputComponentIcon} title='Optimize' label='Optimize' contents='' />
-            <ToolbarPopup classes={classes} Icon={DeleteIcon} title='Clear' label='Clear' contents='' />
-            <ToolbarPopup classes={classes} Icon={InputIcon} title='Load' label='Load' contents='' />
-            <ToolbarPopup classes={classes} Icon={ShareIcon} title='Share' label='Share' contents='' />
+            <ToolbarPopup classes={classes} Icon={OfflineBoltIcon} title='Analyze' label='Analyze' contents=''/>
+            <ToolbarPopup classes={classes} Icon={SettingsInputComponentIcon} title='Optimize' label='Optimize'
+              contents=''/>
+            <ToolbarPopup classes={classes} Icon={DeleteIcon} title='Clear' label='Clear' contents=''/>
+            <ToolbarPopup classes={classes} Icon={InputIcon} title='Load' label='Load' contents=''/>
+            <ToolbarPopup classes={classes} Icon={ShareIcon} title='Share' label='Share' contents=''/>
           </Toolbar>
         </AppBar>
 
-        
+
         <FabPopup title='Help' classes={classes} contents={
           <React.Fragment>
             <Typography variant="h5">Graph Basics</Typography>
@@ -415,7 +421,8 @@ class App extends Component {
               <li><Typography variant="body1">Use the left menu to add nodes to the graph.</Typography></li>
               <li><Typography variant="body1">Click once on a node to select it.</Typography></li>
               <li><Typography variant="body1">Click twice on a node and press DELETE to delete it.</Typography></li>
-              <li><Typography variant="body1">Hold down shift - click and drag from a node to direct it to another node.</Typography></li>
+              <li><Typography variant="body1">Hold down shift - click and drag from a node to direct it to another
+                node.</Typography></li>
             </ul>
           </React.Fragment>
         }/>
@@ -432,18 +439,18 @@ class App extends Component {
             {this.generateNodeList()}
             {this.generateSpringList()}
           </List>
-            
+
           <Divider/>
 
 
           <List>
-            <SidebarPopup classes={classes} Icon={InfoIcon} label='About' title='About' contents='' />
+            <SidebarPopup classes={classes} Icon={InfoIcon} label='About' title='About' contents=''/>
           </List>
         </Drawer>
         <main className={classes.content}>
           {this.state.loaded ? <GraphSvg ref={(graphSvg) => {
             this.graphSvg = graphSvg;
-          }} /> : <div />}
+          }}/> : <div/>}
         </main>
       </MuiThemeProvider>
     </div>;

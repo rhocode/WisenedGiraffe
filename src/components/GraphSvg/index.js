@@ -1,19 +1,8 @@
 import React, {Component} from 'react';
 import {svgKeyDown, svgKeyUp} from './keyboardEvents';
-import {svgMouseDown, svgMouseUp, dragmove, drag_start, drag_drag, drag_end,
-  node_mouse_up, node_mouse_down, node_mouse_out, node_mouse_over, node_clicked} from './mouseEvents';
-import {zoom_actions, zoomed, handleTick, updateGraph, initSimulation, deselect_path_and_nodes} from './graphActions';
+import {node_clicked, node_mouse_down, node_mouse_out, node_mouse_over, node_mouse_up} from './mouseEvents';
+import {deselect_path_and_nodes, initSimulation, updateGraph, zoom_actions} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
-import {
-  circleMouseDown,
-  circleMouseUp,
-  nodeNaming,
-  insertNodeLevel,
-  addOverclockArc,
-  wheelZoomCalculation
-} from './nodeActions';
-import constants from './constants';
-import {calculatePathTooltipPosition, insertEdgeLabel, pathMouseDown} from './edgeActions';
 
 import * as d3 from 'd3';
 
@@ -51,15 +40,15 @@ class GraphSvg extends Component {
     };
 
     this.graphData.links = [
-      {'source':  getter(0), 'target':  getter(1)},
-      {'source':  getter(1), 'target':  getter(2)},
-      {'source':  getter(2), 'target':  getter(0)},
+      {'source': getter(0), 'target': getter(1)},
+      {'source': getter(1), 'target': getter(2)},
+      {'source': getter(2), 'target': getter(0)},
     ];
 
     this.graphData.forceLinks = [
-      {'source':  0, 'target':  1},
-      {'source':  1, 'target':  2},
-      {'source':  2, 'target':  0},
+      {'source': 0, 'target': 1},
+      {'source': 1, 'target': 2},
+      {'source': 2, 'target': 0},
     ];
 
     //add encompassing group for the zoom
@@ -70,13 +59,13 @@ class GraphSvg extends Component {
     const graphObjects = this.svgGroup;
 
     const t = this;
-    inputSvg.on('click', function(d) {
+    inputSvg.on('click', function (d) {
       deselect_path_and_nodes.call(this, t);
     });
 
-    d3.select(window).on('keydown', function(d) {
+    d3.select(window).on('keydown', function (d) {
       svgKeyDown.call(this, d, t);
-    }).on('keyup', function(d) {
+    }).on('keyup', function (d) {
       svgKeyUp.call(this, d, t);
     });
 
@@ -105,10 +94,12 @@ class GraphSvg extends Component {
     this.dragLine = graphObjects.append('g').append('svg:path')
       .attr('class', 'link dragline line-object hidden')
       .attr('d', 'M0,0L0,0')
-      .attr('stroke', function(d) { return d3.color('#000000'); })
+      .attr('stroke', function (d) {
+        return d3.color('#000000');
+      })
       .style('marker-end', 'url(#dragged-end-arrow)');
 
-    const graphLinksGroup =graphObjects.append('g') //graphLinksData
+    const graphLinksGroup = graphObjects.append('g') //graphLinksData
       .attr('class', 'links-g-group');
 
     const graphNodesGroup = graphObjects
@@ -125,7 +116,7 @@ class GraphSvg extends Component {
 
   updateGraphHelper() {
     updateGraph.call(this, this.simulation, this.graphNodesGroup, this.graphLinksGroup);
-    console.log("Graph helper called");
+    console.log('Graph helper called');
   }
 
   componentDidMount() {

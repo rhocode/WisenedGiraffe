@@ -1,7 +1,7 @@
-body{
+body {
   margin: 0;
   padding: 0;
-  overflow:hidden;
+  overflow: hidden;
   height: 100vh;
   width: 100vw;
   font-family: 'Roboto Mono', monospace;
@@ -51,11 +51,11 @@ body{
   cursor: pointer
 }
 
-.graphNodeHoverClass .graphMachineNode{
+.graphNodeHoverClass .graphMachineNode {
   fill: #FF9800;
 }
 
-.selected-node .graphMachineNode  {
+.selected-node .graphMachineNode {
   fill: #E65100;
 }
 
@@ -67,7 +67,7 @@ body{
   stroke-width: 2px;
 }
 
-.line-object.hidden{
+.line-object.hidden {
   stroke-width: 0px;
 }
 
@@ -81,8 +81,7 @@ body{
 //}
 
 
-
-#toolbox{
+#toolbox {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -94,12 +93,12 @@ body{
   z-index: 5;
 }
 
-#toolbox input{
+#toolbox input {
   width: 30px;
   opacity: 0.4;
 }
 
-#toolbox input:hover{
+#toolbox input:hover {
   opacity: 1;
   cursor: pointer;
 }
@@ -112,7 +111,7 @@ body{
 //  margin: 0 0.5em;
 //}
 
-.conceptG text{
+.conceptG text {
   pointer-events: none;
 }
 
@@ -121,7 +120,7 @@ body{
 //  fill: #333;
 //}
 
-g.conceptG circle{
+g.conceptG circle {
   fill: #FFE0B2;
   stroke: #FFCC80;
   stroke-width: 1px;
@@ -140,9 +139,7 @@ g.conceptG circle{
 //}
 
 
-
-
-g.connect-node circle{
+g.connect-node circle {
   fill: #BEFFFF;
 }
 
@@ -166,7 +163,7 @@ div.full-div {
 svg#mainRender {
   height: 100%;
   width: 100%;
-  background-color:#dddddd;
+  background-color: #dddddd;
 }
 
 .lead {
@@ -188,9 +185,11 @@ tspan.node-label {
 .path-end-arrow:hover {
   fill: #4CAF50;
 }
+
 .path-end-arrow.selected {
   fill: #039BE5;
 }
+
 .path-end-arrow {
   fill: #4CAF50;
 }

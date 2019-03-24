@@ -5,8 +5,8 @@ module.exports = (env) => {
 
   const determineAddons = (addons) => {
     return [...[addons]]
-    .filter(addon => Boolean(addon))
-    .map(addon => require(`./config/addons/webpack.${addon}.js`));
+      .filter(addon => Boolean(addon))
+      .map(addon => require(`./config/addons/webpack.${addon}.js`));
   };
 
   const environment = env.env || 'dev';

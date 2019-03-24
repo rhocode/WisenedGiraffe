@@ -4,11 +4,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
-import { withStyles } from '@material-ui/core';
+import {withStyles} from '@material-ui/core';
 
 const styles = theme => ({
-  root: {
-  },
+  root: {},
   modal: {
     position: 'absolute',
     width: theme.spacing.unit * 100,
@@ -20,14 +19,14 @@ const styles = theme => ({
   },
 });
 
-class PopupDialog extends React.Component{
+class PopupDialog extends React.Component {
 
   constructor(props) {
     super(props);
   }
-  
+
   render() {
-    const { classes, title, contents, open, handleModalClose } = this.props;
+    const {classes, title, contents, open, handleModalClose} = this.props;
     return (
       <Dialog
         open={Boolean(open)}
@@ -46,4 +45,4 @@ class PopupDialog extends React.Component{
   }
 }
 
-export default withStyles(styles) (PopupDialog);
+export default withStyles(styles)(PopupDialog);

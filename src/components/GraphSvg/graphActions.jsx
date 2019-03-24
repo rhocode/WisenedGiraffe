@@ -1,15 +1,18 @@
 import constants from './constants';
 import * as d3 from 'd3';
-import {addOverclockArc, insertNodeLevel, wheelZoomCalculation, addNodeImage, node_clicked,
+import {
+  addNodeImage,
+  addOverclockArc,
+  insertNodeLevel,
+  node_clicked,
   node_mouse_down,
   node_mouse_out,
   node_mouse_over,
-  node_mouse_up, remove_select_from_nodes} from './nodeActions';
-import {
-  drag_drag,
-  drag_end,
-  drag_start
-} from './mouseEvents';
+  node_mouse_up,
+  remove_select_from_nodes,
+  wheelZoomCalculation
+} from './nodeActions';
+import {drag_drag, drag_end, drag_start} from './mouseEvents';
 import {pathMouseClick} from './edgeActions';
 
 //v2
@@ -20,90 +23,90 @@ export const initSimulation = () => {
   const height = bodyEl.clientHeight;
 
   return d3.forceSimulation()
-    .force('link', d3.forceLink().id(function(d) {
-      return d.id;
-    }).distance(50))
-    .force('charge', d3.forceManyBody().strength(20))
-    .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collision', d3.forceCollide().radius(function(d) {
-      return 120;
-    }))
-    .force('y', d3.forceY())
-    .force('x', d3.forceX());
+  .force('link', d3.forceLink().id(function (d) {
+    return d.id;
+  }).distance(50))
+  .force('charge', d3.forceManyBody().strength(20))
+  .force('center', d3.forceCenter(width / 2, height / 2))
+  .force('collision', d3.forceCollide().radius(function (d) {
+    return 120;
+  }))
+  .force('y', d3.forceY())
+  .force('x', d3.forceX());
 };
 
-export const updateGraph = function(simulation, graphNodesGroup, graphLinksGroup) {
+export const updateGraph = function (simulation, graphNodesGroup, graphLinksGroup) {
   const t = this;
   console.log(this);
   let nodes = this.graphData.nodes;
-  let links  = this.graphData.links;
-  let forceLinks  = this.graphData.forceLinks;
+  let links = this.graphData.links;
+  let forceLinks = this.graphData.forceLinks;
 
 
-  const drag =  d3.drag()
-    .clickDistance(10)
-    .on('start', (d) => {
-      console.log('DragStart');
-      drag_start.call(this, d, simulation, t);
-    }).on('drag', (d) => {
-      console.log('DragDrag');
-      drag_drag.call(this, d, t);
-    }).on('end', function(d) {
-      console.log('DragEnd');
-      d3.event.sourceEvent.stopImmediatePropagation();
-      drag_end.call(this, d, t, simulation);
-    });
+  const drag = d3.drag()
+  .clickDistance(10)
+  .on('start', (d) => {
+    console.log('DragStart');
+    drag_start.call(this, d, simulation, t);
+  }).on('drag', (d) => {
+    console.log('DragDrag');
+    drag_drag.call(this, d, t);
+  }).on('end', function (d) {
+    console.log('DragEnd');
+    d3.event.sourceEvent.stopImmediatePropagation();
+    drag_end.call(this, d, t, simulation);
+  });
 
   let graphNodesData =
     graphNodesGroup
-      .selectAll('.' + 'node-data-class')
-      .data(nodes, d => d.id);
+    .selectAll('.' + 'node-data-class')
+    .data(nodes, d => d.id);
 
   let graphNodesEnter =
     graphNodesData
-      .enter()
-      .append('g')
-      .classed('node-data-class', true)
-      .attr('id', d => d.id || null)
-      // .on('contextmenu', (d, i)  => {
-      //   t.remove(d);
-      //   d3.event.preventDefault();
-      // })
-      // .on('mouseover', d => console.log(`d.id: ${d.id}`))
-      // .on('click', d => t.handleNodeClicked(d))
-      .on('wheel.zoom', function(d) {
-        wheelZoomCalculation.call(this, d);
-      })
-      .on('click', function (d) {
-        d3.event.stopImmediatePropagation();
-        node_clicked.call(this, d, t);
-        // self.onNodeClicked.emit(d.id);
-      }).on('dblclick', function (d) {
-        d3.event.stopImmediatePropagation();
-        remove_select_from_nodes(t);
-        d.fx = null;
-        d.fy = null;
-      }).on('mouseover', function (d) {
-        node_mouse_over.call(this, d, t);
-      }).on('mouseout', function (d) {
-        node_mouse_out.call(this, d, t);
-      }).on('mousedown', function (d) {
-        node_mouse_down.call(this, d, t);
-      }).on('mouseup', function (d) {
-        node_mouse_up.call(this, d, t);
-      }).call(drag);
+    .enter()
+    .append('g')
+    .classed('node-data-class', true)
+    .attr('id', d => d.id || null)
+    // .on('contextmenu', (d, i)  => {
+    //   t.remove(d);
+    //   d3.event.preventDefault();
+    // })
+    // .on('mouseover', d => console.log(`d.id: ${d.id}`))
+    // .on('click', d => t.handleNodeClicked(d))
+    .on('wheel.zoom', function (d) {
+      wheelZoomCalculation.call(this, d);
+    })
+    .on('click', function (d) {
+      d3.event.stopImmediatePropagation();
+      node_clicked.call(this, d, t);
+      // self.onNodeClicked.emit(d.id);
+    }).on('dblclick', function (d) {
+      d3.event.stopImmediatePropagation();
+      remove_select_from_nodes(t);
+      d.fx = null;
+      d.fy = null;
+    }).on('mouseover', function (d) {
+      node_mouse_over.call(this, d, t);
+    }).on('mouseout', function (d) {
+      node_mouse_out.call(this, d, t);
+    }).on('mousedown', function (d) {
+      node_mouse_down.call(this, d, t);
+    }).on('mouseup', function (d) {
+      node_mouse_up.call(this, d, t);
+    }).call(drag);
 
   let graphNodesExit =
     graphNodesData
-      .exit()
-      .remove();
+    .exit()
+    .remove();
 
   let graphNodeCircles =
     graphNodesEnter
-      .append('circle')
-      .classed(constants.graphNodeClass, true)
-      .attr('cursor', 'pointer')
-      .attr('r', d => 50);
+    .append('circle')
+    .classed(constants.graphNodeClass, true)
+    .attr('cursor', 'pointer')
+    .attr('r', d => 50);
 
 
   addOverclockArc(graphNodesEnter, 'overclock', 59, 322);
@@ -118,76 +121,78 @@ export const updateGraph = function(simulation, graphNodesGroup, graphLinksGroup
   // links
   let graphLinksData =
     graphLinksGroup
-      .selectAll('.' + 'link-data-class')
-      .data(links, function(d) {
-        return d.source.id + '-' + d.target.id;
-      });
+    .selectAll('.' + 'link-data-class')
+    .data(links, function (d) {
+      return d.source.id + '-' + d.target.id;
+    });
   let graphLinksEnter =
     graphLinksData
-      .enter()
-      .append('g')
-      .classed('link-data-class', true);
+    .enter()
+    .append('g')
+    .classed('link-data-class', true);
 
   let graphLinksExit =
     graphLinksData
-      .exit()
-      .remove();
+    .exit()
+    .remove();
 
 
   const linkFullObject = graphLinksEnter
-    .append('g')
-    .attr('id', function(d) {
-      return 'path-parent' + d.source.id + '-' + d.target.id;
-    });
+  .append('g')
+  .attr('id', function (d) {
+    return 'path-parent' + d.source.id + '-' + d.target.id;
+  });
 
   // apply styling to each selected line
   linkFullObject.append('line')
-    .classed(constants.lineStylingPathClass, true)
-    .classed(constants.lineStylingFullClass, true)
-    .attr('display', 'none')
-    .attr('stroke', 'orange')
-    .attr('stroke-width', 10);
+  .classed(constants.lineStylingPathClass, true)
+  .classed(constants.lineStylingFullClass, true)
+  .attr('display', 'none')
+  .attr('stroke', 'orange')
+  .attr('stroke-width', 10);
   linkFullObject.append('line')
-    .classed(constants.lineStylingArrowClass, true)
-    .classed(constants.lineStylingFullClass, true)
-    .attr('display', 'none')
-    .attr('stroke', null)
-    .attr('marker-end', 'url(#highlight-path-arrow-orange)')
-    .attr('stroke-width', 3);
+  .classed(constants.lineStylingArrowClass, true)
+  .classed(constants.lineStylingFullClass, true)
+  .attr('display', 'none')
+  .attr('stroke', null)
+  .attr('marker-end', 'url(#highlight-path-arrow-orange)')
+  .attr('stroke-width', 3);
 
 
   linkFullObject
-    .append('line')
-    .classed(constants.lineObjectClass, true)
-    .attr('stroke', function(d) { return d3.color('#000000'); })
-    .attr('marker-end', 'url(#default-path-arrow)');
+  .append('line')
+  .classed(constants.lineObjectClass, true)
+  .attr('stroke', function (d) {
+    return d3.color('#000000');
+  })
+  .attr('marker-end', 'url(#default-path-arrow)');
 
   // apply styling to each selected line
   linkFullObject
-    .append('line')
-    .classed(constants.lineHitboxObjectClass, true)
-    .on('mouseover', function (d) {
-    }).on('mouseout', function (d) {
-    }).on('click', function (d) {
-      pathMouseClick.call(this, d, t);
-    });
+  .append('line')
+  .classed(constants.lineHitboxObjectClass, true)
+  .on('mouseover', function (d) {
+  }).on('mouseout', function (d) {
+  }).on('click', function (d) {
+    pathMouseClick.call(this, d, t);
+  });
 
   // merge
   graphLinksData =
     graphLinksEnter.merge(graphLinksData);
 
   simulation
-    .nodes(nodes)
-    .on('tick', () => {
-      handleTick.call(this, graphNodesData, graphLinksData, simulation);
-    })
-    .on('end', () => {
-      console.log('Simulation Ended!');
-    });
+  .nodes(nodes)
+  .on('tick', () => {
+    handleTick.call(this, graphNodesData, graphLinksData, simulation);
+  })
+  .on('end', () => {
+    console.log('Simulation Ended!');
+  });
 
   simulation
-    .force('link')
-    .links(links);
+  .force('link')
+  .links(links);
   // simulation
   // .force('link', d3.forceLink().links(forceLinks))
   // experiment: weights>
@@ -214,30 +219,41 @@ export const zoom_actions = (graphObjects) => {
   graphObjects.attr('transform', d3.event.transform);
 };
 
-export const handleTick = function(graphNodesData, graphLinksData, simulation) {
+export const handleTick = function (graphNodesData, graphLinksData, simulation) {
   //update circle positions each tick of the simulation
   const k = 100 * simulation.alpha();
   graphNodesData
-    .attr('transform', function (d) {
-      return 'translate(' + d.x + ',' + d.y + ')';
-    })
-    .attr('cx', function(d) { return d.x; })
-    .attr('cy', function(d) { return d.y; });
+  .attr('transform', function (d) {
+    return 'translate(' + d.x + ',' + d.y + ')';
+  })
+  .attr('cx', function (d) {
+    return d.x;
+  })
+  .attr('cy', function (d) {
+    return d.y;
+  });
 
   //update link positions
   graphLinksData.selectAll('line')
-    .attr('x1', function(d) { return d.source.x; })
-    .attr('y1', function(d) { return d.source.y; })
-    .attr('x2', function(d) { return d.target.x; })
-    .attr('y2', function(d) { return d.target.y; });
+  .attr('x1', function (d) {
+    return d.source.x;
+  })
+  .attr('y1', function (d) {
+    return d.source.y;
+  })
+  .attr('x2', function (d) {
+    return d.target.x;
+  })
+  .attr('y2', function (d) {
+    return d.target.y;
+  });
 
   graphLinksData.selectAll('.' + constants.lineObjectClass)
-    .each(function(d) {
-      d.source.Vy -= k;
-      d.target.Vy += k;
-    });
+  .each(function (d) {
+    d.source.Vy -= k;
+    d.target.Vy += k;
+  });
 };
-
 
 
 //v1
@@ -245,7 +261,7 @@ export const handleTick = function(graphNodesData, graphLinksData, simulation) {
 export const zoomed = function (d3) {
   this.justScaleTransGraph = true;
   d3.select('.' + constants.svgGraphClass)
-    .attr('transform', 'translate(' + d3.event.translate + ') scale(' + d3.event.scale + ')');
+  .attr('transform', 'translate(' + d3.event.translate + ') scale(' + d3.event.scale + ')');
 };
 
 //

@@ -4,7 +4,7 @@ import {deselect_path_and_nodes} from './graphActions';
 import * as d3 from 'd3';
 
 //v2
-export const addPath = function(passedThis, source, target) {
+export const addPath = function (passedThis, source, target) {
   const newEdge = {source: source, target: target};
 
 
@@ -51,7 +51,7 @@ export const pathMouseClick = function (d, t) {
   }
 };
 
-export const removePath = function(d, t) {
+export const removePath = function (d, t) {
   t.graphData.links.splice(t.graphData.links.indexOf(d), 1);
 };
 
@@ -96,7 +96,7 @@ export const pathMouseDown = function (d3, d3path, d) {
 };
 
 
-export const addEdge = function(graphRef, edgeData) {
+export const addEdge = function (graphRef, edgeData) {
   const newEdge = {source: edgeData.from, target: edgeData.to};
 
   const filterResult = graphRef.paths.filter(function (d) {
@@ -116,16 +116,16 @@ export const addEdge = function(graphRef, edgeData) {
   }
 };
 
-export const addEdgeToGraph = function(edgeData) {
+export const addEdgeToGraph = function (edgeData) {
 
 };
 
-export const removeEdge = function(graphRef, l) {
+export const removeEdge = function (graphRef, l) {
   graphRef.edges.splice(graphRef.edges.indexOf(l), 1);
   removeEdgeFromGraph.call(graphRef, l);
 };
 
-export const removeEdgeFromGraph = function(edgeData) {
+export const removeEdgeFromGraph = function (edgeData) {
 
 };
 

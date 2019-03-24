@@ -1,5 +1,5 @@
 import {removeSelectFromNode} from './nodeActions';
-import {removeSelectFromEdge, addPath} from './edgeActions';
+import {addPath, removeSelectFromEdge} from './edgeActions';
 import * as d3 from 'd3';
 import constants from './constants';
 
@@ -25,7 +25,7 @@ export const svgMouseUp = function (d3) {
   this.graphMouseDown = false;
 };
 
-export const dragmove = function(d, d3) {
+export const dragmove = function (d, d3) {
   if (this.shiftNodeDrag) {
     this.dragLine.attr('d', 'M' + d.x + ',' + d.y + 'L' +
       d3.mouse(this.graph.node())[0] + ',' + d3.mouse(this.graph.node())[1]);
@@ -78,6 +78,6 @@ export const drag_end = (d, graphSvg, simulation) => {
       d.fy = null;
     }
   }
-  d3.select('.' +constants.graphNodeGrabbedClass).classed(constants.graphNodeGrabbedClass, false);
+  d3.select('.' + constants.graphNodeGrabbedClass).classed(constants.graphNodeGrabbedClass, false);
   graphSvg.setState({shiftHeld: false, wasMoved: false, wasFixed: false});
 };
