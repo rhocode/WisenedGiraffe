@@ -1,5 +1,5 @@
 import {removeSelectFromNode} from './nodeActions';
-import {removeSelectFromEdge, addEdgeAndRestartSimulation} from './edgeActions';
+import {removeSelectFromEdge, addPath} from './edgeActions';
 import * as d3 from 'd3';
 import constants from './constants';
 
@@ -66,7 +66,7 @@ export const drag_end = (d, graphSvg, simulation) => {
     if (graphSvg.state.mouseOverNode) {
       const source = graphSvg.state.mouseDragSource;
       const target = graphSvg.state.mouseOverNode;
-      addEdgeAndRestartSimulation.call(this, graphSvg,   graphSvg.state.mouseDragSource, graphSvg.state.mouseOverNode , simulation);
+      addPath.call(this, graphSvg, graphSvg.state.mouseDragSource, graphSvg.state.mouseOverNode);
     }
     graphSvg.dragLine.classed('hidden', true).attr('d', 'M0,0L0,0');
   } else {
@@ -78,50 +78,6 @@ export const drag_end = (d, graphSvg, simulation) => {
       d.fy = null;
     }
   }
-  console.log(d.x, d.y, d.fx, d.fy);
+  d3.select('.' +constants.graphNodeGrabbedClass).classed(constants.graphNodeGrabbedClass, false);
   graphSvg.setState({shiftHeld: false, wasMoved: false, wasFixed: false});
-  d3.select(this).classed(constants.graphNodeGrabbedClass, false);
-};
-
-export const node_clicked = function(d, graphSvg) {
-  // unselect currently selected node
-  d3.select('.' + constants.selectedNodeClass)
-    .classed(constants.selectedNodeClass, false);
-
-  d3.select(this).classed(constants.graphNodeHoverClass, true)
-    .classed(constants.graphNodeGrabbedClass, false)
-    .classed(constants.selectedNodeClass, true);
-  console.log(graphSvg.state);
-
-};
-
-export const node_mouse_over = function(d, graphSvg) {
-  console.log('mouseover');
-  graphSvg.setState({mouseOverNode: d3.select(this).datum()});
-  d3.select(this).classed(constants.graphNodeHoverClass, true);
-};
-
-export const node_mouse_out = function(d, graphSvg) {
-  graphSvg.setState({mouseOverNode: null});
-  d3.select(this).classed(constants.graphNodeHoverClass, false);
-};
-
-export const node_mouse_down = function(d, graphSvg) {
-  if (d3.event.shiftKey) {
-    // d3.event.stopImmediatePropagation();
-    graphSvg.setState({shiftHeld: true, sourceId: d3.select(this).datum().id});
-  } else {
-    d3.select(this).classed(constants.graphNodeGrabbedClass, true);
-  }
-};
-
-export const node_mouse_up = function(d, graphSvg) {
-  // Only triggered if it's not a drag
-  if (graphSvg.state && graphSvg.state.shiftHeld) {
-    console.log('shift was held');
-  } else {
-    //probably can't get to this case
-    console.log('shift was NOT held');
-  }
-  graphSvg.setState({shiftHeld: false});
 };

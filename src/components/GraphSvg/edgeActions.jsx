@@ -1,25 +1,59 @@
 import constants from './constants';
 import {removeSelectFromNode} from './nodeActions';
+import {deselect_path_and_nodes} from './graphActions';
 import * as d3 from 'd3';
 
 //v2
-export const addEdgeAndRestartSimulation = function(passedThis, source, target, simulation) {
-  const newEdge = {source, target};
-  console.log(passedThis)
-  passedThis.graphData.links.push(newEdge);
+export const addPath = function(passedThis, source, target) {
+  const newEdge = {source: source, target: target};
+
+
+  //
+  const filterResult = passedThis.graphData.links.filter(function (d) {
+    if (d.source.id === newEdge.target.id && d.target.id === newEdge.source.id) {
+      removePath(d, passedThis);
+    }
+    return d.source.id === newEdge.source.id && d.target.id === newEdge.target.id;
+  });
+
+  //Todo: make nodes not connect if they dont provide the right resources
+
+  // Filter if it doesn't resolve
+  if (!filterResult.length) {
+    passedThis.graphData.links.push(newEdge);
+  }
   passedThis.updateGraphHelper();
+};
+
+export const pathMouseOver = function (d) {
 
 };
 
+export const pathMouseOut = function (d) {
 
+};
 
+export const pathMouseClick = function (d, t) {
+  d3.event.stopImmediatePropagation();
+  const parentElement = d3.select(this.parentElement);
+  // const styledLine = parentElement.select('.' + constants.lineStylingPathClass);
+  // const styledMarker = parentElement.select('.' + constants.lineStylingArrowClass);
 
+  if (t.state && t.state.selectedPath && t.state.selectedPath == d) {
+    // set the new selected one to this one
+    deselect_path_and_nodes.call(this, t);
+  } else {
+    deselect_path_and_nodes.call(this, t);
+    d3.selectAll('.' + constants.lineStylingFullClass).attr('display', 'none');
+    t.setState({selectedPath: d});
+    const both = parentElement.selectAll('.' + constants.lineStylingFullClass);
+    both.attr('display', 'inherit');
+  }
+};
 
-
-
-
-
-
+export const removePath = function(d, t) {
+  t.graphData.links.splice(t.graphData.links.indexOf(d), 1);
+};
 
 //v1
 export const replaceSelectEdge = function (d3Path, edgeData) {

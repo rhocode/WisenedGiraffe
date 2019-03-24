@@ -210,7 +210,6 @@ class App extends Component {
             });
             Object.keys(row).filter(str => !str.endsWith('_id')).forEach(rowKey => {
               const rowValue = row[rowKey];
-              console.log(rowValue);
               const replaceTable = (id, id_name, object) => {
                 if (!id_name.endsWith('_id')) {
                   if (typeof object[id_name] === 'string'  && object[id_name].startsWith('http')) {
@@ -339,7 +338,6 @@ class App extends Component {
       .map(key => {
         const returnDivList = [];
         if (!['Miner'].includes(key)) {
-          console.log(key, springByClass[key]);
           returnDivList.push(<div/>);
         }
         return returnDivList;

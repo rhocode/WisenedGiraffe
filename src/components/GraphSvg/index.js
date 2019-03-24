@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {svgKeyDown, svgKeyUp} from './keyboardEvents';
 import {svgMouseDown, svgMouseUp, dragmove, drag_start, drag_drag, drag_end,
   node_mouse_up, node_mouse_down, node_mouse_out, node_mouse_over, node_clicked} from './mouseEvents';
-import {zoom_actions, zoomed, handleTick, updateGraph, initSimulation} from './graphActions';
+import {zoom_actions, zoomed, handleTick, updateGraph, initSimulation, deselect_path_and_nodes} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
 import {
   circleMouseDown,
@@ -33,81 +33,7 @@ class GraphSvg extends Component {
 
     this.mouseDownNode = null;
     this.mouseDownLink = null;
-  }
-
-  createGraph(svg) {
-    // Generate definitions for arrow markers
-    const defs = svg.append('svg:defs');
-    const graphSvgRef = this;
-    this.graphSvgRaw = svg;
-
-    appendMarkerAttributes(defs.append('svg:marker')
-      .attr('id', 'path-end-arrow')
-      .attr('refX', '32'));
-
-    // define arrow markers for leading arrow
-    appendMarkerAttributes(defs.append('svg:marker')
-      .attr('id', 'dragged-end-arrow')
-      .attr('refX', '7'));
-
-    // Add the graph class attribute to the actual graph for easy access
-    this.graph = svg.append('g').classed(constants.svgGraphClass, true);
-
-    //The dragged line
-    this.dragLine = this.graph.append('svg:path')
-      .attr('class', 'link dragline hidden')
-      .attr('d', 'M0,0L0,0')
-      .style('marker-end', 'url(#dragged-end-arrow)');
-
-    this.paths = this.graph.append('g').selectAll('g');
-    this.circles = this.graph.append('g').selectAll('g');
-
-    //Dragging functions
-    this.drag = d3.behavior.drag().origin(function (d) {
-      return {x: d.x, y: d.y};
-    }).on('drag', function (args) {
-      graphSvgRef.justDragged = true;
-      dragmove.call(graphSvgRef, args, d3);
-    }).on('dragend', function () {
-      // ??
-    });
-
-
-    //key functions
-    d3.select(window).on('keydown', function () {
-      svgKeyDown.call(graphSvgRef, d3);
-    }).on('keyup', function () {
-      svgKeyUp.call(graphSvgRef);
-    });
-
-    // Mouse functions
-    svg.on('mousedown', function () {
-      svgMouseDown.call(graphSvgRef);
-    });
-    svg.on('mouseup', function () {
-      svgMouseUp.call(graphSvgRef, d3);
-    });
-
-    // listen for dragging
-    const dragSvg = d3.behavior.zoom().on('zoom', function () {
-      if (d3.event.sourceEvent.shiftKey) {
-        // TODO  the internal d3 state is still changing
-        return false;
-      } else {
-        zoomed.call(graphSvgRef, d3);
-      }
-      return true;
-    }).on('zoomstart', function () {
-      if (!d3.event.sourceEvent.shiftKey){
-        d3.select('body').style('cursor', 'move');
-      }
-    }).on('zoomend', function () {
-      d3.select('body').style('cursor', 'auto');
-    });
-
-    svg.call(dragSvg).on('dblclick.zoom', null);
-
-    const width = window.innerWidth, height = window.innerHeight;
+    this.state = {};
   }
 
   createGraphV2(inputSvg) {
@@ -117,29 +43,24 @@ class GraphSvg extends Component {
         {'id': id++, 'x': 0, 'y': 0, 'overclock': 98},
         {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
         {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        // {'id': id++, 'x': 0, 'y': 0, 'overclock': 50}
       ],
-      'links': [
-        {'source':  0, 'target':  1},
-        // {'source':  1, 'target':  2},
-        // {'source':  2, 'target':  3},
-        // {'source':  0, 'target':  4},
-        // {'source':  1, 'target':  5},
-        // {'source':  4, 'target':  6},
-        // {'source':  6, 'target':  7},
-        // {'source':  7, 'target':  8},
-        // {'source':  8, 'target':  9},
-        // {'source':  9, 'target':  10},
-      ]
     };
+
+    const getter = id => {
+      return this.graphData.nodes[id];
+    };
+
+    this.graphData.links = [
+      {'source':  getter(0), 'target':  getter(1)},
+      {'source':  getter(1), 'target':  getter(2)},
+      {'source':  getter(2), 'target':  getter(0)},
+    ];
+
+    this.graphData.forceLinks = [
+      {'source':  0, 'target':  1},
+      {'source':  1, 'target':  2},
+      {'source':  2, 'target':  0},
+    ];
 
     //add encompassing group for the zoom
     this.svgGroup = inputSvg.append('g')
@@ -147,6 +68,17 @@ class GraphSvg extends Component {
       .attr('id', 'svgGroup');
 
     const graphObjects = this.svgGroup;
+
+    const t = this;
+    inputSvg.on('click', function(d) {
+      deselect_path_and_nodes.call(this, t);
+    });
+
+    d3.select(window).on('keydown', function(d) {
+      svgKeyDown.call(this, d, t);
+    }).on('keyup', function(d) {
+      svgKeyUp.call(this, d, t);
+    });
 
     //add zoom capabilities
     const zoom_handler = d3.zoom()
@@ -159,6 +91,11 @@ class GraphSvg extends Component {
     appendMarkerAttributes(defs.append('svg:marker')
       .attr('id', 'default-path-arrow')
       .attr('refX', 35));
+
+    appendMarkerAttributes(defs.append('svg:marker')
+      .attr('id', 'highlight-path-arrow-orange')
+      .attr('fill', 'orange')
+      .attr('refX', 24));
 
     appendMarkerAttributes(defs.append('svg:marker')
       .attr('id', 'dragged-end-arrow')
@@ -188,6 +125,7 @@ class GraphSvg extends Component {
 
   updateGraphHelper() {
     updateGraph.call(this, this.simulation, this.graphNodesGroup, this.graphLinksGroup);
+    console.log("Graph helper called");
   }
 
   componentDidMount() {
@@ -197,6 +135,7 @@ class GraphSvg extends Component {
   }
 
   render() {
+    console.log(this.state.selectedNode, this.state.selectedPath);
     return <svg id="mainRender"/>;
   }
 }

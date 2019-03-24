@@ -15,9 +15,30 @@ body{
   display: flex;
 }
 
-p{
-  overflow: overlay;
-  position: relative;
+//p {
+//  overflow: overlay;
+//  position: relative;
+//}
+
+// paths
+
+.line-object-hitbox {
+  stroke-opacity: 0;
+  stroke: black;
+  stroke-width: 15px;
+  cursor: pointer;
+}
+
+
+//
+.overclockFont {
+  font-family: 'Crimson Text', serif;
+  font-weight: bold;
+  shape-rendering: crispEdges;
+}
+
+.overclockedArcClass {
+  shape-rendering: geometricPrecision;
 }
 
 .graphMachineNode {
@@ -27,7 +48,7 @@ p{
 }
 
 .graphNodeHoverClass {
-  cursor: grab
+  cursor: pointer
 }
 
 .graphNodeHoverClass .graphMachineNode{

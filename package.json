@@ -17,16 +17,7 @@
     "lint:fix": "eslint . --fix; exit 0",
     "start": "npm run serve:dev",
     "test": "echo \"No tests available\"; exit 0",
-    "deploy": "gh-pages-deploy"
-  },
-  "gh-pages-deploy": {
-    "staticpath": "public",
-    "cname": "www.satisfactory.tools",
-    "prep": [
-      "build:prod"
-    ],
-    "commit": "Updating Github Pages Build",
-    "noprompt": false
+    "deploy": "gh-pages -d public"
   },
   "repository": {
     "type": "git",
@@ -56,7 +47,6 @@
     "eslint-plugin-react": "^7.8.2",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^1.1.11",
-    "gh-pages-deploy": "^0.5.1",
     "html-webpack-plugin": "^3.2.0",
     "live-server": "^1.2.1",
     "node-sass": "^4.11.0",

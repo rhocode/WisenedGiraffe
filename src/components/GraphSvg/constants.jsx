@@ -1,5 +1,11 @@
 const constants = {
   lineObjectClass: 'line-object',
+  lineHitboxObjectClass: 'line-object-hitbox',
+  lineStylingPathClass: 'line-object-path-styled',
+  lineStylingArrowClass: 'line-object-arrow-styled',
+  lineStylingFullClass: 'line-object-combined-styled',
+
+
   selectedClass: 'selected',
   selectedNodeClass: 'selected-node',
   selectedLineClass: 'selected-line',

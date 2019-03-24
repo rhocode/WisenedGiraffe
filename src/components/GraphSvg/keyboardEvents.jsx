@@ -1,35 +1,35 @@
-import constants from "./constants";
-import {spliceLinksForNode} from "./nodeActions";
-import {removeNode} from "./nodeActions";
-import {removeEdge} from "./edgeActions";
+import constants from './constants';
+import {spliceLinksForNode} from './nodeActions';
+import {removeNode, delete_node} from './nodeActions';
+import {removeEdge, removePath} from './edgeActions';
 
-export const svgKeyUp = function () {
-  this.lastKeyDown = -1;
+import * as d3 from 'd3';
+
+export const svgKeyUp = function (d, t) {
+  t.setState({pressedKey: null});
 };
 
-export const svgKeyDown = function (d3) {
-  // make sure repeated key presses don't register for each keydown
-  if (this.lastKeyDown !== -1) return;
-
-  this.lastKeyDown = d3.event.keyCode;
-  const selectedNode = this.selectedNode,
-    selectedEdge = this.selectedEdge;
-
+export const svgKeyDown = function (d, t) {
+  // make sure repeated keyd presses don't register for each keydown
+  if (t.state.pressedKey) return;
+  t.setState({pressedKey: d3.event.keyCode});
+  // this.lastKeyDown = d3.event.keyCode;
+  // const selectedNode = this.selectedNode,
+  //   selectedEdge = this.selectedEdge;
+  //
   switch (d3.event.keyCode) {
   case constants.BACKSPACE_KEY:
   case constants.DELETE_KEY:
     d3.event.preventDefault();
-    if (selectedNode) {
-      //remove the node
-      spliceLinksForNode.call(this, selectedNode);
-      removeNode(this, selectedNode);
-      this.selectedNode = null;
-      this.updateGraph();
-    } else if (selectedEdge) {
-      removeEdge(this, selectedEdge);
-      this.selectedEdge = null;
-      this.updateGraph();
+    if (t.state.selectedPath) {
+      removePath.call(this, t.state.selectedPath, t);
+      t.setState({selectedPath: null});
+    } else if (t.state.selectedNode) {
+      delete_node.call(this, d, t);
+      t.setState({selectedNode: null});
+
     }
     break;
   }
+  t.updateGraphHelper();
 };
