@@ -425,6 +425,7 @@ class App extends Component {
         </Drawer>
         <main className={classes.content}>
           {this.state.loaded ? <GraphSvg ref={(graphSvg) => {
+            console.log(graphSvg);
             t.graphSvg = graphSvg;
           }}/> : <div/>}
         </main>

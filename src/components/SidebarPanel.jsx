@@ -35,7 +35,7 @@ class SidebarPanel extends React.Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, parentState } = this.props;
     return (
       <Paper className={classes.paper}>
         <Typography variant="h5">Settings</Typography>
@@ -55,7 +55,10 @@ class SidebarPanel extends React.Component {
         >
         </TextField>
 
-        <Button className={classes.button} fullWidth>
+        <Button className={classes.button} fullWidth onClick={() => {
+          console.log(parentState);
+          parentState.graphSvg.jiggle();
+        }}>
           <ShuffleIcon/>
           <div className={classes.label}>Rejiggle Graph</div>
         </Button>

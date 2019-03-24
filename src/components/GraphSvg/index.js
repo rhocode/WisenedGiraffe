@@ -34,6 +34,15 @@ class GraphSvg extends Component {
     add_node(nodeData, this);
   }
 
+  jiggle() {
+    this.graphData.nodes.forEach(node => {
+      node.x = 0;
+      node.y = 0;
+    });
+
+    this.updateGraphHelper();
+  }
+
   createGraph(inputSvg) {
     this.id = 0;
     this.graphData = {
