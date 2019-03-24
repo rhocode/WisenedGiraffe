@@ -56,7 +56,7 @@ class NestedSidebarButton extends React.Component {
   };
 
   render() {
-    const {classes, listItems, label} = this.props;
+    const {classes, listItems, label, appObject} = this.props;
     const {anchorEl} = this.state;
     const open = Boolean(anchorEl);
 
@@ -86,7 +86,7 @@ class NestedSidebarButton extends React.Component {
                         const returnDivList = [];
                         if (['Miner'].includes(key)) {
                           listItems[key].forEach(resource => {
-                            returnDivList.push(<InnerNestedSidebarButton resource={resource}/>);
+                            returnDivList.push(<InnerNestedSidebarButton appObject={appObject} resource={resource}/>);
                           });
                         }
                         return returnDivList;

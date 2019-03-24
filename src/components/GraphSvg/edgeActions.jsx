@@ -7,19 +7,32 @@ import * as d3 from 'd3';
 export const addPath = function (passedThis, source, target) {
   const newEdge = {source: source, target: target};
 
+  // Check if there are items you can shove in
+  const sharedItems =  target.allowedIn.filter(value => source.allowedOut.includes(value));
 
-  //
+  // check if there are open slots
+  const outgoing = source.id;
+  const incoming = target.id;
+
+  const usedOut = (passedThis.nodeOut[outgoing] ? passedThis.nodeOut[outgoing].length : 0);
+  const usedIn = (passedThis.nodeIn[incoming] ? passedThis.nodeIn[incoming].length : 0);
+
+  // return early if we can't do anything with this node.
+  if ( usedOut >= source.instance.output_slots || usedIn >= target.instance.input_slots ||
+    sharedItems.length <= 0)
+  {
+    passedThis.updateGraphHelper();
+    return;
+  }
+
   const filterResult = passedThis.graphData.links.filter(function (d) {
     if (d.source.id === newEdge.target.id && d.target.id === newEdge.source.id) {
       removePath(d, passedThis);
     }
-    return d.source.id === newEdge.source.id && d.target.id === newEdge.target.id;
+    return (d.source.id === newEdge.source.id && d.target.id === newEdge.target.id) || newEdge.source.id === newEdge.target.id;
   });
 
-  //Todo: make nodes not connect if they dont provide the right resources
-
-  // Filter if it doesn't resolve
-  if (!filterResult.length) {
+  if (filterResult.length === 0) {
     passedThis.graphData.links.push(newEdge);
   }
   passedThis.updateGraphHelper();
@@ -52,6 +65,15 @@ export const pathMouseClick = function (d, t) {
 };
 
 export const removePath = function (d, t) {
+  if (t.graphData.links.indexOf(d) === -1) {
+    throw new Error('d not found in graph links: ' + JSON.stringify(d));
+  }
+  const outgoing = d.source.id;
+  const incoming = d.target.id;
+
+  t.nodeOut[outgoing].splice(t.nodeOut[outgoing].indexOf(d.target), 1);
+  t.nodeIn[incoming].splice(t.nodeIn[incoming].indexOf(d.source), 1);
+  console.log(t.nodeOut, t.nodeIn)
   t.graphData.links.splice(t.graphData.links.indexOf(d), 1);
 };
 

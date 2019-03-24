@@ -50,7 +50,7 @@ class InnerNestedSidebarButton extends React.Component {
   };
 
   render() {
-    const {classes, resource} = this.props;
+    const {classes, resource, appObject} = this.props;
     const {anchorEl} = this.state;
     const icon = resource.item.icon;
     const label = resource.item.name;
@@ -82,8 +82,27 @@ class InnerNestedSidebarButton extends React.Component {
                     {
                       listItems.map((item) => {
                         return (
-                          <MenuItem key={label + item.name}><img src={machineIcon}
-                                                                 className={classes.itemListIcon}/>{item.name}
+                          <MenuItem onClick = {
+                            () => {
+                              const machine_nodes = appObject.state.machine_node.machine_node;
+                              machine_nodes.sort((node1, node2) => node1.rank - node2.rank);
+                              const upgrades = machine_nodes.filter(node => node.machine_class.id === resource.machine_class.id );
+                              const instance = upgrades[0];
+
+                              appObject.graphSvg.addNode(
+                                {
+                                  data: {machine: resource, node: item},
+                                  machine: resource.machine_class,
+                                  allowedIn: [],
+                                  allowedOut: [resource.item.id],
+                                  instance: instance,
+                                  upgradeTypes: upgrades
+                                }
+                              );
+                              this.handleClose();
+                            }
+                          } key={label + item.name}><img src={machineIcon}
+                              className={classes.itemListIcon}/>{item.name}
                           </MenuItem>
                         );
                       })

@@ -17,18 +17,17 @@ export const svgKeyDown = function (d, t) {
   //   selectedEdge = this.selectedEdge;
   //
   switch (d3.event.keyCode) {
-    case constants.BACKSPACE_KEY:
-    case constants.DELETE_KEY:
-      d3.event.preventDefault();
-      if (t.state.selectedPath) {
-        removePath.call(this, t.state.selectedPath, t);
-        t.setState({selectedPath: null});
-      } else if (t.state.selectedNode) {
-        delete_node.call(this, d, t);
-        t.setState({selectedNode: null});
-
-      }
-      break;
+  case constants.BACKSPACE_KEY:
+  case constants.DELETE_KEY:
+    d3.event.preventDefault();
+    if (t.state.selectedPath) {
+      removePath.call(this, t.state.selectedPath, t);
+      t.setState({selectedPath: null});
+    } else if (t.state.selectedNode) {
+      delete_node.call(this, d, t);
+      t.setState({selectedNode: null});
+    }
+    break;
   }
   t.updateGraphHelper();
 };

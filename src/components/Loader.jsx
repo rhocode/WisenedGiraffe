@@ -33,7 +33,6 @@ class Loader extends React.Component {
 
   render() {
     const {ready, parentState, classes} = this.props;
-    console.log(this.props);
     return (
       <React.Fragment>
         <div className="loader-spinner"/>

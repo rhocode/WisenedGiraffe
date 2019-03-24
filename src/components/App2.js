@@ -307,7 +307,7 @@ export default class App2 extends Component {
         d3.event.stopPropagation();
       }).on('keydown', function (d) {
         d3.event.stopPropagation();
-        if (d3.event.keyCode == consts.ENTER_KEY && !d3.event.shiftKey) {
+        if (d3.event.keyCode === consts.ENTER_KEY && !d3.event.shiftKey) {
           this.blur();
         }
       }).on('blur', function (d) {

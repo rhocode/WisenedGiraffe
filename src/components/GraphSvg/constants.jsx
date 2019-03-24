@@ -4,7 +4,8 @@ const constants = {
   lineStylingPathClass: 'line-object-path-styled',
   lineStylingArrowClass: 'line-object-arrow-styled',
   lineStylingFullClass: 'line-object-combined-styled',
-
+  overclockedTextClass: 'overclockedTextClass',
+  nodeVersionTextClass: 'nodeVersionTextClass',
 
   selectedClass: 'selected',
   selectedNodeClass: 'selected-node',

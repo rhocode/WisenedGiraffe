@@ -3,52 +3,56 @@ import {svgKeyDown, svgKeyUp} from './keyboardEvents';
 import {node_clicked, node_mouse_down, node_mouse_out, node_mouse_over, node_mouse_up} from './mouseEvents';
 import {deselect_path_and_nodes, initSimulation, updateGraph, zoom_actions} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
+import {withStyles} from '@material-ui/core';
 
 import * as d3 from 'd3';
+import {add_node} from './nodeActions';
 
 // const d3 = window.d3;
+
+const styles = theme => ({
+  tooltip: {
+    position: 'absolute',
+    textAlign: 'center',
+    padding: 2,
+    font: '12px sans-serif',
+    background: 'lightsteelblue',
+    border: 0,
+    borderRadius: 8,
+    pointerEvents: 'none',
+    zIndex: 1202
+  }
+});
 
 class GraphSvg extends Component {
   constructor(props) {
     super(props);
-    this.nodes = [];
-    this.edges = [];
-    this.justDragged = false;
-    this.shiftNodeDrag = false;
-    this.idct = 0;
-
-    this.circles = null;
-    this.paths = null;
-
-    this.mouseDownNode = null;
-    this.mouseDownLink = null;
     this.state = {};
   }
 
-  createGraphV2(inputSvg) {
-    let id = 0;
+  addNode(nodeData) {
+    add_node(nodeData, this);
+  }
+
+  createGraph(inputSvg) {
+    this.id = 0;
     this.graphData = {
       'nodes': [
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 98},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
-        {'id': id++, 'x': 0, 'y': 0, 'overclock': 50},
+        {'data':{'recipe':{'name':'Iron Ingot','inputs':[{'quantity':1,'item':{'name':'Iron Ore','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png','hidden':false,'id':1}}],'time':2,'power':4,'quantity':1,'hidden':false,'id':0,'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3},'item':{'name':'Iron Ingot','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png','hidden':false,'id':4}}},'machine':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3},'allowedIn':[1],'allowedOut':[4],'instance':{'name':'Smelter Mk.1','speed':100,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','input_slots':1,'output_slots':1,'hidden':false,'id':4,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'hidden':false,'id':1},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}},'upgradeTypes':[{'name':'Smelter Mk.1','speed':100,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','input_slots':1,'output_slots':1,'hidden':false,'id':4,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'hidden':false,'id':1},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}},{'name':'Smelter Mk.2','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','speed':100,'hidden':true,'input_slots':1,'output_slots':1,'id':5,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.2','rank':1,'hidden':false,'id':2},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}}],'id':2,'x':0,'y':0,'overclock':100},
+        {'data':{'recipe':{'name':'Iron Plate','inputs':[{'quantity':12,'item':{'name':'Iron Ingot','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png','hidden':false,'id':4}}],'time':4,'power':4,'quantity':1,'hidden':false,'id':2,'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0},'item':{'name':'Iron Plate','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Plate.png','hidden':false,'id':6}}},'machine':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0},'allowedIn':[4],'allowedOut':[6],'instance':{'name':'Constructor Mk.1','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'input_slots':1,'output_slots':1,'hidden':false,'id':6,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'hidden':false,'id':1},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}},'upgradeTypes':[{'name':'Constructor Mk.1','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'input_slots':1,'output_slots':1,'hidden':false,'id':6,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'hidden':false,'id':1},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}},{'name':'Constructor Mk.2','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'hidden':true,'input_slots':1,'output_slots':1,'id':7,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.2','rank':1,'hidden':false,'id':2},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}}],'id':3,'x':0,'y':0,'overclock':100}
       ],
     };
+
+    this.graphData.nodes.forEach(elem => {
+      elem.id = (this.id++);
+    });
 
     const getter = id => {
       return this.graphData.nodes[id];
     };
 
     this.graphData.links = [
-      {'source': getter(0), 'target': getter(1)},
-      {'source': getter(1), 'target': getter(2)},
-      {'source': getter(2), 'target': getter(0)},
-    ];
-
-    this.graphData.forceLinks = [
-      {'source': 0, 'target': 1},
-      {'source': 1, 'target': 2},
-      {'source': 2, 'target': 0},
+      // {'source': getter(0), 'target': getter(1)},
     ];
 
     //add encompassing group for the zoom
@@ -90,6 +94,43 @@ class GraphSvg extends Component {
       .attr('id', 'dragged-end-arrow')
       .attr('refX', 7));
 
+    const filter = defs.append('filter')
+      .attr('id', 'drop-shadow')
+      .attr('height', '130%')
+      .attr('width', '130%')
+      .attr('filterUnits', 'userSpaceOnUse');
+      // .attr('x', '-100%')
+      // .attr('y', '100%');
+
+    filter.append('feGaussianBlur')
+      .attr('in', 'SourceAlpha')
+      .attr('stdDeviation', 5)
+      .attr('result', 'blur');
+
+    filter.append('feOffset')
+      .attr('in', 'blur')
+      .attr('result', 'offsetBlur');
+
+    filter.append('feFlood')
+      .attr('in', 'offsetBlur')
+      .attr('flood-color','white')
+      .attr('flood-opacity', '1')
+      .attr('result', 'offsetColor');
+
+    filter.append('feComposite')
+      .attr('in', 'offsetColor')
+      .attr('in2', 'offsetBlur')
+      .attr('operator', 'in')
+      .attr('result', 'offsetBlur');
+
+    const feMerge = filter.append('feMerge');
+
+    feMerge.append('feMergeNode')
+      .attr('in', 'offsetBlur');
+    feMerge.append('feMergeNode')
+      .attr('in', 'SourceGraphic');
+
+
     //The dragged line
     this.dragLine = graphObjects.append('g').append('svg:path')
       .attr('class', 'link dragline line-object hidden')
@@ -116,19 +157,18 @@ class GraphSvg extends Component {
 
   updateGraphHelper() {
     updateGraph.call(this, this.simulation, this.graphNodesGroup, this.graphLinksGroup);
-    console.log('Graph helper called');
   }
 
   componentDidMount() {
     const svg = d3.select('#mainRender');
-    // this.createGraph(svg);
-    this.createGraphV2(svg);
+    this.createGraph(svg);
   }
 
   render() {
-    console.log(this.state.selectedNode, this.state.selectedPath);
     return <svg id="mainRender"/>;
   }
 }
 
 export default GraphSvg;
+
+// export default withStyles(styles)(GraphSvg);
