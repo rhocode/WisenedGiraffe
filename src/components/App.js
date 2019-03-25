@@ -191,7 +191,7 @@ class App extends Component {
               const tableName = rowKey.slice(0, -3);
               const associatedData = globalStructure[tableName];
               delete row[rowKey];
-
+              console.log(tableName)
               const possibleData = associatedData.filter(elem => elem.id === refId);
               if (possibleData.length === 1) {
                 row[tableName] = possibleData[0];
@@ -255,16 +255,16 @@ class App extends Component {
     createDatabase().then((db) => {
       this.setState({db, loaded: true});
     }).then(() => {
-      return this.generateRecursiveStructure('recipe').then(recipes => {
-        this.setState({recipes}, () => {
-          return this.generateRecursiveStructure('machine_node').then(machine_node => {
-            this.setState({machine_node}, () => {
-              return this.generateRecursiveStructure('spring').then(spring => {
-                this.setState({spring}, () => {
-                  return this.generateRecursiveStructure('purity_type').then(purity_type => {
-                    this.setState({purity_type}, () => {
-                      return this.generateRecursiveStructure('player_unlock').then(player_unlock => {
-                        this.setState({player_unlock, isLoaded: true});
+      return this.generateRecursiveStructure('player_unlock').then(player_unlock => {
+        this.setState({player_unlock}, () => {
+          return this.generateRecursiveStructure('recipe').then(recipe => {
+            this.setState({recipe}, () => {
+              return this.generateRecursiveStructure('machine_node').then(machine_node => {
+                this.setState({machine_node}, () => {
+                  return this.generateRecursiveStructure('spring').then(spring => {
+                    this.setState({spring}, () => {
+                      return this.generateRecursiveStructure('purity_type').then(purity_type => {
+                        this.setState({purity_type, isLoaded: true});
                       });
                     });
                   });
@@ -308,6 +308,7 @@ class App extends Component {
       const item = this.state.recipes.recipe.filter(elem => elem.player_unlock && (elem.player_unlock.id === player_unlock.id) )[0];
       dataList.push({player_unlock, item});
     });
+    console.log(dataList)
     return (
       <div>hello</div>
     );
@@ -431,7 +432,7 @@ class App extends Component {
           <List>
             <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers' contents={
               <React.Fragment>
-                <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a href="https://github.com/thinkaliker">Adam</a>.</Typography>
+                <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a href="https://github.com/thinkaliker">Adam</a> (<a href="https://twitter.com/thinkaliker">@thinkaliker</a>).</Typography>
                 <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain Studios AB, or THQ Nordic AB.</Typography>
                 <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from Coffee Stain Studios AB's Satisfactory.</Typography>
               </React.Fragment>

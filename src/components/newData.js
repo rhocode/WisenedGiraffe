@@ -255,6 +255,38 @@ const data = [
         name: 'Rotor',
         icon: baseUrl + 'Rotor.png'
       },
+      {
+        name: 'Caterium Ore',
+        icon: 'TODO'
+      },
+      {
+        name: 'Caterium Ingot',
+        icon: 'TODO'
+      },
+      {
+        name: 'Quickwire',
+        icon: 'TODO'
+      },
+      {
+        name: 'Steel Ingot',
+        icon: 'TODO'
+      },
+      {
+        name: 'Steel Beam',
+        icon: 'TODO'
+      },
+      {
+        name: 'Steel Pipe',
+        icon: 'TODO'
+      },
+      {
+        name: 'Encased Industrial Beam',
+        icon: 'TODO'
+      },
+      {
+        name: 'Stator',
+        icon: 'TODO'
+      },
     ]
   },
   {
@@ -487,7 +519,24 @@ const data = [
   {
     key: 'player_unlock',
     value: [
-      {name: 'Hard Drive: Alternative Reinforced Iron Plate'}
+      {name: 'Reinforced Iron Plate (Alt.)'},
+      {name: 'Stitched Iron Plate'},
+      //{name: 'Caterium Wire'}, 9 output, 1 caterium ingot @ 67.5ppm
+      {name: 'Encased Industrial Beam (Alt.)'},
+      {name: 'Heavy Modular Frame (Alt.)'},
+      {name: 'Iron Ingot (Alt.)'},
+      {name: 'Iron Wire'},
+      {name: 'Modular Frame (Alt.)'},
+      {name: 'Rotor (Alt.)'},
+      {name: 'Stator (Alt.)'},
+      {name: 'Steel Ingot'},
+      {name: 'Screw (Alt.)'},
+      // {name: 'Rubber Cable'},
+      // {name: 'Circuit Board'},
+      // {name: 'Caterium Computer'},
+      // {name: 'Quickwire'},
+      // {name: 'Caterium Circuit Board'},
+      // {name: 'Crystal Computer'}
     ]
   },
   {
@@ -635,7 +684,42 @@ const data = [
         time: 24,
         power: 15,
         quantity: 3,
-        hidden: true
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Reinforced Iron Plate (Alt.)')
+      },
+      {
+        name: 'Stitched Iron Plate',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Plate'),
+          quantity: 6
+        }, {
+          item_id: getTableEntryIdByName('item', 'Wire'),
+          quantity: 30
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+        time: 24,
+        power: 15,
+        quantity: 3,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Stitched Iron Plate')
+      },
+      {
+        name: 'Encased Industrial Beam',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Steel Pipe'),
+          quantity: 18
+        }, {
+          item_id: getTableEntryIdByName('item', 'Concrete'),
+          quantity: 10
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Encased Industrial Beam'),
+        time: 30,
+        power: 15,
+        quantity: 3,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Encased Industrial Beam (Alt.)')
       },
       {
         name: 'Rotor',

@@ -4,6 +4,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import ShuffleIcon from '@material-ui/icons/Shuffle';
+import ReplayIcon from '@material-ui/icons/Replay';
 import { withStyles } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
@@ -133,13 +134,13 @@ class SidebarPanel extends React.Component {
         <Button className={classes.button} fullWidth onClick={() => {
           parentState.graphSvg.resetCamera();
         }}>
-          <ShuffleIcon/>
+          <ReplayIcon/>
           <div className={classes.label}>Reset Camera</div>
         </Button>
         <Button className={classes.button} fullWidth onClick={() => {
           parentState.graphSvg.unfixNodes();
         }}>
-          <ShuffleIcon/>
+          <ReplayIcon/>
           <div className={classes.label}>Unfix Nodes</div>
         </Button>
       </Paper>
