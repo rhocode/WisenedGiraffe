@@ -53,50 +53,76 @@ class SimpleSidebarButton extends React.Component {
   };
 
   render() {
-    const { classes, listItems, label } = this.props;
+    const { classes, listItems, label, appObject } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
 
     return (
-      <React.Fragment key={label}>
-        <Paper className={classes.paper}>
-          <Button
-            aria-owns={open ? 'menu-appbar' : null}
-            aria-haspopup="true"
-            onClick={open ? this.handleClose : this.handleMenu}
-            className={classes.button}
-          >
-            <AddBoxIcon/>
-            <div className={classes.label}>Logistics</div>
-          </Button>
-          <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition placement="right-start">
-            {({ TransitionProps, placement }) => (
-              <Grow
-                {...TransitionProps}
-                id="menu-list-grow"
-                style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
-              >
-                <Paper>
-                  <ClickAwayListener onClickAway={this.handleClose}>
-                    <MenuList>
-                      {Object.keys(listItems).map(key => {
-                        const returnDivList = [];
-                        if (!['Miner'].includes(key)) {
-                          listItems[key].forEach(resource => {
-                            returnDivList.push(<MenuItem key={resource.machine_class.name+resource.machine_class.id}>
-                              <img src={resource.machine_class.icon} className={classes.itemListIcon} />{resource.machine_class.name}</MenuItem>);
-                          });
-                        }
-                        return returnDivList;
-                      })}
-                    </MenuList>
-                  </ClickAwayListener>
-                </Paper>
-              </Grow>
-            )}
-          </Popper>
-        </Paper>
-      </React.Fragment>
+      <Paper className={classes.paper}>
+        <Button
+          aria-owns={open ? 'menu-appbar' : null}
+          aria-haspopup="true"
+          onClick={open ? this.handleClose : this.handleMenu}
+          className={classes.button}
+        >
+          <AddBoxIcon/>
+          <div className={classes.label}>Logistics</div>
+        </Button>
+        <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition placement="right-start">
+          {({ TransitionProps, placement }) => (
+            <Grow
+              {...TransitionProps}
+              id="menu-list-grow"
+              style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+            >
+              <Paper>
+                <ClickAwayListener onClickAway={this.handleClose}>
+                  <MenuList>
+                    {Object.keys(listItems).map(key => {
+                      const returnDivList = [];
+                      if (!['Miner', 'Logistic'].includes(key)) {
+                        listItems[key].forEach(resource => {
+                          returnDivList.push(<MenuItem onClick={ () => {
+                            const machine_nodes = appObject.state.machine_node.machine_node;
+                            machine_nodes.sort((node1, node2) => node1.rank - node2.rank);
+                            const upgrades = machine_nodes.filter(node => node.machine_class.id === resource.machine_class.id );
+                            const instance = upgrades[0];
+                            appObject.graphSvg.addNode(
+                              {
+                                data: {recipe: resource},
+                                machine: resource.machine_class,
+                                allowedIn: [],
+                                allowedOut: [],
+                                instance: instance,
+                                upgradeTypes: upgrades
+                              }
+                            );
+                            this.handleClose();
+                          }}
+                          key={resource.machine_class.name+resource.machine_class.id}>
+                            <img
+                              src={resource.machine_class.icon} className={classes.itemListIcon} />{resource.machine_class.name}</MenuItem>);
+                        });
+                      }
+                      // if (['Logistic'].includes(key)) {
+                      //   listItems[key].forEach(resource => {
+                      //     console.log(resource);
+                      //     returnDivList.push(<MenuItem onClick={ () => {
+                      //       console.log('CLicked');
+                      //     }}
+                      //     key={resource.name}>
+                      //       <img src={resource.icon} className={classes.itemListIcon} />{resource.name}</MenuItem>);
+                      //   });
+                      // }
+                      return returnDivList;
+                    })}
+                  </MenuList>
+                </ClickAwayListener>
+              </Paper>
+            </Grow>
+          )}
+        </Popper>
+      </Paper>
     );
   }
 }

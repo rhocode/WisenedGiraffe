@@ -333,11 +333,21 @@ const data = [
     key: 'machine_node',
     value: [
       {
+        name: 'Container',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Container'),
+        speed: 999999,
+        icon: baseUrl + 'Storage_Container_MK1.png',
+        input_slots: 1,
+        output_slots: 1
+      },
+      {
         name: 'Splitter',
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
-        speed: 100,
+        speed: 999999,
         icon: baseUrl + 'Splitter.png',
         input_slots: 1,
         output_slots: 3
@@ -347,7 +357,7 @@ const data = [
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
-        speed: 100,
+        speed: 999999,
         icon: baseUrl + 'Merger.png',
         input_slots: 3,
         output_slots: 1

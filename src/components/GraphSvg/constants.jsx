@@ -8,6 +8,7 @@ const constants = {
   nodeVersionTextClass: 'nodeVersionTextClass',
   nodeRequirementsIconClass: 'nodeRequirementsIconClass',
   nodeRequirementsSubIconClass: 'nodeRequirementsSubIconClass',
+  nodeProducesClass: 'nodeProducesClass',
 
   selectedClass: 'selected',
   selectedNodeClass: 'selected-node',

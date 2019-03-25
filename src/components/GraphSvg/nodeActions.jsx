@@ -265,7 +265,44 @@ export const forceUpdateComponentLabel = function() {
 };
 
 export const insertComponents = function(parentElement) {
-  const el = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);
+  const el1 = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);
+
+  el1.each(function(d){
+    if (d.machine && d.machine.name === 'Container') {
+      if (d.machine.containedItem) {
+        d3.select(this).append('svg:image')
+          .classed(constants.nodeProducesClass, true)
+          .attr('xlink:href', function (d) {
+            return d.machine.containedItem.icon;
+          })
+          .attr('x', function (d) {
+            return -55;
+          })
+          .attr('y', function (d) {
+            return 18;
+          })
+          .attr('height', 40)
+          .attr('width', 40);
+      }
+    } else {
+      d3.select(this).append('svg:image')
+        .classed(constants.nodeProducesClass, true)
+        .attr('xlink:href', function (d) {
+          return d.data.recipe.item.icon;
+        })
+        .attr('x', function (d) {
+          return -55;
+        })
+        .attr('y', function (d) {
+          return 18;
+        })
+        .attr('height', 40)
+        .attr('width', 40);
+    }
+  });
+
+
+
 
   forceUpdateComponentLabel.call(this);
 };

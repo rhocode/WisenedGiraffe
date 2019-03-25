@@ -296,15 +296,23 @@ class App extends Component {
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
+
+    // Manually handle splitters and mergers
+    springByClass['Logistic'] = this.state.machine_node.machine_node.filter(elem => elem.machine_class.name === 'Logistic');
+    console.log(springByClass);
+
+
     return (
-      <SimpleSidebarButton label="Container" listItems={springByClass} />
+      <React.Fragment>
+        <SimpleSidebarButton label="Logistics" appObject={this} listItems={springByClass} />
+      </React.Fragment>
+
     );
   }
 
   generateUnlocksList() {
     const dataList = [];
     this.state.player_unlock && this.state.player_unlock.player_unlock.forEach(player_unlock => {
-      console.log(this.state.recipes.recipe)
       const item = this.state.recipes.recipe.filter(elem => elem.player_unlock && (elem.player_unlock.id === player_unlock.id) )[0];
       dataList.push({player_unlock, item});
     });
