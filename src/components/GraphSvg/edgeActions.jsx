@@ -73,7 +73,6 @@ export const removePath = function (d, t) {
 
   t.nodeOut[outgoing].splice(t.nodeOut[outgoing].indexOf(d.target), 1);
   t.nodeIn[incoming].splice(t.nodeIn[incoming].indexOf(d.source), 1);
-  console.log(t.nodeOut, t.nodeIn)
   t.graphData.links.splice(t.graphData.links.indexOf(d), 1);
 };
 

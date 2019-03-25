@@ -438,7 +438,7 @@ class App extends Component {
           </List>
         </Drawer>
         <main className={classes.content}>
-          {this.state.loaded ? <GraphSvg ref={(graphSvg) => {
+          {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
             console.log(graphSvg);
             t.graphSvg = graphSvg;
           }}/> : <div/>}

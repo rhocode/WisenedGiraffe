@@ -7,6 +7,7 @@ const constants = {
   overclockedTextClass: 'overclockedTextClass',
   nodeVersionTextClass: 'nodeVersionTextClass',
   nodeRequirementsIconClass: 'nodeRequirementsIconClass',
+  nodeRequirementsSubIconClass: 'nodeRequirementsSubIconClass',
 
   selectedClass: 'selected',
   selectedNodeClass: 'selected-node',

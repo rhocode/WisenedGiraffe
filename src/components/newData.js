@@ -713,7 +713,7 @@ const createDatabase = () => {
 
         await Promise.all(valuePromiseRows);
         await db.insertOrReplace().into(table).values(rows).exec();
-        console.log('Loaded ' + rows.length + ' into ' + key);
+        console.info('Loaded ' + rows.length + ' into ' + key);
       }
       await Promise.all(promiseList);
       return db;
