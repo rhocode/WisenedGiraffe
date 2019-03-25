@@ -181,9 +181,8 @@ export const updateComponents = function(elementsToUpdate) {
   elementsToUpdate.each(function(d) {
     const allowedInRemaining = d.allowedIn.slice();
     const provided = t.nodeIn[d.id] || [];
-
-
-    const actualIn = provided.map(node => node.allowedOut).flatten(1);
+    console.error(provided);
+    const actualIn = provided.map(node => node.allowedOut).flat(1);
     new Set(actualIn).forEach(id => { allowedInRemaining.splice(allowedInRemaining.indexOf(id), 1); });
     const element = d3.select(this);
 
@@ -222,7 +221,7 @@ export const updateComponents = function(elementsToUpdate) {
     }
     const allowedOutRemaining = d.allowedOut.slice();
     const provides = t.nodeOut[d.id] || [];
-    const actualOut = provides.map(node => node.allowedIn).flatten(1);
+    const actualOut = provides.map(node => node.allowedIn).flat(1);
     new Set(actualOut).forEach(id => { allowedOutRemaining.splice(allowedOutRemaining.indexOf(id), 1); });
 
     if (allowedOutRemaining.length > 0) {

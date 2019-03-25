@@ -76,7 +76,7 @@ const config = {
   plugins: [
     new webpack.ProgressPlugin(),
     new ExtractTextPlugin('[name].css'),
-    new CleanPlugin({ cleanOnceBeforeBuildPatterns: ['../public'], dangerouslyAllowCleanPatternsOutsideProject: true }),
+    new CleanPlugin({ dry: false, cleanOnceBeforeBuildPatterns: ['../public'], dangerouslyAllowCleanPatternsOutsideProject: true }),
     new HtmlPlugin({
       filename: 'index.html',
       template: commonPaths.template,

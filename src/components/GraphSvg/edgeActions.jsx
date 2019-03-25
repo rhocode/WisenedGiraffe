@@ -57,9 +57,10 @@ export const recalculateStorageContainers = function() {
       return -1;
     }
   });
-
+  const reverseTraversal = [];
   while (myTinyQueue.size() > 0) {
     const elem = myTinyQueue.pop();
+    reverseTraversal.push(elem)
     const outgoing = nodeOutShallow[elem.id.toString()];
     if (outgoing) {
       const source = elem.id;
@@ -71,6 +72,13 @@ export const recalculateStorageContainers = function() {
     }
     console.log(elem.machine.name);
   }
+
+  // Now reverse the traversal
+
+  // reset the edgegraph
+  reverseTraversal.forEach(elem => {
+    console.log(elem);
+  })
 };
 
 export const addPath = function (passedThis, source, target) {
