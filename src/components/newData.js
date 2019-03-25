@@ -106,6 +106,8 @@ schemaBuilder.createTable('player_unlock')
   .addColumn('id', lf.Type.INTEGER)
   .addPrimaryKey(['id'])
   .addColumn('name', lf.Type.STRING)
+  .addColumn('chip_name', lf.Type.STRING)
+  .addNullable(['chip_name'])
   .addColumn('hidden', lf.Type.BOOLEAN);
 
 const getTableEntryIdByName = (table, name) => {
