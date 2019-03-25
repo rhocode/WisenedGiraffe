@@ -5,6 +5,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import ShuffleIcon from '@material-ui/icons/Shuffle';
 import ReplayIcon from '@material-ui/icons/Replay';
+import UndoIcon from '@material-ui/icons/Undo';
 import { withStyles } from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
@@ -14,6 +15,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import Chip from '@material-ui/core/Chip';
+import Tooltip from '@material-ui/core/Tooltip';
 
 const styles = theme => ({
   root : {
@@ -42,6 +44,20 @@ const styles = theme => ({
   chip: {
     margin: theme.spacing.unit / 4,
   },
+  tooltip: {},
+  tooltipIcon: {
+    height: 40,
+    display: 'inline-block',
+    paddingLeft: 10
+  },
+  tooltipIconFirst: {
+    height: 40,
+    display: 'inline-block',
+  },
+  tooltipText: {
+    fontSize: 18,
+    display: 'inline-block',
+  },
 });
 
 const ITEM_HEIGHT = 48;
@@ -54,40 +70,22 @@ const MenuProps = {
   },
 };
 
-const drives = [
-  'Caterium Wire',
-  'Encased Industrial Beam',
-  'Heavy Modular Frame',
-  'Iron Ingot',
-  'Iron Wire',
-  'Modular Frame',
-  'Rotor',
-  'Reinforced Iron Plate',
-  'Stator',
-  'Steel Ingot',
-  'Screw',
-  'Stitched Iron Plate',
-  'Rubber Cable',
-  'Circuit Board',
-  'Caterium Computer',
-  'Quickwire',
-  'Caterium Circuit Board',
-  'Crystal Computer'
-];
-
 class SidebarPanel extends React.Component {
   
   constructor(props) {
     super(props);
-    this.state = { name : []};
+    this.state = { playerUnlock: this.props.playerUnlock.player_unlock, recipe : this.props.playerUnlock.recipe, selectedDrives: {}};
   }
 
   handleChange = event => {
-    this.setState({ name: event.target.value });
+    console.log(event.currentTarget)
+    const newSelectedDrives = Object.assign({}, this.state.selectedDrives, {[event.currentTarget.innerText]:!this.state.selectedDrives[event.currentTarget.innerText]});
+    this.setState({ selectedDrives: newSelectedDrives });
   };
 
+
   render() {
-    const { classes, parentState } = this.props;
+    const { classes, parentState, playerUnlock } = this.props;
     return (
       <Paper className={classes.paper}>
         <Typography variant="h5">Settings</Typography>
@@ -115,12 +113,24 @@ class SidebarPanel extends React.Component {
               </div>
             )}
           >
-            {drives.map(name => (
-              <MenuItem key={name} value={name}>
-                <Checkbox checked={this.state.name.indexOf(name) > -1} color="primary" />
-                <ListItemText primary={name} />
-              </MenuItem>
-            ))}
+            {this.state.playerUnlock.map(drive => {
+              console.log(drive)
+              return (<Tooltip key={drive.name+drive.id+'toolip'} className={classes.tooltip} placement="right" title={
+                this.state.recipe[drive.id].inputs.map((element, index) => {
+                  return (
+                    <React.Fragment key={element.item.id}>
+                      <img src={element.item.icon} className={index === 0 ? classes.tooltipIconFirst : classes.tooltipIcon}/>
+                      <div className={classes.tooltipText}>{element.quantity}</div>
+                    </React.Fragment>
+                  );
+                })
+              }>
+                <MenuItem key={drive.name+drive.id} value={drive.name}>
+                  <Checkbox checked={this.state.selectedDrives[drive.name]} color="primary" />
+                  <ListItemText primary={drive.name} />
+                </MenuItem>
+              </Tooltip>);
+            })}
           </Select>
         </FormControl>
 
@@ -145,7 +155,7 @@ class SidebarPanel extends React.Component {
         <Button className={classes.button} fullWidth onClick={() => {
           parentState.graphSvg.unfixNodes();
         }}>
-          <ReplayIcon/>
+          <UndoIcon/>
           <div className={classes.label}>Unfix Nodes</div>
         </Button>
       </Paper>

@@ -259,40 +259,44 @@ const data = [
       },
       {
         name: 'Caterium Ore',
-        icon: 'TODO'
+        icon: baseUrl + 'Caterium_Ore.png'
       },
       {
         name: 'Caterium Ingot',
-        icon: 'TODO'
+        icon: baseUrl + 'Caterium_Ingot.png'
       },
       {
         name: 'Quickwire',
-        icon: 'TODO'
+        icon: baseUrl + 'Quickwire.png'
       },
       {
         name: 'Steel Ingot',
-        icon: 'TODO'
+        icon: baseUrl + 'Steel_Ingot.png'
       },
       {
         name: 'Steel Beam',
-        icon: 'TODO'
+        icon: baseUrl + 'Steel_Beam.png'
       },
       {
         name: 'Steel Pipe',
-        icon: 'TODO'
+        icon: baseUrl + 'Steel_Pipe.png'
       },
       {
         name: 'Encased Industrial Beam',
-        icon: 'TODO'
+        icon: baseUrl + 'Encased_Industrial_Beam.png'
       },
       {
         name: 'Stator',
-        icon: 'TODO'
+        icon: baseUrl + 'Stator.png'
       },
       {
         name: 'Heavy Modular Frame',
-        icon: 'TODO'
+        icon: baseUrl + 'Heavy_Modular_Frame.png'
       },
+      {
+        name: 'Motor',
+        icon: baseUrl + 'Motor.png'
+      }
     ]
   },
   {
@@ -365,7 +369,7 @@ const data = [
       {name: 'Manufacturer', plural: 'Manufacturer', icon: baseUrl + 'Manufacturer.png'},
       {name: 'Container', plural: 'Containers', icon: baseUrl + 'Storage_Container_MK1.png'},
       {name: 'Logistic', plural: 'Logistics', icon: baseUrl + 'Splitter.png'},
-      {name: 'Foundry', plural: 'Foundries', icon: 'TODO'}
+      {name: 'Foundry', plural: 'Foundries', icon: baseUrl + 'Foundry_MK1.png'}
     ]
   },
   {
@@ -529,7 +533,7 @@ const data = [
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
-        icon: baseUrl + 'TODO',
+        icon: baseUrl + 'Foundry_MK1.png',
         speed: 100,
         hidden: true,
         input_slots: 2,
@@ -540,7 +544,7 @@ const data = [
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
-        icon: baseUrl + 'TODO',
+        icon: baseUrl + 'Foundry_MK2.png', //TODO get MK2 icon
         speed: 100,
         hidden: true,
         input_slots: 2,
@@ -560,7 +564,7 @@ const data = [
     value: [
       {name: 'Reinforced Iron Plate (Alt.)'},
       {name: 'Stitched Iron Plate'},
-      //{name: 'Caterium Wire'}, 9 output, 1 caterium ingot @ 67.5ppm
+      {name: 'Caterium Wire'},
       {name: 'Encased Industrial Beam (Alt.)'},
       {name: 'Heavy Modular Frame (Alt.)'},
       {name: 'Iron Ingot (Alt.)'},
@@ -573,9 +577,10 @@ const data = [
       // {name: 'Rubber Cable'},
       // {name: 'Circuit Board'},
       // {name: 'Caterium Computer'},
-      // {name: 'Quickwire'},
+      {name: 'Quickwire (Alt.)'},
       // {name: 'Caterium Circuit Board'},
       // {name: 'Crystal Computer'}
+      // time = output_quantity * 60 / ppm
     ]
   },
   {
@@ -608,6 +613,18 @@ const data = [
         time: 2,
         power: 4,
         quantity: 1
+      },
+      {
+        name: 'Caterium Ingot',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Caterium Ore'),
+          quantity: 4
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
+        item_id: getTableEntryIdByName('item', 'Caterium Ingot'),
+        time: 4,
+        power: 4,
+        quantity: 1,
       },
       {
         name: 'Iron Plate',
@@ -646,6 +663,34 @@ const data = [
         quantity: 3
       },
       {
+        name: 'Iron Wire',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Ingot'),
+          quantity: 2
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Wire'),
+        time: 8,
+        power: 4,
+        quantity: 9,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Iron Wire')
+      },
+      {
+        name: 'Caterium Wire',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Caterium Ingot'),
+          quantity: 1
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Wire'),
+        time: 8,
+        power: 4,
+        quantity: 9,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Caterium Wire')
+      },
+      {
         name: 'Cable',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Wire'),
@@ -668,6 +713,20 @@ const data = [
         time: 4,
         power: 4,
         quantity: 6
+      },
+      {
+        name: 'Screw (Alt.)',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Ingot'),
+          quantity: 2
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Screw'),
+        time: 8,
+        power: 4,
+        quantity: 12,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Screw (Alt.)')
       },
       {
         name: 'Concrete',
@@ -693,36 +752,6 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
         time: 12,
-        power: 15,
-        quantity: 1,
-      },
-      {
-        name: 'Rotor',
-        inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Iron Rod'),
-          quantity: 3
-        }, {
-          item_id: getTableEntryIdByName('item', 'Screw'),
-          quantity: 22
-        }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
-        item_id: getTableEntryIdByName('item', 'Rotor'),
-        time: 10,
-        power: 15,
-        quantity: 1,
-      },
-      {
-        name: 'Modular Frame',
-        inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
-          quantity: 3
-        }, {
-          item_id: getTableEntryIdByName('item', 'Iron Rod'),
-          quantity: 6
-        }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
-        item_id: getTableEntryIdByName('item', 'Modular Frame'),
-        time: 15,
         power: 15,
         quantity: 1,
       },
@@ -759,6 +788,70 @@ const data = [
         quantity: 3,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Stitched Iron Plate')
+      },
+      {
+        name: 'Rotor',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Rod'),
+          quantity: 3
+        }, {
+          item_id: getTableEntryIdByName('item', 'Screw'),
+          quantity: 22
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Rotor'),
+        time: 10,
+        power: 15,
+        quantity: 1,
+      },
+      {
+        name: 'Rotor (Alt.)',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Steel Pipe'),
+          quantity: 6
+        }, {
+          item_id: getTableEntryIdByName('item', 'Wire'),
+          quantity: 20
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Rotor'),
+        time: 20,
+        power: 15,
+        quantity: 3,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Rotor (Alt.)')
+      },
+      {
+        name: 'Modular Frame',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+          quantity: 3
+        }, {
+          item_id: getTableEntryIdByName('item', 'Iron Rod'),
+          quantity: 6
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Modular Frame'),
+        time: 15,
+        power: 15,
+        quantity: 1,
+      },
+      {
+        name: 'Modular Frame (Alt.)',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+          quantity: 6
+        }, {
+          item_id: getTableEntryIdByName('item', 'Steel Pipe'),
+          quantity: 6
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Modular Frame'),
+        time: 30,
+        power: 15,
+        quantity: 3,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Modular Frame (Alt.)')
       },
       {
         name: 'Encased Industrial Beam',
@@ -845,61 +938,13 @@ const data = [
           item_id: getTableEntryIdByName('item', 'Copper Ore'),
           quantity: 1
         }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
         item_id: getTableEntryIdByName('item', 'Iron Ingot'),
         time: 4,
         power: 4,
         quantity: 3,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Iron Ingot (Alt.)')
-      },
-      {
-        name: 'Iron Wire',
-        inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Iron Ingot'),
-          quantity: 2
-        }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
-        item_id: getTableEntryIdByName('item', 'Wire'),
-        time: 8,
-        power: 4,
-        quantity: 9,
-        hidden: true,
-        player_unlock_id: getTableEntryIdByName('player_unlock', 'Iron Wire')
-      },
-      {
-        name: 'Modular Frame (Alt.)',
-        inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
-          quantity: 6
-        }, {
-          item_id: getTableEntryIdByName('item', 'Steel Pipe'),
-          quantity: 6
-        }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
-        item_id: getTableEntryIdByName('item', 'Modular Frame'),
-        time: 30,
-        power: 15,
-        quantity: 3,
-        hidden: true,
-        player_unlock_id: getTableEntryIdByName('player_unlock', 'Modular Frame (Alt.)')
-      },
-      {
-        name: 'Rotor (Alt.)',
-        inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Steel Pipe'),
-          quantity: 6
-        }, {
-          item_id: getTableEntryIdByName('item', 'Wire'),
-          quantity: 20
-        }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
-        item_id: getTableEntryIdByName('item', 'Rotor'),
-        time: 20,
-        power: 15,
-        quantity: 3,
-        hidden: true,
-        player_unlock_id: getTableEntryIdByName('player_unlock', 'Rotor (Alt.)')
       },
       {
         name: 'Steel Ingot',
@@ -958,32 +1003,6 @@ const data = [
         quantity: 1,
       },
       {
-        name: 'Screw (Alt.)',
-        inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Iron Ingot'),
-          quantity: 2
-        }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
-        item_id: getTableEntryIdByName('item', 'Screw'),
-        time: 8,
-        power: 4,
-        quantity: 12,
-        hidden: true,
-        player_unlock_id: getTableEntryIdByName('player_unlock', 'Screw (Alt.)')
-      },
-      {
-        name: 'Caterium Ingot',
-        inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Caterium Ore'),
-          quantity: 4
-        }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
-        item_id: getTableEntryIdByName('item', 'Caterium Ingot'),
-        time: 4,
-        power: 4,
-        quantity: 1,
-      },
-      {
         name: 'Quickwire',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Caterium Ingot'),
@@ -994,6 +1013,38 @@ const data = [
         time: 4,
         power: 4,
         quantity: 4,
+      },
+      {
+        name: 'Quickwire (Alt.)',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Caterium Ingot'),
+          quantity: 1
+        }, {
+          item_id: getTableEntryIdByName('item', 'Copper Ingot'),
+          quantity: 2
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Quickwire'),
+        time: 8,
+        power: 4,
+        quantity: 12,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Quickwire (Alt.)')
+      },
+      {
+        name: 'Motor',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Rotor'),
+          quantity: 2
+        }, {
+          item_id: getTableEntryIdByName('item', 'Stator'),
+          quantity: 2
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Motor'),
+        time: 12,
+        power: 15,
+        quantity: 1,
       },
     ]
   }
