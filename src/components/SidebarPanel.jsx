@@ -74,15 +74,28 @@ class SidebarPanel extends React.Component {
   
   constructor(props) {
     super(props);
-    this.state = { playerUnlock: this.props.playerUnlock.player_unlock, recipe : this.props.playerUnlock.recipe, selectedDrives: {}};
+    this.state = { playerUnlock: this.props.playerUnlock.player_unlock, recipe : this.props.playerUnlock.recipe, selectedDrives: []};
   }
 
-  handleChange = event => {
-    console.log(event.currentTarget)
-    const newSelectedDrives = Object.assign({}, this.state.selectedDrives, {[event.currentTarget.innerText]:!this.state.selectedDrives[event.currentTarget.innerText]});
-    this.setState({ selectedDrives: newSelectedDrives });
+  handleChangeMultiple = event => {
+    console.log(event.currentTarget);
+    const options = event.currentTarget.parentElement.children;
+    const value = [];
+    for (let i = 0, l = options.length; i < l; i += 1) {
+      if (options[i].getAttribute('value') === event.currentTarget.getAttribute('value')) {
+        if (this.state.selectedDrives.indexOf(options[i].getAttribute('value')) === -1) {
+          value.push(options[i].getAttribute('value'));
+        }
+      } else {
+        if (options[i].querySelector('input').checked) {
+          value.push(options[i].getAttribute('value'));
+        }
+      }
+    }
+    this.setState({
+      selectedDrives: value,
+    });
   };
-
 
   render() {
     const { classes, parentState, playerUnlock } = this.props;
@@ -101,8 +114,8 @@ class SidebarPanel extends React.Component {
           <InputLabel htmlFor="select-multiple-chip">Hard Drives</InputLabel>
           <Select
             multiple
-            value={this.state.name}
-            onChange={this.handleChange}
+            value={this.state.selectedDrives}
+            onChange={this.handleChangeMultiple}
             input={<Input id="select-multiple-chip" />}
             MenuProps={MenuProps}
             renderValue={selected => (
@@ -114,7 +127,6 @@ class SidebarPanel extends React.Component {
             )}
           >
             {this.state.playerUnlock.map(drive => {
-              console.log(drive)
               return (<Tooltip key={drive.name+drive.id+'toolip'} className={classes.tooltip} placement="right" title={
                 this.state.recipe[drive.id].inputs.map((element, index) => {
                   return (
@@ -126,7 +138,7 @@ class SidebarPanel extends React.Component {
                 })
               }>
                 <MenuItem key={drive.name+drive.id} value={drive.name}>
-                  <Checkbox checked={this.state.selectedDrives[drive.name]} color="primary" />
+                  <Checkbox checked={this.state.selectedDrives.indexOf(drive.name) !== -1} color="primary" />
                   <ListItemText primary={drive.name} />
                 </MenuItem>
               </Tooltip>);
