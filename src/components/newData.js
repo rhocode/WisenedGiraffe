@@ -671,6 +671,36 @@ const data = [
         quantity: 1,
       },
       {
+        name: 'Rotor',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Iron Rod'),
+          quantity: 3
+        }, {
+          item_id: getTableEntryIdByName('item', 'Screw'),
+          quantity: 22
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Rotor'),
+        time: 10,
+        power: 15,
+        quantity: 1,
+      },
+      {
+        name: 'Modular Frame',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+          quantity: 3
+        }, {
+          item_id: getTableEntryIdByName('item', 'Iron Rod'),
+          quantity: 6
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Modular Frame'),
+        time: 15,
+        power: 15,
+        quantity: 1,
+      },
+      {
         name: 'Alternative Reinforced Iron Plate',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Plate'),
@@ -722,35 +752,40 @@ const data = [
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Encased Industrial Beam (Alt.)')
       },
       {
-        name: 'Rotor',
+        name: 'Heavy Modular Frame (Alt.)',
         inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Iron Rod'),
-          quantity: 3
+          item_id: getTableEntryIdByName('item', 'Modular Frame'),
+          quantity: 8
         }, {
-          item_id: getTableEntryIdByName('item', 'Screw'),
-          quantity: 22
+          item_id: getTableEntryIdByName('item', 'Encased Industrial Beam'),
+          quantity: 10
+        }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Heavy Modular Frame'),
+        time: 20,
+        power: 15,
+        quantity: 3,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Heavy Modular Frame (Alt.)')
+      },
+      {
+        name: 'Rotor (Alt.)',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Steel Pipe'),
+          quantity: 6
+        }, {
+          item_id: getTableEntryIdByName('item', 'Wire'),
+          quantity: 20
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Rotor'),
-        time: 10,
+        time: 20,
         power: 15,
-        quantity: 1,
+        quantity: 3,
+        hidden: true,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Rotor (Alt.)')
       },
-      {
-        name: 'Modular Frame',
-        inputs: parseRecipeIngredients([{
-          item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
-          quantity: 3
-        }, {
-          item_id: getTableEntryIdByName('item', 'Iron Rod'),
-          quantity: 6
-        }]),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
-        item_id: getTableEntryIdByName('item', 'Modular Frame'),
-        time: 15,
-        power: 15,
-        quantity: 1,
-      }
+
     ]
   }
 ];
