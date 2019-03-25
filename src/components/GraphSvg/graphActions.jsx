@@ -13,7 +13,7 @@ import {
   wheelZoomCalculation, insertNodeTier, insertComponents
 } from './nodeActions';
 import {drag_drag, drag_end, drag_start} from './mouseEvents';
-import {pathMouseClick} from './edgeActions';
+import {pathMouseClick, recalculateStorageContainers} from './edgeActions';
 
 //v2
 export const initSimulation = () => {
@@ -52,6 +52,8 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     this.nodeOut[outgoing].push(elem.target);
     this.nodeIn[incoming].push(elem.source);
   });
+
+  recalculateStorageContainers.call(t);
 
   const drag = d3.drag()
     .clickDistance(10)
@@ -259,16 +261,9 @@ export const handleTick = function (graphNodesData, graphLinksData, simulation) 
 
   graphLinksData.selectAll('.' + constants.lineObjectClass)
     .each(function (d) {
-      d.source.vy -= k;
-      d.target.vy += k;
+      d.source.vy += k;
+      d.target.vy -= k;
     });
-};
-//v1
-
-export const zoomed = function (d3) {
-  this.justScaleTransGraph = true;
-  d3.select('.' + constants.svgGraphClass)
-    .attr('transform', 'translate(' + d3.event.translate + ') scale(' + d3.event.scale + ')');
 };
 
 //

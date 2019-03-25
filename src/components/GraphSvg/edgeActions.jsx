@@ -2,41 +2,145 @@ import constants from './constants';
 import {removeSelectFromNode} from './nodeActions';
 import {deselect_path_and_nodes} from './graphActions';
 import * as d3 from 'd3';
+import TinyQueue from "../TinyQueue";
 
-//v2
-export const addPath = function (passedThis, source, target) {
-  const newEdge = {source: source, target: target};
+const processNodeTopologically = function() {
 
-  // Check if there are items you can shove in
-  const sharedItems =  target.allowedIn.filter(value => source.allowedOut.includes(value));
+};
 
-  // check if there are open slots
-  const outgoing = source.id;
-  const incoming = target.id;
-
-  const usedOut = (passedThis.nodeOut[outgoing] ? passedThis.nodeOut[outgoing].length : 0);
-  const usedIn = (passedThis.nodeIn[incoming] ? passedThis.nodeIn[incoming].length : 0);
-
-  // return early if we can't do anything with this node.
-  if ( usedOut >= source.instance.output_slots || usedIn >= target.instance.input_slots ||
-    sharedItems.length <= 0)
-  {
-    passedThis.updateGraphHelper();
-    return;
-  }
-
-  const filterResult = passedThis.graphData.links.filter(function (d) {
-    if (d.source.id === newEdge.target.id && d.target.id === newEdge.source.id) {
-      removePath(d, passedThis);
-    }
-    return (d.source.id === newEdge.source.id && d.target.id === newEdge.target.id) || newEdge.source.id === newEdge.target.id;
+export const recalculateStorageContainers = function() {
+  const nodeInShallow = {};
+  Object.keys(this.nodeIn).forEach(key => {
+    const value = this.nodeIn[key];
+    nodeInShallow[key] = value.map(elem => elem.id);
   });
 
-  if (filterResult.length === 0) {
-    passedThis.graphData.links.push(newEdge);
+  const nodeOutShallow = {};
+  Object.keys(this.nodeOut).forEach(key => {
+    const value = this.nodeOut[key];
+    nodeOutShallow[key] = value.map(elem => elem.id);
+  });
+
+  console.error(nodeInShallow, nodeOutShallow);
+  const nodeUnion = new Set(Object.keys(nodeInShallow));
+  Object.keys(nodeOutShallow).forEach(node => nodeUnion.add(node));
+  const nodeUnionArray = Array.from(nodeUnion);
+  console.error('AAAAA');
+  console.error(nodeUnion, nodeUnionArray);
+  nodeUnionArray.forEach((value, index) => {
+    nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
+  });
+
+  const myTinyQueue = new TinyQueue(nodeUnionArray, (a, b) => {
+    const incomingEdgesA = nodeInShallow[a.id.toString()];
+    const incomingEdgesB = nodeInShallow[b.id.toString()];
+
+    if ((!incomingEdgesA || !incomingEdgesA.length) && (!incomingEdgesB || !incomingEdgesB.length)) {
+      if (a.machine.name !== 'Container') {
+        return -1;
+      } else if (b.machine.name !== 'Container'){
+        return 1;
+      } else if (a.machine.name === 'Container' && a.containedItem) {
+        return -1;
+      }  else if (b.machine.name === 'Container' && b.containedItem) {
+        return 1;
+      } else {
+        //TODO: splitters?
+        //Save on a sort cycle;
+        return -1;
+      }
+    } else if ((!incomingEdgesB || !incomingEdgesB.length)) {
+      return 1;
+    } else if ((!incomingEdgesA || !incomingEdgesA.length)) {
+      return -1;
+    } else {
+      return -1;
+    }
+  });
+
+  while (myTinyQueue.size() > 0) {
+    const elem = myTinyQueue.pop();
+    const outgoing = nodeOutShallow[elem.id.toString()];
+    if (outgoing) {
+      const source = elem.id;
+
+      outgoing.forEach(element => {
+        nodeInShallow[element].splice(nodeInShallow[element].indexOf(source), 1);
+      });
+      myTinyQueue.reheapify();
+    }
+    console.log(elem.machine.name);
   }
-  passedThis.updateGraphHelper();
 };
+
+export const addPath = function (passedThis, source, target) {
+  if (source.machine.name === 'Container' || target.machine.name === 'Container') {
+    // special handling if the source is a container
+    const newEdge = {source: source, target: target};
+    //
+    // // Check if there are items you can shove in
+    // const sharedItems =  target.allowedIn.filter(value => source.allowedOut.includes(value));
+
+    // check if there are open slots
+    const outgoing = source.id;
+    const incoming = target.id;
+
+    const usedOut = (passedThis.nodeOut[outgoing] ? passedThis.nodeOut[outgoing].length : 0);
+    const usedIn = (passedThis.nodeIn[incoming] ? passedThis.nodeIn[incoming].length : 0);
+
+    // return early if we can't do anything with this node,
+    if ( usedOut >= source.instance.output_slots || usedIn >= target.instance.input_slots)
+    {
+      passedThis.updateGraphHelper();
+      return;
+    }
+
+    const filterResult = passedThis.graphData.links.filter(function (d) {
+      if (d.source.id === newEdge.target.id && d.target.id === newEdge.source.id) {
+        removePath(d, passedThis);
+      }
+      return (d.source.id === newEdge.source.id && d.target.id === newEdge.target.id) || newEdge.source.id === newEdge.target.id;
+    });
+
+    if (filterResult.length === 0) {
+      passedThis.graphData.links.push(newEdge);
+    }
+    passedThis.updateGraphHelper();
+  } else {
+    const newEdge = {source: source, target: target};
+
+    // Check if there are items you can shove in
+    const sharedItems =  target.allowedIn.filter(value => source.allowedOut.includes(value));
+
+    // check if there are open slots
+    const outgoing = source.id;
+    const incoming = target.id;
+
+    const usedOut = (passedThis.nodeOut[outgoing] ? passedThis.nodeOut[outgoing].length : 0);
+    const usedIn = (passedThis.nodeIn[incoming] ? passedThis.nodeIn[incoming].length : 0);
+
+    // return early if we can't do anything with this node.
+    if ( usedOut >= source.instance.output_slots || usedIn >= target.instance.input_slots ||
+        sharedItems.length <= 0)
+    {
+      passedThis.updateGraphHelper();
+      return;
+    }
+
+    const filterResult = passedThis.graphData.links.filter(function (d) {
+      if (d.source.id === newEdge.target.id && d.target.id === newEdge.source.id) {
+        removePath(d, passedThis);
+      }
+      return (d.source.id === newEdge.source.id && d.target.id === newEdge.target.id) || newEdge.source.id === newEdge.target.id;
+    });
+
+    if (filterResult.length === 0) {
+      passedThis.graphData.links.push(newEdge);
+    }
+    passedThis.updateGraphHelper();
+  }
+};
+
 
 export const pathMouseOver = function (d) {
 
@@ -97,25 +201,6 @@ export const removeSelectFromEdge = function () {
 
   this.selectedEdge = null;
 };
-
-export const pathMouseDown = function (d3, d3path, d) {
-  d3.event.stopPropagation();
-  this.mouseDownLink = d;
-
-  if (this.selectedNode) {
-    removeSelectFromNode.call(this);
-  }
-
-  const prevEdge = this.selectedEdge;
-  if (!prevEdge || prevEdge !== d) {
-    replaceSelectEdge.call(this, d3path, d);
-  } else {
-    removeSelectFromEdge.call(this);
-  }
-
-  this.updateGraph();
-};
-
 
 export const addEdge = function (graphRef, edgeData) {
   const newEdge = {source: edgeData.from, target: edgeData.to};

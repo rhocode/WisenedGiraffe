@@ -137,6 +137,12 @@ class SidebarPanel extends React.Component {
           <div className={classes.label}>Reset Camera</div>
         </Button>
         <Button className={classes.button} fullWidth onClick={() => {
+          parentState.graphSvg.fixNodes();
+        }}>
+          <ReplayIcon/>
+          <div className={classes.label}>Fix Nodes</div>
+        </Button>
+        <Button className={classes.button} fullWidth onClick={() => {
           parentState.graphSvg.unfixNodes();
         }}>
           <ReplayIcon/>
