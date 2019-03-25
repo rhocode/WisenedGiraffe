@@ -289,6 +289,10 @@ const data = [
         name: 'Stator',
         icon: 'TODO'
       },
+      {
+        name: 'Heavy Modular Frame',
+        icon: 'TODO'
+      },
     ]
   },
   {
@@ -856,7 +860,7 @@ const data = [
           quantity: 2
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
-        item_id: getTableEntryIdByName('item', 'Copper Wire'),
+        item_id: getTableEntryIdByName('item', 'Wire'),
         time: 8,
         power: 4,
         quantity: 9,
