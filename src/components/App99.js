@@ -329,7 +329,7 @@ class App extends Component {
 
   generateNodeList() {
     const recipesByMachineClass = {};
-    this.state.recipes && this.state.recipes.recipe.forEach(recipe => {
+    this.state.recipe && this.state.recipe.recipe.forEach(recipe => {
       const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
       thisList.push(recipe);
       recipesByMachineClass[recipe.machine_class.name] = thisList;

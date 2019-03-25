@@ -178,7 +178,7 @@ export const updateNodeTier = function(textElement) {
 
 export const updateComponents = function(elementsToUpdate) {
   const t = this;
-  const itemAccessor = t.props.parentAccessor.state.recipes.item;
+  const itemAccessor = t.props.parentAccessor.state.recipe.item;
   elementsToUpdate.each(function(d) {
     const allowedInRemaining = d.allowedIn.slice();
     const provided = t.nodeIn[d.id] || [];
