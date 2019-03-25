@@ -91,7 +91,7 @@ class InnerNestedSidebarButton extends React.Component {
 
                               appObject.graphSvg.addNode(
                                 {
-                                  data: {machine: resource, node: item},
+                                  data: {machine: resource, node: item, recipe: resource},
                                   machine: resource.machine_class,
                                   allowedIn: [],
                                   allowedOut: [resource.item.id],

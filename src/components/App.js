@@ -133,10 +133,11 @@ class App extends Component {
   }
 
   generateRecursiveStructure(startingTable) {
+    console.log(startingTable);
     const db = this.state.db;
     const starting = db.getSchema().table(startingTable);
-    const globalStructure = {};
-    this.globalStructure = this.globalStructure || globalStructure;
+    this.globalStructure = this.globalStructure || {};
+    const globalStructure = this.globalStructure;
 
     return db.select().from(starting).exec().then(async results => {
       if (results.length > 0) {
@@ -279,7 +280,7 @@ class App extends Component {
 
   generateNodeList() {
     const recipesByMachineClass = {};
-    this.state.recipes && this.state.recipes.recipe.forEach(recipe => {
+    this.state.recipe && this.state.recipe.recipe.forEach(recipe => {
       const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
       thisList.push(recipe);
       recipesByMachineClass[recipe.machine_class.name] = thisList;
@@ -296,17 +297,27 @@ class App extends Component {
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
+
+    // Manually handle splitters and mergers
+    springByClass['Logistic'] = this.state.machine_node.machine_node.filter(elem => elem.machine_class.name === 'Logistic');
+    console.log(springByClass);
+
+
     return (
-      <SimpleSidebarButton label="Container" listItems={springByClass} />
+      <React.Fragment>
+        <SimpleSidebarButton label="Logistics" appObject={this} listItems={springByClass} />
+      </React.Fragment>
+
     );
   }
 
   generateUnlocksList() {
     const dataList = [];
     this.state.player_unlock && this.state.player_unlock.player_unlock.forEach(player_unlock => {
-      console.log(this.state.recipes.recipe)
-      const item = this.state.recipes.recipe.filter(elem => elem.player_unlock && (elem.player_unlock.id === player_unlock.id) )[0];
-      dataList.push({player_unlock, item});
+      const item = this.state.recipe.recipe.filter(elem => elem.player_unlock && (elem.player_unlock.id === player_unlock.id) )[0];
+      if (item) {
+        // dataList.push({player_unlock, item});
+      }
     });
     console.log(dataList)
     return (
@@ -440,7 +451,7 @@ class App extends Component {
           </List>
         </Drawer>
         <main className={classes.content}>
-          {this.state.loaded ? <GraphSvg ref={(graphSvg) => {
+          {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
             console.log(graphSvg);
             t.graphSvg = graphSvg;
           }}/> : <div/>}

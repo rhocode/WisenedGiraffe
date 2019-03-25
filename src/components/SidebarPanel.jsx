@@ -125,7 +125,6 @@ class SidebarPanel extends React.Component {
         </FormControl>
 
         <Button className={classes.button} fullWidth onClick={() => {
-          console.log(parentState);
           parentState.graphSvg.jiggle();
         }}>
           <ShuffleIcon/>

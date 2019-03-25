@@ -10,7 +10,6 @@ export const add_node = (d, t) => {
   d.overclock = d.overclock || 100;
 
   t.graphData.nodes.push(d);
-  console.log(JSON.stringify(d));
   t.updateGraphHelper();
 };
 
@@ -20,7 +19,6 @@ export const delete_node = function (d, t) {
   remove_select_from_nodes(t);
 
   const toSplice = t.graphData.links.filter(function (l) {
-    console.error(l, selectedNode.id, l.source.id === selectedNode.id || l.target.id === selectedNode.id);
     return l.source.id === selectedNode.id || l.target.id === selectedNode.id;
   });
 
@@ -28,7 +26,6 @@ export const delete_node = function (d, t) {
     removePath(l, t);
   });
 
-  console.log(t.graphData.nodes.indexOf(selectedNode));
   t.graphData.nodes.splice(t.graphData.nodes.indexOf(selectedNode), 1);
 };
 
@@ -181,46 +178,133 @@ export const updateNodeTier = function(textElement) {
 
 export const updateComponents = function(elementsToUpdate) {
   const t = this;
-  elementsToUpdate.each(function(d, i) {
-    const allowedIn = d.allowedIn;
-    const actualIn = t.nodeIn[d.id] || [];
+  const itemAccessor = t.props.parentAccessor.state.recipe.item;
+  elementsToUpdate.each(function(d) {
+    const allowedInRemaining = d.allowedIn.slice();
+    const provided = t.nodeIn[d.id] || [];
 
-    const provided = actualIn.map(node => node.allowedOut);
 
+    const actualIn = provided.map(node => node.allowedOut).flatten(1);
+    new Set(actualIn).forEach(id => { allowedInRemaining.splice(allowedInRemaining.indexOf(id), 1); });
     const element = d3.select(this);
-    element.append('text').attr('class', 'fas fa-sign-in-alt')
-      .attr('x', function (d) {
-        return 56;
-      })
-      .attr('y', function (d) {
-        return -28;
-      })
-      .attr('height', 25)
-      .attr('width', 25);
 
-    const allowedOut = d.allowedIn;
-    const actualOut = t.nodeOut[d.id] || [];
+    element.selectAll('.' + constants.nodeRequirementsSubIconClass).remove();
 
-    const provides = actualOut.map(node => node.allowedIn);
+    if (allowedInRemaining.length > 0) {
+      element.append('text').attr('class', 'fas fa-arrow-left')
+        .classed(constants.nodeRequirementsSubIconClass, true)
+        .attr('x', function (d) {
+          return 56;
+        })
+        .attr('y', function (d) {
+          return -28;
+        })
+        .attr('height', 25)
+        .attr('width', 25);
+      const fetchRemainingIn = allowedInRemaining.map(item =>
+        itemAccessor.filter(findItem => item === findItem.id)[0].icon
+      );
 
-    element.append('text').attr('class', 'fas fa-sign-out-alt')
-      .attr('x', function (d) {
-        return 58;
-      })
-      .attr('y', function (d) {
-        return 3;
-      })
-      .attr('height', 25)
-      .attr('width', 25);
+      fetchRemainingIn.forEach((remaining, i) => {
+        element.append('svg:image')
+          .classed(constants.nodeRequirementsSubIconClass, true)
+          .attr('xlink:href', function (d) {
+            return remaining;
+          })
+          .attr('x', function (d) {
+            return 58 + 28 + (28 * i);
+          })
+          .attr('y', function (d) {
+            return -28;
+          })
+          .attr('height', 25)
+          .attr('width', 25);
+      });
+    }
+    const allowedOutRemaining = d.allowedOut.slice();
+    const provides = t.nodeOut[d.id] || [];
+    const actualOut = provides.map(node => node.allowedIn).flatten(1);
+    new Set(actualOut).forEach(id => { allowedOutRemaining.splice(allowedOutRemaining.indexOf(id), 1); });
 
-    console.log(allowedIn, actualIn, provided, allowedOut, actualOut, provides);
+    if (allowedOutRemaining.length > 0) {
+      element.append('text').attr('class', 'fas fa-arrow-right')
+        .classed(constants.nodeRequirementsSubIconClass, true)
+        .attr('x', function (d) {
+          return 58;
+        })
+        .attr('y', function (d) {
+          return 3;
+        })
+        .attr('height', 25)
+        .attr('width', 25);
+      const fetchRemainingOut = allowedOutRemaining.map(item =>
+        itemAccessor.filter(findItem => item === findItem.id)[0].icon
+      );
+
+      fetchRemainingOut.forEach((remaining, i) => {
+        element.append('svg:image')
+          .classed(constants.nodeRequirementsSubIconClass, true)
+          .attr('xlink:href', function (d) {
+            return remaining;
+          })
+          .attr('x', function (d) {
+            return 56 + 28 + (28 * i);
+          })
+          .attr('y', function (d) {
+            return 3;
+          })
+          .attr('height', 25)
+          .attr('width', 25);
+      });
+    }
   });
 };
 
-export const insertComponents = function(parentElement) {
-  const el = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);
+export const forceUpdateComponentLabel = function() {
+  updateComponents.call(this, d3.selectAll('.' + constants.nodeRequirementsIconClass));
+};
 
-  updateComponents.call(this, el);
+export const insertComponents = function(parentElement) {
+  const el1 = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);
+
+  el1.each(function(d){
+    if (d.machine && d.machine.name === 'Container') {
+      if (d.machine.containedItem) {
+        d3.select(this).append('svg:image')
+          .classed(constants.nodeProducesClass, true)
+          .attr('xlink:href', function (d) {
+            return d.machine.containedItem.icon;
+          })
+          .attr('x', function (d) {
+            return -55;
+          })
+          .attr('y', function (d) {
+            return 18;
+          })
+          .attr('height', 40)
+          .attr('width', 40);
+      }
+    } else {
+      d3.select(this).append('svg:image')
+        .classed(constants.nodeProducesClass, true)
+        .attr('xlink:href', function (d) {
+          return d.data.recipe.item.icon;
+        })
+        .attr('x', function (d) {
+          return -55;
+        })
+        .attr('y', function (d) {
+          return 18;
+        })
+        .attr('height', 40)
+        .attr('width', 40);
+    }
+  });
+
+
+
+
+  forceUpdateComponentLabel.call(this);
 };
 
 export const insertNodeTier = (gEl) => {
@@ -261,22 +345,6 @@ export const insertNodeOverclock = (gEl) => {
     .attr('font-size', 20);
 
   updateOverclock(tspan);
-
-  // for (let i = 0; i < words.length; i++) {
-  //   const backgroundText = el.append('text')
-  //     .attr('fill', 'white')
-  //     .attr('stroke', 'white')
-  //     .attr('stroke-width', 1)
-  //     .attr('font-size', 15)
-  //     .attr('font-weight', 'bold')
-  //     .text(words[i]).attr('x', 32).attr('dy', -32);
-  //
-  //   // if (i > 0) backgroundText.attr('x', 0).attr('dy', 15 * i);
-  //   const tspan = el.append('text').attr('fill', 'black').text(words[i]).attr('x', 32).attr('dy', -32)
-  //     .attr('class', 'overclockFont')
-  //     .attr('font-size', 20);
-  //   // if (i > 0) tspan.attr('x', 0).attr('dy', 15 * i);
-  // }
 };
 
 export const insertNodeTitle = (gEl) => {
@@ -311,7 +379,6 @@ export const addNode = (graphRef, machine, x = null, y = null) => {
   var bodyEl = document.getElementById('mainRender');
   var width = bodyEl.clientWidth,
     height = bodyEl.clientHeight;
-  console.log('Called addNode');
   const d = generateNodeDef(x || width / 2, y || height / 2, graphRef.idct++, {});
   graphRef.nodes.push(d);
   addNodeToGraph(graphRef, d);
