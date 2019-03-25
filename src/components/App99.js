@@ -14,24 +14,15 @@ import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponen
 import InputIcon from '@material-ui/icons/Input';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-// import * as d3 from 'd3';
 
-import Loader from './Loader';
 import createDatabase from './newData';
 import GraphSvg from './GraphSvg';
-import {addNode} from './GraphSvg/nodeActions';
-
 import SidebarButton from './SidebarButton';
 import FabPopup from './FabPopup';
 import ToolbarPopup from './ToolbarPopup';
 import SidebarPopup from './SidebarPopup';
 import NestedSidebarButton from './NestedSidebarButton';
-import SimpleSidebarButton from './SimpleSidebarButton';
-import SidebarPanel from './SidebarPanel';
-
+// import * as d3 from 'd3';
 
 /* global d3 */
 
@@ -56,10 +47,6 @@ const styles = theme => ({
     width: drawerWidth,
     position: 'unset'
   },
-  drawerTitle: {
-    paddingLeft: 15,
-    paddingTop: 5,
-  },
   content: {
     display: 'flex',
     flexGrow: 1,
@@ -71,6 +58,9 @@ const styles = theme => ({
   },
   grow: {
     flexGrow: 1,
+  },
+  icons: {
+    marginRight: 0
   },
   pathIcon: {
     height: 15,
@@ -84,25 +74,16 @@ const styles = theme => ({
     margin: theme.spacing.unit * 2,
     display: 'flex',
   },
+  fab: {
+    position: 'absolute',
+    bottom: theme.spacing.unit * 2,
+    right: theme.spacing.unit * 2,
+  },
   button: {
     flex: '0 0 100%',
   },
   label: {
     paddingLeft: 10,
-  },
-  inlineDialogButton : {
-    paddingTop: 10,
-    paddingBottom: 10,
-  },
-  dialogButton: {
-    marginTop: 10,
-  },
-  dialogContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  clearButton: {
-    paddingTop: 20,
   },
 });
 
@@ -117,6 +98,9 @@ const theme = createMuiTheme({
   }
 });
 
+
+const round = (num) => Math.round(num * 100) / 100;
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -124,6 +108,19 @@ class App extends Component {
       loaded: false
     };
   }
+
+
+  // calculateGraph() {
+  //   console.log('Calculation Run');
+  //   Object.keys(this.inputEdges).forEach((e) => {
+  //     const edge = this.inputEdges[e];
+  //     if (Object.keys(edge) == 0) {
+  //       return;
+  //     }
+  //
+  //     console.log(this.inputEdges[e]);
+  //   });
+  // }
 
   getRefkeyTable(table) {
     const db = this.state.db;
@@ -133,11 +130,10 @@ class App extends Component {
   }
 
   generateRecursiveStructure(startingTable) {
-    console.log(startingTable);
     const db = this.state.db;
     const starting = db.getSchema().table(startingTable);
-    this.globalStructure = this.globalStructure || {};
-    const globalStructure = this.globalStructure;
+    const globalStructure = {};
+    this.globalStructure = this.globalStructure || globalStructure;
 
     return db.select().from(starting).exec().then(async results => {
       if (results.length > 0) {
@@ -192,7 +188,7 @@ class App extends Component {
               const tableName = rowKey.slice(0, -3);
               const associatedData = globalStructure[tableName];
               delete row[rowKey];
-              console.log(tableName)
+
               const possibleData = associatedData.filter(elem => elem.id === refId);
               if (possibleData.length === 1) {
                 row[tableName] = possibleData[0];
@@ -221,12 +217,9 @@ class App extends Component {
             });
             Object.keys(row).filter(str => !str.endsWith('_id')).forEach(rowKey => {
               const rowValue = row[rowKey];
+
               const replaceTable = (id, id_name, object) => {
                 if (!id_name.endsWith('_id')) {
-                  if (typeof object[id_name] === 'string' && object[id_name].startsWith('http')) {
-                    const img = new Image();
-                    img.src = object[id_name];
-                  }
                   return;
                 }
 
@@ -252,43 +245,97 @@ class App extends Component {
     });
   }
 
+
   componentDidMount() {
     createDatabase().then((db) => {
       this.setState({db, loaded: true});
     }).then(() => {
-      return this.generateRecursiveStructure('player_unlock').then(player_unlock => {
-        this.setState({player_unlock}, () => {
-          return this.generateRecursiveStructure('recipe').then(recipe => {
-            this.setState({recipe}, () => {
-              return this.generateRecursiveStructure('machine_node').then(machine_node => {
-                this.setState({machine_node}, () => {
-                  return this.generateRecursiveStructure('spring').then(spring => {
-                    this.setState({spring}, () => {
-                      return this.generateRecursiveStructure('purity_type').then(purity_type => {
-                        this.setState({purity_type, isLoaded: true});
-                      });
+      return this.generateRecursiveStructure('recipe').then(recipes => {
+        this.setState({recipes}, () => {
+          return this.generateRecursiveStructure('machine_node').then(machine_node => {
+            this.setState({machine_node}, () => {
+              return this.generateRecursiveStructure('spring').then(spring => {
+                this.setState({spring}, () => {
+                  return this.generateRecursiveStructure('purity_type').then(purity_type => {
+                    this.setState({purity_type}, () => {
+                      this.setState({isReady: true});
                     });
                   });
+                  // console.log(this.state);
+
+                  // return this.generateRecursiveStructure('spring').then(spring => { this.setState({spring})});
                 });
               });
             });
           });
         });
       });
+
+      // this.generateRecursiveStructure('recipe').then(recipe => {console.log(recipe); this.setState({recipe})});
+      // addNode(this.graphSvg, {}, 0,0);
+      // addNode(this.graphSvg, {}, 0,200);
+      //
+      //
+      // const svg = d3.select('#mainRender');
+      //
+      // this.graph = new this.GraphCreator(svg);
+      // // this.graph = new this.GraphCreator(svg, nodes, edges);
+      // this.graph.setIdCt(0);
+      // this.graph.updateGraph();
+      // const machine1 = {
+      //   'name': 'Smelter Mk.1: Iron Ingot',
+      //   'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png',
+      //   'base_type': 'SMELTER_NODE',
+      //   'produces': {
+      //     'name': 'Iron Ingot',
+      //     'resource_name': 'IRON_INGOT',
+      //     'in': [{'resource': 'IRON_ORE', 'quantity': 1}],
+      //     'machine': 'SMELTER_NODE',
+      //     'output_quantity': 1,
+      //     'time': 2,
+      //     'power': 4
+      //   }
+      // };
+      // this.addNode(this.graphCreatorInstance, machine1, 0, 200);
+      // const machine2 = {
+      //   'name': 'Miner Mk.1: Impure Iron',
+      //   'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Miner_MK1.png',
+      //   'base_type': 'MINER_NODE',
+      //   'produces': {
+      //     'name': 'Iron Ore',
+      //     'resource_name': 'IRON_ORE',
+      //     'in': [{'resource': 'IRON', 'quantity': 1, 'raw': true, 'purity': 'IMPURE'}],
+      //     'machine': 'MINER_NODE',
+      //     'output_quantity': 1,
+      //     'time': 2,
+      //     'power': 5
+      //   },
+      //   'mining_data': {
+      //     'name': 'Impure Iron',
+      //     'icon': 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png',
+      //     'produces': 'IRON_ORE',
+      //     'quality': 'IMPURE'
+      //   }
+      // };
+      // this.addNode(this.graphCreatorInstance, machine2, 0, 0);
+      // this.graph.updateGraph();
+      // this.addEdge(this.graphCreatorInstance, {
+      //   'from': d3.select('#graph-node-1').datum(),
+      //   'to': d3.select('#graph-node-0').datum()
+      // });
+      // this.graph.updateGraph();
     });
   }
 
   generateNodeList() {
     const recipesByMachineClass = {};
-    const machineClassPlural = {};
     this.state.recipe && this.state.recipe.recipe.forEach(recipe => {
       const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
       thisList.push(recipe);
       recipesByMachineClass[recipe.machine_class.name] = thisList;
-      machineClassPlural[recipe.machine_class.name] = recipe.machine_class.plural;
     });
     return Object.keys(recipesByMachineClass).map(key =>
-      <SidebarButton appObject={this} label={machineClassPlural[key]} key={key} items={recipesByMachineClass[key]}/>
+      <SidebarButton label={key} key={key} items={recipesByMachineClass[key]}/>
     );
   }
 
@@ -299,36 +346,18 @@ class App extends Component {
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
-
-    // Manually handle splitters and mergers
-    springByClass['Logistic'] = this.state.machine_node.machine_node.filter(elem => elem.machine_class.name === 'Logistic');
-    console.log(springByClass);
-
-
-    return (
-      <React.Fragment>
-        <SimpleSidebarButton label="Logistics" appObject={this} listItems={springByClass} />
-      </React.Fragment>
-
-    );
-  }
-
-  generateUnlocksList() {
-    const dataList = [];
-    this.state.player_unlock && this.state.player_unlock.player_unlock.forEach(player_unlock => {
-      const item = this.state.recipe.recipe.filter(elem => elem.player_unlock && (elem.player_unlock.id === player_unlock.id) )[0];
-      if (item) {
-        // dataList.push({player_unlock, item});
-      }
-    });
-    console.log(dataList)
-    return (
-      <div>hello</div>
-    );
+    return Object.keys(springByClass)
+      .map(key => {
+        const returnDivList = [];
+        if (!['Miner'].includes(key)) {
+          console.log(key, springByClass[key]);
+          returnDivList.push(<div/>);
+        }
+        return returnDivList;
+      });
   }
 
   generateSpringList() {
-    this.generateUnlocksList();
     const springByClass = {};
     this.state.spring && this.state.spring.spring.forEach(spring => {
       const thisList = springByClass[spring.spring_type.name] || [];
@@ -336,79 +365,56 @@ class App extends Component {
       springByClass[spring.spring_type.name] = thisList;
     });
     return (
-      <NestedSidebarButton label='Miners' listItems={springByClass} appObject={this}/>
+      <NestedSidebarButton label='Miner' listItems={springByClass}/>
+      // <React.Fragment key={label}>
+      //   <Paper className={classes.paper}>
+      //     <Button
+      //       aria-owns={open ? 'menu-appbar' : null}
+      //       aria-haspopup="true"
+      //       onClick={open ? this.handleClose : this.handleMenu}
+      //       className={classes.button}
+      //     >
+      //       <AddBoxIcon/>
+      //       <div className={classes.label}>Miner</div>
+      //     </Button>
+      //     {Object.keys(springByClass).map(key => {
+      //       const returnDivList = [];
+      //       if (['Miner'].includes(key)) {
+      //         springByClass[key].forEach(resource => {
+      //           console.log(resource);
+      //           returnDivList.push();
+      //         });
+      //       }
+      //       return returnDivList;
+      //     })}
+      //   </Paper>
+      // </React.Fragment>
     );
   }
 
-
   render() {
     const {classes} = this.props;
-    if (!this.state.isReady) {
-      return <Loader ready={this.state.isLoaded} parentState={this}/>;
-    }
-
-    const t = this;
 
     return <div className={classes.root}>
       <CssBaseline/>
       <MuiThemeProvider theme={theme}>
         <AppBar position="fixed" className={classes.appBar}>
           <Toolbar>
-            <img alt="wow so satis factory" className={classes.logo}
+            <img className={classes.logo}
               src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
               title="logo"/>
             <div className={classes.grow}></div>
-            <Button color="inherit" >
-              <OfflineBoltIcon/>
-              <div className={classes.label}>Analyze</div>
-            </Button>
-            <Button color="inherit" >
-              <SettingsInputComponentIcon/>
-              <div className={classes.label}>Optimize</div>
-            </Button>
-            <ToolbarPopup Icon={DeleteIcon} title='Clear' label='Clear' contents={
-              <React.Fragment>
-                <div className={classes.dialogContainer}>
-                  <Typography variant="h5">Are you sure you want to clear everything?</Typography>
-                  <Button color="secondary" variant="outlined" className={`${classes.dialogButton}`}>
-                    <DeleteIcon />
-                    <div className={classes.label}>Yes, I'm sure!</div>
-                  </Button>
-                </div>
-              </React.Fragment>
-            } />
-            <ToolbarPopup Icon={InputIcon} title='Load' label='Load' contents={
-              <React.Fragment>
-                <TextField label="Share Code">
-                </TextField>
-                <Button color="inherit" className={classes.inlineDialogButton}>
-                  <InputIcon/>
-                  <div className={classes.label}>Load</div>
-                </Button>
-              </React.Fragment>
-            } />
-            <ToolbarPopup Icon={ShareIcon} title='Share' label='Share' contents={
-              <React.Fragment>
-                <div className={classes.dialogContainer}>
-                  <div>
-                    <TextField label="Share Code">
-                    </TextField>
-                    <Button color="inherit" className={classes.inlineDialogButton}>
-                      <FileCopyIcon/>
-                      <div className={classes.label}>Copy</div>
-                    </Button>
-                  </div>
-                  <Button color="inherit" className={classes.dialogButton} fullWidth>
-                    <ShareIcon/>
-                    <div className={classes.label}>Generate Image</div>
-                  </Button>
-                </div>
-              </React.Fragment>
-            } />
+            <ToolbarPopup classes={classes} Icon={OfflineBoltIcon} title='Analyze' label='Analyze' contents=''/>
+            <ToolbarPopup classes={classes} Icon={SettingsInputComponentIcon} title='Optimize' label='Optimize'
+              contents=''/>
+            <ToolbarPopup classes={classes} Icon={DeleteIcon} title='Clear' label='Clear' contents=''/>
+            <ToolbarPopup classes={classes} Icon={InputIcon} title='Load' label='Load' contents=''/>
+            <ToolbarPopup classes={classes} Icon={ShareIcon} title='Share' label='Share' contents=''/>
           </Toolbar>
         </AppBar>
 
-        <FabPopup title='Help' contents={
+
+        <FabPopup title='Help' classes={classes} contents={
           <React.Fragment>
             <Typography variant="h5">Graph Basics</Typography>
             <ul>
@@ -418,10 +424,9 @@ class App extends Component {
               <li><Typography variant="body1">Hold down shift - click and drag from a node to direct it to another
                 node.</Typography></li>
             </ul>
-            <Typography variant="h5">Saving/Loading</Typography>
-            <Typography variant="body1">TODO</Typography>
           </React.Fragment>
         }/>
+
 
         <Drawer
           className={classes.drawer}
@@ -431,36 +436,26 @@ class App extends Component {
           }}
         >
           <List>
-            <Typography variant="h5" className={classes.drawerTitle}>Nodes</Typography>
             {this.generateNodeList()}
             {this.generateSpringList()}
-            {this.generateContainerList()}
           </List>
-          <Divider/>
-          
-          <SidebarPanel parentState={this} playerUnlock={this.state.player_unlock}/>
 
           <Divider/>
+
 
           <List>
-            <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers' contents={
-              <React.Fragment>
-                <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a href="https://github.com/thinkaliker">Adam</a> (<a href="https://twitter.com/thinkaliker">@thinkaliker</a>).</Typography>
-                <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain Studios AB, or THQ Nordic AB.</Typography>
-                <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from Coffee Stain Studios AB's Satisfactory.</Typography>
-              </React.Fragment>
-            } />
+            <SidebarPopup classes={classes} Icon={InfoIcon} label='About' title='About' contents=''/>
           </List>
         </Drawer>
         <main className={classes.content}>
-          {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
-            console.log(graphSvg);
-            t.graphSvg = graphSvg;
+          {this.state.loaded ? <GraphSvg ref={(graphSvg) => {
+            this.graphSvg = graphSvg;
           }}/> : <div/>}
         </main>
       </MuiThemeProvider>
     </div>;
   }
+
 }
 
 App.propTypes = {

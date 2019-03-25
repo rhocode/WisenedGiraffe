@@ -1,18 +1,10 @@
-body{
+body {
   margin: 0;
   padding: 0;
-  overflow:hidden;
+  overflow: hidden;
   height: 100vh;
   width: 100vw;
-}
-
-p{
-  text-align: center;
-  overflow: overlay;
-  position: relative;
-}
-
-body{
+  font-family: 'Roboto Mono', monospace;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -23,7 +15,73 @@ body{
   display: flex;
 }
 
-#toolbox{
+//p {
+//  overflow: overlay;
+//  position: relative;
+//}
+
+// paths
+
+.line-object-hitbox {
+  stroke-opacity: 0;
+  stroke: black;
+  stroke-width: 15px;
+  cursor: pointer;
+}
+
+
+//
+.overclockFont {
+  font-family: 'Crimson Text', serif;
+  font-weight: bold;
+  shape-rendering: crispEdges;
+}
+
+.overclockedArcClass {
+  shape-rendering: geometricPrecision;
+}
+
+.graphMachineNode {
+  fill: #FFE0B2;
+  stroke: #FFCC80;
+  stroke-width: 1px;
+}
+
+.graphNodeHoverClass {
+  cursor: pointer
+}
+
+.graphNodeHoverClass .graphMachineNode {
+  fill: #FF9800;
+}
+
+.selected-node .graphMachineNode {
+  fill: #E65100;
+}
+
+.graphNodeGrabbedClass {
+  cursor: grabbing !important;
+}
+
+.line-object {
+  stroke-width: 2px;
+}
+
+.line-object.hidden {
+  stroke-width: 0px;
+}
+
+//
+//.graphMachineNode circle{
+//  fill: #E65100;
+//}
+//
+//.graphMachineNode:hover circle{
+//  fill: #E65100;
+//}
+
+
+#toolbox {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -35,89 +93,54 @@ body{
   z-index: 5;
 }
 
-#toolbox input{
+#toolbox input {
   width: 30px;
   opacity: 0.4;
 }
-#toolbox input:hover{
+
+#toolbox input:hover {
   opacity: 1;
   cursor: pointer;
 }
 
-#hidden-file-upload{
-  display: none;
-}
+//#hidden-file-upload{
+//  display: none;
+//}
+//
+//#download-input{
+//  margin: 0 0.5em;
+//}
 
-#download-input{
-  margin: 0 0.5em;
-}
-
-.conceptG text{
+.conceptG text {
   pointer-events: none;
 }
 
-marker{
-  fill: #333;
-}
+// Not needed?
+//marker{
+//  fill: #333;
+//}
 
-g.conceptG circle{
+g.conceptG circle {
   fill: #FFE0B2;
   stroke: #FFCC80;
   stroke-width: 1px;
 }
 
-g.conceptG:hover circle {
-  fill: #FF9800;
-}
+//g.conceptG:hover circle {
+//  fill: #FF9800;
+//}
+//
+//g.selected circle{
+//  fill: #E65100;
+//}
+//
+//g.selected:hover circle{
+//  fill: #E65100;
+//}
 
-g.selected circle{
-  fill: #E65100;
-}
 
-g.selected:hover circle{
-  fill: #E65100;
-}
-
-path.link {
-  fill: none;
-  stroke: #4CAF50;
-  stroke-width: 6px;
-  cursor: default;
-}
-
-#end-arrow:hover {
-  fill: #4CAF50;
-}
-
-#end-arrow.selected {
-  fill: #039BE5;
-}
-
-#end-arrow {
-  fill: #4CAF50;
-}
-
-path.link:hover{
-  stroke: #81C784;
-}
-
-path.link.selected {
-  stroke: #388E3C;
-}
-
-g.connect-node circle{
+g.connect-node circle {
   fill: #BEFFFF;
-}
-
-path.link.hidden{
-  stroke-width: 0;
-}
-
-
-
-path.hidden-hitbox{
-  stroke-width: 12;
-  stroke-opacity: 0;
 }
 
 div.full-div {
@@ -125,25 +148,8 @@ div.full-div {
   flex: 1;
 }
 
-div.tooltip {
-
-}
-
 #mainRender {
   flex: 1;
-}
-
-path.link.selected {
-  stroke: #039BE5;
-}
-
-path.hidden-hitbox{
-  stroke-width: 12;
-  stroke-opacity: 0;
-}
-
-path.tooltip {
-  stroke: #A5D6A7;
 }
 
 .path-tooltip-div {
@@ -157,6 +163,7 @@ path.tooltip {
 svg#mainRender {
   height: 100%;
   width: 100%;
+  background-color: #dddddd;
 }
 
 .lead {
@@ -170,3 +177,59 @@ svg#mainRender {
 tspan.node-label {
   color: white;
 }
+
+//=======
+// new css
+
+// Path end arrow
+.path-end-arrow:hover {
+  fill: #4CAF50;
+}
+
+.path-end-arrow.selected {
+  fill: #039BE5;
+}
+
+.path-end-arrow {
+  fill: #4CAF50;
+}
+
+// Path Link properties
+//path.link {
+//  fill: none;
+//  stroke: #4CAF50;
+//  stroke-width: 6px;
+//  cursor: default;
+//}
+//path.link:hover{
+//  stroke: #81C784;
+//}
+//path.link.selected {
+//  stroke: #039BE5;
+//}
+//path.hidden-hitbox{
+//  stroke-width: 12;
+//  stroke-opacity: 0;
+//}
+//
+////Draggable link properties
+//path.link.hidden{
+//  stroke-width: 0;
+//}
+//
+//
+//.link {
+//  stroke: #000;
+//  stroke-width: 1.5px;
+//}
+//
+//.node {
+//  cursor: move;
+//  fill: #ccc;
+//  stroke: #000;
+//  stroke-width: 1.5px;
+//}
+//
+//.node.fixed {
+//  fill: #f00;
+//}

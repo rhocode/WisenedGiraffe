@@ -307,7 +307,7 @@ export default class App2 extends Component {
         d3.event.stopPropagation();
       }).on('keydown', function (d) {
         d3.event.stopPropagation();
-        if (d3.event.keyCode == consts.ENTER_KEY && !d3.event.shiftKey) {
+        if (d3.event.keyCode === consts.ENTER_KEY && !d3.event.shiftKey) {
           this.blur();
         }
       }).on('blur', function (d) {
@@ -423,20 +423,20 @@ export default class App2 extends Component {
         selectedEdge = state.selectedEdge;
 
       switch (d3.event.keyCode) {
-        case consts.BACKSPACE_KEY:
-        case consts.DELETE_KEY:
-          d3.event.preventDefault();
-          if (selectedNode) {
-            thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
-            thisGraph.spliceLinksForNode(selectedNode);
-            state.selectedNode = null;
-            thisGraph.updateGraph();
-          } else if (selectedEdge) {
-            thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
-            state.selectedEdge = null;
-            thisGraph.updateGraph();
-          }
-          break;
+      case consts.BACKSPACE_KEY:
+      case consts.DELETE_KEY:
+        d3.event.preventDefault();
+        if (selectedNode) {
+          thisGraph.nodes.splice(thisGraph.nodes.indexOf(selectedNode), 1);
+          thisGraph.spliceLinksForNode(selectedNode);
+          state.selectedNode = null;
+          thisGraph.updateGraph();
+        } else if (selectedEdge) {
+          thisGraph.edges.splice(thisGraph.edges.indexOf(selectedEdge), 1);
+          state.selectedEdge = null;
+          thisGraph.updateGraph();
+        }
+        break;
       }
     };
 
@@ -572,10 +572,10 @@ export default class App2 extends Component {
 
     /**** MAIN ****/
 
-      // // warn the user when leaving
-      // window.onbeforeunload = function () {
-      //   return 'Make sure to save your graph locally before leaving :-)';
-      // };
+    // // warn the user when leaving
+    // window.onbeforeunload = function () {
+    //   return 'Make sure to save your graph locally before leaving :-)';
+    // };
 
     var docEl = document.documentElement,
       bodyEl = document.getElementsByTagName('body')[0];
