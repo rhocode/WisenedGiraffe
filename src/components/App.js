@@ -280,13 +280,15 @@ class App extends Component {
 
   generateNodeList() {
     const recipesByMachineClass = {};
+    const machineClassPlural = {};
     this.state.recipe && this.state.recipe.recipe.forEach(recipe => {
       const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
       thisList.push(recipe);
       recipesByMachineClass[recipe.machine_class.name] = thisList;
+      machineClassPlural[recipe.machine_class.name] = recipe.machine_class.plural;
     });
     return Object.keys(recipesByMachineClass).map(key =>
-      <SidebarButton appObject={this} label={key} key={key} items={recipesByMachineClass[key]}/>
+      <SidebarButton appObject={this} label={machineClassPlural[key]} key={key} items={recipesByMachineClass[key]}/>
     );
   }
 
@@ -436,7 +438,7 @@ class App extends Component {
           </List>
           <Divider/>
           
-          <SidebarPanel parentState={this}/>
+          <SidebarPanel parentState={this} playerUnlock={this.state.player_unlock}/>
 
           <Divider/>
 

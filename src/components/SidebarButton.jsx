@@ -111,7 +111,6 @@ class SidebarButton extends React.Component {
         </Tooltip>
       );
     });
-
     return (
       <React.Fragment key={label}>
         <Paper className={classes.paper}>
@@ -123,7 +122,7 @@ class SidebarButton extends React.Component {
           >
             <AddBoxIcon/>
             <div className={classes.label}>
-              {label}s
+              {label}
             </div>
           </Button>
           <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition placement="right-start">
