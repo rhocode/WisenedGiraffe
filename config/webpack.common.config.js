@@ -6,7 +6,7 @@ const commonPaths = require('./common-paths');
 
 const config = {
   entry: {
-    main: ['babel-polyfill', './src/index.js']
+    main: ['@babel/polyfill', './src/index.js']
   },
   output: {
     filename: '[name].js',
@@ -73,7 +73,7 @@ const config = {
   plugins: [
     new webpack.ProgressPlugin(),
     new ExtractTextPlugin('[name].css'),
-    new CleanPlugin(['../public'], { allowExternal: true }),
+    new CleanPlugin({ cleanOnceBeforeBuildPatterns: ['../public'], dangerouslyAllowCleanPatternsOutsideProject: true }),
     new HtmlPlugin({
       filename: 'index.html',
       template: commonPaths.template,
