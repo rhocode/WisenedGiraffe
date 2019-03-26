@@ -53,6 +53,14 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     this.nodeIn[incoming].push(elem.source);
   });
 
+  nodes.forEach(node => {
+    const input_slots = node.instance.input_slots;
+    const output_slots = node.instance.output_slots;
+    node.open_in_slots = input_slots - (t.nodeIn[node.id] || []).length;
+    node.open_out_slot = output_slots - (t.nodeOut[node.id] || []).length;
+    console.log(node);
+  })
+
   recalculateStorageContainers.call(t);
 
   const drag = d3.drag()
@@ -117,13 +125,13 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
       .attr('cursor', 'pointer')
       .attr('r', d => 50);
 
+  const callbacks = [];
 
   addEfficiencyArc(graphNodesEnter, 'overclock', 59, 322);
   addNodeImage(graphNodesEnter);
   insertNodeOverclock(graphNodesEnter);
   insertNodeTier(graphNodesEnter);
   insertComponents.call(t, graphNodesEnter);
-
 
   // merge
   graphNodesData =
@@ -216,7 +224,7 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
   // simulation.force('charge', d3.forceManyBody().strength(function(d) {
   //   return 20 - (20 * t.linkWeights[d.id]);
   // }));
-
+  callbacks.forEach(callback => callback());
   simulation.alphaTarget(0.3).restart();
 };
 

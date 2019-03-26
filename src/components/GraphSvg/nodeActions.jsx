@@ -1,5 +1,5 @@
 import constants from './constants';
-import {addEdge, removeEdge, removePath, removeSelectFromEdge} from './edgeActions';
+import {addEdge, addPath, removeEdge, removePath, removeSelectFromEdge} from './edgeActions';
 import * as d3 from 'd3';
 import {deselect_path_and_nodes} from './graphActions';
 
@@ -200,14 +200,26 @@ export const updateComponents = function(elementsToUpdate) {
         .attr('height', 25)
         .attr('width', 25);
       const fetchRemainingIn = allowedInRemaining.map(item =>
-        itemAccessor.filter(findItem => item === findItem.id)[0].icon
+        itemAccessor.filter(findItem => item === findItem.id)[0]
       );
 
       fetchRemainingIn.forEach((remaining, i) => {
         element.append('svg:image')
           .classed(constants.nodeRequirementsSubIconClass, true)
+          .on('mousedown', function(d) {
+            d3.event.stopImmediatePropagation();
+          })
+          .on('click', function(d) {
+            const findSuitableSource = t.graphData.nodes.filter(node => node.id !== d.id && node.open_out_slot > 0
+              && node.allowedOut.includes(remaining.id));
+            const thisNode = t.graphData.nodes.filter(node => node.id === d.id);
+            if (findSuitableSource.length > 0) {
+              addPath(t, findSuitableSource[0], thisNode[0]);
+            }
+            d3.event.stopImmediatePropagation();
+          })
           .attr('xlink:href', function (d) {
-            return remaining;
+            return remaining.icon;
           })
           .attr('x', function (d) {
             return 58 + 28 + (28 * i);
@@ -236,14 +248,26 @@ export const updateComponents = function(elementsToUpdate) {
         .attr('height', 25)
         .attr('width', 25);
       const fetchRemainingOut = allowedOutRemaining.map(item =>
-        itemAccessor.filter(findItem => item === findItem.id)[0].icon
+        itemAccessor.filter(findItem => item === findItem.id)[0]
       );
 
       fetchRemainingOut.forEach((remaining, i) => {
         element.append('svg:image')
           .classed(constants.nodeRequirementsSubIconClass, true)
+          .on('mousedown', function(d) {
+            d3.event.stopImmediatePropagation();
+          })
+          .on('click', function(d) {
+            const findSuitableTarget = t.graphData.nodes.filter(node => node.id !== d.id && node.open_in_slots > 0
+              && node.allowedIn.includes(remaining.id));
+            const thisNode = t.graphData.nodes.filter(node => node.id === d.id);
+            if (findSuitableTarget.length > 0) {
+              addPath(t, thisNode[0], findSuitableTarget[0]);
+            }
+            d3.event.stopImmediatePropagation();
+          })
           .attr('xlink:href', function (d) {
-            return remaining;
+            return remaining.icon;
           })
           .attr('x', function (d) {
             return 56 + 28 + (28 * i);
@@ -260,6 +284,7 @@ export const updateComponents = function(elementsToUpdate) {
 
 export const forceUpdateComponentLabel = function() {
   updateComponents.call(this, d3.selectAll('.' + constants.nodeRequirementsIconClass));
+
 };
 
 
@@ -287,17 +312,15 @@ export const insertComponents = function(parentElement) {
     }
   });
 
-  const el2 = d3.selectAll('.' + constants.nodeRequirementsIconClass).each(function(d) {
-    console.error("AAAA")
+  d3.selectAll('.' + constants.nodeRequirementsIconClass).each(function(d) {
     if (d.machine && d.machine.name === 'Container') {
       const nodeThis = d3.select(this);
-      console.error("WE'RE DOIN IT TONY", d)
       nodeThis.selectAll('.' + constants.nodeProducesClass).remove();
       if (d.containedItems && d.containedItems.length) {
         nodeThis.append('svg:image')
           .classed(constants.nodeProducesClass, true)
           .attr('xlink:href', function (d) {
-            console.log(d.containedItems[0])
+            //TODO: fix this static containedItem
             return d.containedItems[0].icon;
           })
           .attr('x', function (d) {
@@ -311,7 +334,6 @@ export const insertComponents = function(parentElement) {
       }
     }
   });
-
 
 
   forceUpdateComponentLabel.call(this);
