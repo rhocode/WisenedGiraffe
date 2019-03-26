@@ -133,7 +133,6 @@ class App extends Component {
   }
 
   generateRecursiveStructure(startingTable) {
-    console.log(startingTable);
     const db = this.state.db;
     const starting = db.getSchema().table(startingTable);
     this.globalStructure = this.globalStructure || {};
@@ -192,7 +191,6 @@ class App extends Component {
               const tableName = rowKey.slice(0, -3);
               const associatedData = globalStructure[tableName];
               delete row[rowKey];
-              console.log(tableName)
               const possibleData = associatedData.filter(elem => elem.id === refId);
               if (possibleData.length === 1) {
                 row[tableName] = possibleData[0];

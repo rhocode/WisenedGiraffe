@@ -181,7 +181,7 @@ export const updateComponents = function(elementsToUpdate) {
   elementsToUpdate.each(function(d) {
     const allowedInRemaining = d.allowedIn.slice();
     const provided = t.nodeIn[d.id] || [];
-    console.error(provided);
+    console.error(d.id, provided);
     const actualIn = provided.map(node => node.allowedOut).flat(1);
     new Set(actualIn).forEach(id => { allowedInRemaining.splice(allowedInRemaining.indexOf(id), 1); });
     const element = d3.select(this);
@@ -262,26 +262,14 @@ export const forceUpdateComponentLabel = function() {
   updateComponents.call(this, d3.selectAll('.' + constants.nodeRequirementsIconClass));
 };
 
+
 export const insertComponents = function(parentElement) {
+
   const el1 = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);
 
   el1.each(function(d){
     if (d.machine && d.machine.name === 'Container') {
-      if (d.containedItem) {
-        d3.select(this).append('svg:image')
-          .classed(constants.nodeProducesClass, true)
-          .attr('xlink:href', function (d) {
-            return d.containedItem.icon;
-          })
-          .attr('x', function (d) {
-            return -55;
-          })
-          .attr('y', function (d) {
-            return 18;
-          })
-          .attr('height', 40)
-          .attr('width', 40);
-      }
+      // save this for later...
     } else {
       d3.select(this).append('svg:image')
         .classed(constants.nodeProducesClass, true)
@@ -298,6 +286,33 @@ export const insertComponents = function(parentElement) {
         .attr('width', 40);
     }
   });
+
+  const el2 = d3.selectAll('.' + constants.nodeRequirementsIconClass).each(function(d) {
+    console.error("AAAA")
+    if (d.machine && d.machine.name === 'Container') {
+      const nodeThis = d3.select(this);
+      console.error("WE'RE DOIN IT TONY", d)
+      nodeThis.selectAll('.' + constants.nodeProducesClass).remove();
+      if (d.containedItems && d.containedItems.length) {
+        nodeThis.append('svg:image')
+          .classed(constants.nodeProducesClass, true)
+          .attr('xlink:href', function (d) {
+            console.log(d.containedItems[0])
+            return d.containedItems[0].icon;
+          })
+          .attr('x', function (d) {
+            return -55;
+          })
+          .attr('y', function (d) {
+            return 18;
+          })
+          .attr('height', 40)
+          .attr('width', 40);
+      }
+    }
+  });
+
+
 
   forceUpdateComponentLabel.call(this);
 };

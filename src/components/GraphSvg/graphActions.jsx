@@ -261,8 +261,8 @@ export const handleTick = function (graphNodesData, graphLinksData, simulation) 
 
   graphLinksData.selectAll('.' + constants.lineObjectClass)
     .each(function (d) {
-      d.source.vy += k;
-      d.target.vy -= k;
+      d.source.vx += k;
+      d.target.vx -= k;
     });
 };
 
