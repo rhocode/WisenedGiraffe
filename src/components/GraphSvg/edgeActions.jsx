@@ -195,7 +195,8 @@ export const addPath = function (passedThis, source, target) {
 
   if ((specialSource && specialTarget && sourceChecker && targetChecker)
     || (specialSource && !specialTarget && sourceChecker)
-    || (!specialSource && specialTarget && targetChecker))
+    || (!specialSource && specialTarget && targetChecker)
+    || (!specialSource && !specialTarget))
   {
     console.log("CHECKED FLOW");
     //checked
