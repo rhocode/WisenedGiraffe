@@ -503,7 +503,7 @@ const data = [
         icon: '',
         speed: 100,
         hidden: true,
-        input_slots: 3,
+        input_slots: 4,
         output_slots: 1
       },
       {
@@ -514,7 +514,7 @@ const data = [
         icon: '',
         speed: 100,
         hidden: true,
-        input_slots: 3,
+        input_slots: 4,
         output_slots: 1
       },
       {
