@@ -31,6 +31,7 @@ import SidebarPopup from './SidebarPopup';
 import NestedSidebarButton from './NestedSidebarButton';
 import SimpleSidebarButton from './SimpleSidebarButton';
 import SidebarPanel from './SidebarPanel';
+import SelectorPanel from './SelectorPanel';
 
 
 /* global d3 */
@@ -419,6 +420,8 @@ class App extends Component {
           </React.Fragment>
         }/>
 
+        <SelectorPanel label='Splitters'/>
+
         <Drawer
           className={classes.drawer}
           variant="permanent"
@@ -435,7 +438,7 @@ class App extends Component {
           <Divider/>
           
           <SidebarPanel parentState={this} playerUnlock={this.state.player_unlock}/>
-
+          
           <Divider/>
 
           <List>
