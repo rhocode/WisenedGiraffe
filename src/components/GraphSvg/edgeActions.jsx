@@ -173,11 +173,6 @@ const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLook
         propagateSplitterData(node, outgoingEdges);
       }
     }
-
-
-
-
-
   } else {
     //it's a container.
     const propagateContainerData = (node, outgoingEdges) => {
@@ -221,31 +216,31 @@ const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLook
           remainingDeps.push(allowedIn);
         }
       });
-
-
-      // Try best fit, otherwise, FUCK it and just pick whatever.
-      remainingDeps.sort(function(a, b) {
-        return a.length - b.length;
-      });
-      const shiftedArray = remainingDeps.slice().shift() || [];
-      const commonElements = shiftedArray.filter(function(v) {
-        return remainingDeps.every(function(a) {
-          return a.indexOf(v) !== -1;
-        });
-      });
-
-      if (commonElements.length > 0) {
-        //pick one. May change later...but most likely not.
-        console.log('We can pick');
-        // In theory we COULD pick multiple.
-        node.containedItems = [  recipes[commonElements[0]]  ];
-        console.log(commonElements, node.containedItems);
-        propagateContainerData(node, outgoingEdges);
-      } else {
-        // No common elements...
-        console.error('No common elements!!!');
-        node.hasError = {error: 'What the fuck, why is this connected? It has no common links', type: 'NO_COMMON_LINKS'};
-      }
+      //
+      //
+      // // Try best fit, otherwise, FUCK it and just pick whatever.
+      // remainingDeps.sort(function(a, b) {
+      //   return a.length - b.length;
+      // });
+      // const shiftedArray = remainingDeps.slice().shift() || [];
+      // const commonElements = shiftedArray.filter(function(v) {
+      //   return remainingDeps.every(function(a) {
+      //     return a.indexOf(v) !== -1;
+      //   });
+      // });
+      //
+      // if (commonElements.length > 0) {
+      //   //pick one. May change later...but most likely not.
+      //   console.log('We can pick');
+      //   // In theory we COULD pick multiple.
+      //   node.containedItems = [  recipes[commonElements[0]]  ];
+      //   console.log(commonElements, node.containedItems);
+      //   propagateContainerData(node, outgoingEdges);
+      // } else {
+      //   // No common elements...
+      //   console.error('No common elements!!!');
+      //   node.hasError = {error: 'What the fuck, why is this connected? It has no common links', type: 'NO_COMMON_LINKS'};
+      // }
     }
   }
 };
@@ -264,7 +259,6 @@ export const addPath = function (passedThis, source, target) {
     || (!specialSource && specialTarget && targetChecker)
     || (!specialSource && !specialTarget))
   {
-    console.log('CHECKED FLOW');
     //checked
     const newEdge = {source: source, target: target};
 
