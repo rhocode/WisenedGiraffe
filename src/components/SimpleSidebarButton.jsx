@@ -104,16 +104,29 @@ class SimpleSidebarButton extends React.Component {
                               src={resource.machine_class.icon} className={classes.itemListIcon} />{resource.machine_class.name}</MenuItem>);
                         });
                       }
-                      // if (['Logistic'].includes(key)) {
-                      //   listItems[key].forEach(resource => {
-                      //     console.log(resource);
-                      //     returnDivList.push(<MenuItem onClick={ () => {
-                      //       console.log('CLicked');
-                      //     }}
-                      //     key={resource.name}>
-                      //       <img src={resource.icon} className={classes.itemListIcon} />{resource.name}</MenuItem>);
-                      //   });
-                      // }
+                      if (['Logistic'].includes(key)) {
+                        listItems[key].forEach(resource => {
+                          returnDivList.push(<MenuItem onClick={ () => {
+                            const machine_nodes = appObject.state.machine_node.machine_node;
+                            machine_nodes.sort((node1, node2) => node1.rank - node2.rank);
+                            const upgrades = machine_nodes.filter(node => node.machine_class.id === resource.machine_class.id && resource.name === node.name);
+                            const instance = upgrades[0]
+                            appObject.graphSvg.addNode(
+                              {
+                                data: {recipe: resource},
+                                machine: resource.machine_class,
+                                allowedIn: [],
+                                allowedOut: [],
+                                instance: instance,
+                                upgradeTypes: upgrades
+                              }
+                            );
+                            this.handleClose();
+                          }}
+                          key={resource.name}>
+                            <img src={resource.icon} className={classes.itemListIcon} />{resource.name}</MenuItem>);
+                        });
+                      }
                       return returnDivList;
                     })}
                   </MenuList>

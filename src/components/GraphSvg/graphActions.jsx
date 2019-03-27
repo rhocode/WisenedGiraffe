@@ -58,8 +58,7 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     const output_slots = node.instance.output_slots;
     node.open_in_slots = input_slots - (t.nodeIn[node.id] || []).length;
     node.open_out_slot = output_slots - (t.nodeOut[node.id] || []).length;
-    console.log(node);
-  })
+  });
 
   recalculateStorageContainers.call(t);
 

@@ -171,7 +171,8 @@ export const updateOverclock = function(textElement) {
 
 export const updateNodeTier = function(textElement) {
   textElement.text(function (d) {
-    return 'I';
+    console.log(d);
+    return d.instance.machine_version.representation;
   });
 };
 
@@ -181,7 +182,6 @@ export const updateComponents = function(elementsToUpdate) {
   elementsToUpdate.each(function(d) {
     const allowedInRemaining = d.allowedIn.slice();
     const provided = t.nodeIn[d.id] || [];
-    console.error(d.id, provided);
     const actualIn = provided.map(node => node.allowedOut).flat(1);
     new Set(actualIn).forEach(id => { allowedInRemaining.splice(allowedInRemaining.indexOf(id), 1); });
     const element = d3.select(this);
@@ -293,7 +293,7 @@ export const insertComponents = function(parentElement) {
   const el1 = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);
 
   el1.each(function(d){
-    if (d.machine && d.machine.name === 'Container') {
+    if (d.machine && ['Container', 'Logistic'].includes(d.machine.name)) {
       // save this for later...
     } else {
       d3.select(this).append('svg:image')
@@ -313,7 +313,7 @@ export const insertComponents = function(parentElement) {
   });
 
   d3.selectAll('.' + constants.nodeRequirementsIconClass).each(function(d) {
-    if (d.machine && d.machine.name === 'Container') {
+    if (d.machine && ['Container', 'Logistic'].includes(d.machine.name)) {
       const nodeThis = d3.select(this);
       nodeThis.selectAll('.' + constants.nodeProducesClass).remove();
       if (d.containedItems && d.containedItems.length) {

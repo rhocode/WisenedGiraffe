@@ -1,7 +1,7 @@
 import lf from 'lovefield';
 
 /** @namespace lf.Type */
-const schemaBuilder = lf.schema.create('test', 5);
+const schemaBuilder = lf.schema.create('test', 6);
 
 schemaBuilder.createTable('node_type')
   .addColumn('id', lf.Type.INTEGER)
@@ -21,8 +21,9 @@ schemaBuilder.createTable('machine_version')
   .addColumn('hidden', lf.Type.BOOLEAN)
   .addColumn('color', lf.Type.STRING)
   .addColumn('rank', lf.Type.INTEGER)
-  .addNullable(['color', 'rank'])
-  .addColumn('name', lf.Type.STRING);
+  .addColumn('representation', lf.Type.STRING)
+  .addColumn('name', lf.Type.STRING)
+  .addNullable(['color', 'rank']);
 
 schemaBuilder.createTable('machine_class')
   .addColumn('id', lf.Type.INTEGER)
@@ -309,13 +310,15 @@ const data = [
   {
     key: 'machine_version',
     value: [
-      {name: 'internal'},
-      {name: 'Mk.1', rank: 0},
-      {name: 'Mk.2', rank: 1},
-      {name: 'Mk.3', rank: 2},
-      {name: 'Mk.4', rank: 3},
-      {name: 'Mk.5', rank: 4},
-      {name: 'Mk.6', rank: 5},
+      {name: 'internal', representation: ''},
+      {name: 'Mk.1', rank: 0, representation: 'I'},
+      {name: 'Mk.2', rank: 1, representation: 'II'},
+      {name: 'Mk.3', rank: 2, representation: 'III'},
+      {name: 'Mk.4', rank: 3, representation: 'VI'},
+      {name: 'Mk.5', rank: 4, representation: 'V'},
+      {name: 'Mk.6', rank: 5, representation: 'IV'},
+      {name: 'S', rank: 6, representation: 'S'}, // For Splitters
+      {name: 'M', rank: 7, representation: 'M'},
     ]
   },
   {
@@ -388,7 +391,7 @@ const data = [
       {
         name: 'Splitter',
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+        machine_version_id: getTableEntryIdByName('machine_version', 'S'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
         speed: 999999,
         icon: baseUrl + 'Splitter.png',
@@ -398,7 +401,7 @@ const data = [
       {
         name: 'Merger',
         node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+        machine_version_id: getTableEntryIdByName('machine_version', 'M'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
         speed: 999999,
         icon: baseUrl + 'Merger.png',

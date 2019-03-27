@@ -39,8 +39,6 @@ export const recalculateStorageContainers = function() {
     nodeUnionArray[index].childProvides = [];
     nodeUnionArray[index].logisticNeeds = [];
     nodeLookupArray[nodeUnionArray[index].id] =nodeUnionArray[index];
-
-    console.error('Setting node' + nodeUnionArray[index].machine.name + 'back to original', nodeUnionArray[index]);
   });
 
 
@@ -50,13 +48,13 @@ export const recalculateStorageContainers = function() {
     const incomingEdgesB = nodeInShallow[b.id.toString()];
 
     if ((!incomingEdgesA || !incomingEdgesA.length) && (!incomingEdgesB || !incomingEdgesB.length)) {
-      if (a.machine.name !== 'Container') {
+      if (!['Container', 'Logistic'].includes(a.machine.name )) {
         return -1;
-      } else if (b.machine.name !== 'Container'){
+      } else if (!['Container', 'Logistic'].includes(b.machine.name )){
         return 1;
-      } else if (a.machine.name === 'Container' && a.containedItems) {
+      } else if (['Container', 'Logistic'].includes(a.machine.name ) && a.containedItems) {
         return -1;
-      }  else if (b.machine.name === 'Container' && b.containedItems) {
+      }  else if (['Container', 'Logistic'].includes(b.machine.name ) && b.containedItems) {
         return 1;
       } else {
         //TODO: splitters?
@@ -82,6 +80,10 @@ export const recalculateStorageContainers = function() {
     const elem = myTinyQueue.pop();
     reverseTraversal.push(elem);
     const outgoing = nodeOutShallow[elem.id.toString()] || [];
+    if (nodeInShallow[elem.id.toString()].length()) {
+      // We detected a cycle!!!!
+
+    }
     processCurrentNode.call(this, elem, outgoing.map(i => nodeLookupArray[i]), nodeInShallow, nodeLookupArray, nodeInShallowCopy, this.props.parentAccessor);
 
     if (outgoing) {
@@ -102,7 +104,6 @@ export const recalculateStorageContainers = function() {
 };
 
 const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLookupArray, immutableNodeInShallow, mainGraphAccessor) {
-  console.log('Processing current node: ' + node.machine);
   if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
     // update downstream
     outgoingEdges.forEach(elem => {
@@ -111,7 +112,81 @@ const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLook
       }
     }); // wow, we're literally only going to have one outgoing edge.
   } else if (node.machine.name ==='Logistic') {
-    console.error('They\'re not supposed to be here!!');
+    if (node.instance.name === 'Splitter') {
+
+      const propagateSplitterData = (node, outgoingEdges) => {
+        node.allowedIn = node.containedItems.map(elem => elem.id);
+        node.allowedOut = node.containedItems.map(elem => elem.id);
+        outgoingEdges.forEach(elem => {
+          console.log(elem.childProvides.filter(entry => entry.source === node.id));
+          if (elem.childProvides.filter(entry => entry.source === node.id).length === 0) {
+            node.childProvides.forEach(childEntry => {
+              const provider = Object.assign({}, childEntry, {source: node.id});
+              elem.childProvides.push(provider);
+            });
+          }
+        });
+      };
+
+      if (node.childProvides.length) {
+
+        node.containedItems = node.childProvides.map(elem => elem.item.item);
+        propagateSplitterData(node, outgoingEdges);
+      }
+
+      // deduce what your upstream needs:
+      const parents = outgoingEdges.map(elem =>
+        ({type: elem.machine.name, allowedIn: elem.allowedIn, node: elem, has: elem.childProvides, otherNodes: immutableNodeInShallow[elem.id].map(nodeId => nodeLookupArray[nodeId]).filter(other => node.id !== other.id)    })
+      );  // wow, we're literally only going to have one outgoing edge.
+
+      const remainingDeps = [];
+      const recipes = {};
+      const otherChildrenByParent = {};
+      parents.forEach(parent => {
+        const allowedIn = parent.allowedIn.slice();
+        const childrenAllowedOut = parent.otherNodes.map(node => node.allowedOut).flat();
+        //TODO: *probably* shouldn't used allowedOut... we should use containedItem
+        const unresolvedQueries = parent.otherNodes.filter(node => node.allowedOut.length === 0 && ['Container', 'Logistic'].includes(node.machine.name));
+        childrenAllowedOut.forEach(item => {
+          allowedIn.splice(allowedIn.indexOf(item), 1);
+        });
+
+        otherChildrenByParent[id] = unresolvedQueries;
+
+        if (allowedIn.length === unresolvedQueries.length + 1) {
+          // """"smart"""" linking. We can find the least common denominator
+          allowedIn.forEach(id => recipes[id] = mainGraphAccessor.state.recipe.item[id]);
+          remainingDeps.push(allowedIn);
+        }
+      });
+
+      // Try best fit, otherwise, FUCK it and just pick whatever.
+      remainingDeps.sort(function(a, b) {
+        return a.length - b.length;
+      });
+
+      const shiftedArray = remainingDeps.slice().shift() || [];
+      const commonElements = shiftedArray.filter(function(v) {
+        return remainingDeps.every(function(a) {
+          return a.indexOf(v) !== -1;
+        });
+      });
+
+      if (commonElements.length > 0) {
+        if ()
+        //pick one. May change later...but most likely not.
+        console.log('We can pick');
+        // In theory we COULD pick multiple.
+        node.containedItems = [  recipes[commonElements[0]]  ];
+        console.log(commonElements, node.containedItems);
+        propagateSplitterData(node, outgoingEdges);
+      } else {
+        // No common elements...
+        console.error('No common elements!!!');
+        node.hasError = {error: 'What the fuck, why is this connected? It has no common links', type: 'NO_COMMON_LINKS'};
+      }
+    }
+
   } else {
     //it's a container.
     const propagateContainerData = (node, outgoingEdges) => {
@@ -188,8 +263,8 @@ export const addPath = function (passedThis, source, target) {
 
   const sourceChecker = (source.containedItems || []).length > 0;
   const targetChecker = (target.containedItems || []).length > 0;
-  const specialSource = ['Container'].includes(source.machine.name);
-  const specialTarget = ['Container'].includes(target.machine.name);
+  const specialSource = ['Container', 'Logistic'].includes(source.machine.name);
+  const specialTarget = ['Container', 'Logistic'].includes(target.machine.name);
 
   console.log(sourceChecker, targetChecker, specialSource, specialTarget);
 
@@ -305,14 +380,6 @@ export const removePath = function (d, t) {
   t.graphData.links.splice(t.graphData.links.indexOf(d), 1);
 };
 
-//v1
-export const replaceSelectEdge = function (d3Path, edgeData) {
-  d3Path.classed(constants.selectedClass, true);
-  if (this.selectedEdge) {
-    removeSelectFromEdge.call(this);
-  }
-  this.selectedEdge = edgeData;
-};
 
 export const removeSelectFromEdge = function () {
   if (!this.selectedEdge) {

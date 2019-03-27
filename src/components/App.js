@@ -300,7 +300,6 @@ class App extends Component {
 
     // Manually handle splitters and mergers
     springByClass['Logistic'] = this.state.machine_node.machine_node.filter(elem => elem.machine_class.name === 'Logistic');
-    console.log(springByClass);
 
 
     return (
@@ -319,7 +318,6 @@ class App extends Component {
         // dataList.push({player_unlock, item});
       }
     });
-    console.log(dataList)
     return (
       <div>hello</div>
     );
@@ -452,7 +450,7 @@ class App extends Component {
         </Drawer>
         <main className={classes.content}>
           {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
-            console.log(graphSvg);
+            console.log("Loaded graphSvg main object:", graphSvg);
             t.graphSvg = graphSvg;
           }}/> : <div/>}
         </main>
