@@ -9,12 +9,11 @@ import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import InfoIcon from '@material-ui/icons/Info';
-import ShareIcon from '@material-ui/icons/Share';
+
 import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
 import InputIcon from '@material-ui/icons/Input';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
+
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Loader from './Loader';
@@ -29,6 +28,9 @@ import NestedSidebarButton from './NestedSidebarButton';
 import SimpleSidebarButton from './SimpleSidebarButton';
 import SidebarPanel from './SidebarPanel';
 import SelectorPanel from './SelectorPanel';
+import ClearButton from "./ClearButton";
+import ShareButton from "./ShareButton";
+import LoadButton from "./LoadButton";
 // import * as d3 from 'd3';
 
 /* global d3 */
@@ -360,45 +362,9 @@ class App extends Component {
               <SettingsInputComponentIcon/>
               <div className={classes.label}>Optimize</div>
             </Button>
-            <ToolbarPopup Icon={DeleteIcon} title='Clear' label='Clear' contents={
-              <React.Fragment>
-                <div className={classes.dialogContainer}>
-                  <Typography variant="h5">Are you sure you want to clear everything?</Typography>
-                  <Button color="secondary" variant="outlined" className={`${classes.dialogButton}`}>
-                    <DeleteIcon />
-                    <div className={classes.label}>Yes, I'm sure!</div>
-                  </Button>
-                </div>
-              </React.Fragment>
-            } />
-            <ToolbarPopup Icon={InputIcon} title='Load' label='Load' contents={
-              <React.Fragment>
-                <TextField label="Share Code">
-                </TextField>
-                <Button color="inherit" className={classes.inlineDialogButton}>
-                  <InputIcon/>
-                  <div className={classes.label}>Load</div>
-                </Button>
-              </React.Fragment>
-            } />
-            <ToolbarPopup Icon={ShareIcon} title='Share' label='Share' contents={
-              <React.Fragment>
-                <div className={classes.dialogContainer}>
-                  <div>
-                    <TextField label="Share Code">
-                    </TextField>
-                    <Button color="inherit" className={classes.inlineDialogButton}>
-                      <FileCopyIcon/>
-                      <div className={classes.label}>Copy</div>
-                    </Button>
-                  </div>
-                  <Button color="inherit" className={classes.dialogButton} fullWidth>
-                    <ShareIcon/>
-                    <div className={classes.label}>Generate Image</div>
-                  </Button>
-                </div>
-              </React.Fragment>
-            } />
+            <ShareButton t={t} />
+            <LoadButton t={t} />
+            <ClearButton t={t} />
           </Toolbar>
         </AppBar>
 
@@ -450,7 +416,7 @@ class App extends Component {
         </Drawer>
         <main className={classes.content}>
           {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
-            console.log("Loaded graphSvg main object:", graphSvg);
+            console.log('Loaded graphSvg main object:', graphSvg);
             t.graphSvg = graphSvg;
           }}/> : <div/>}
         </main>

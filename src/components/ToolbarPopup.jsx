@@ -10,6 +10,8 @@ const styles = theme => ({
   },
 });
 
+const MyContext = React.createContext();
+
 class ToolbarPopup extends React.Component {
   constructor(props) {
     super(props);
@@ -19,9 +21,9 @@ class ToolbarPopup extends React.Component {
   handleModalClose = () => this.setState({modalOpen: false});
   handleModalOpen = () => this.setState({modalOpen: true});
 
-  render() {
-    const {classes, Icon, label, title, contents, onClick} = this.props;
 
+  render() {
+    const {classes, Icon, label, title, children, onClick} = this.props;
     return (
       <React.Fragment>
         <Button color='inherit' onClick={onClick || this.handleModalOpen}>
@@ -29,7 +31,11 @@ class ToolbarPopup extends React.Component {
           <div className={classes.label}>{label}</div>
         </Button>
         <PopupDialog title={title} open={this.state.modalOpen}
-                     handleModalClose={() => this.setState({modalOpen: false})} contents={contents}/>
+          handleModalClose={this.handleModalClose} >
+          <MyContext.Provider value={{ handleModalClose: this.handleModalClose, handleModalOpen: this.handleModalOpen}}>
+            {children}
+          </MyContext.Provider>
+        </PopupDialog>
       </React.Fragment>
     );
   }

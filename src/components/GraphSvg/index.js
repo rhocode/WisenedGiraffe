@@ -1,13 +1,14 @@
 import React, {Component} from 'react';
 import {svgKeyDown, svgKeyUp} from './keyboardEvents';
-import {node_clicked, node_mouse_down, node_mouse_out, node_mouse_over, node_mouse_up} from './mouseEvents';
 import {deselect_path_and_nodes, initSimulation, updateGraph, zoom_actions} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
 
 import * as d3 from 'd3';
 import {add_node} from './nodeActions';
-
-// const d3 = window.d3;
+import {parse, stringify} from 'flatted/esm';
+import JSONC from 'jsoncomp';
+import pako from 'pako';
+import Base64 from 'Base64';
 
 const styles = theme => ({
   tooltip: {
@@ -64,32 +65,25 @@ class GraphSvg extends Component {
     this.graphData.nodes.forEach(node => {
       node.fx = null;
       node.fy = null;
+      node.vx = 0;
+      node.vy  = 0;
     });
 
     this.updateGraphHelper();
   }
 
-  createGraph(inputSvg) {
-    this.id = 0;
+  createGraph(inputSvg, nodes = [], links = [], data = {}) {
+
     this.graphData = {
-      'nodes': [
-        {'data':{'recipe':{'name':'Iron Ingot','inputs':[{'quantity':1,'item':{'name':'Iron Ore','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png','hidden':false,'id':1}}],'time':2,'power':4,'quantity':1,'hidden':false,'id':0,'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3},'item':{'name':'Iron Ingot','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png','hidden':false,'id':4}}},'machine':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3},'allowedIn':[1],'allowedOut':[4],'instance':{'name':'Smelter Mk.1','speed':100,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','input_slots':1,'output_slots':1,'hidden':false,'id':5,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}},'upgradeTypes':[{'name':'Smelter Mk.1','speed':100,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','input_slots':1,'output_slots':1,'hidden':false,'id':5,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}},{'name':'Smelter Mk.2','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','speed':100,'hidden':true,'input_slots':1,'output_slots':1,'id':6,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.2','rank':1,'representation':'II','hidden':false,'id':2},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}}],'id':3,'x':0,'y':0,'overclock':100,'open_in_slots':1,'open_out_slot':1,'index':1,'vy':0,'vx':0},
-        {'data':{'recipe':{'name':'Iron Plate','inputs':[{'quantity':12,'item':{'name':'Iron Ingot','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png','hidden':false,'id':4}}],'time':4,'power':4,'quantity':1,'hidden':false,'id':3,'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0},'item':{'name':'Iron Plate','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Plate.png','hidden':false,'id':6}}},'machine':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0},'allowedIn':[4],'allowedOut':[6],'instance':{'name':'Constructor Mk.1','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'input_slots':1,'output_slots':1,'hidden':false,'id':7,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}},'upgradeTypes':[{'name':'Constructor Mk.1','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'input_slots':1,'output_slots':1,'hidden':false,'id':7,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}},{'name':'Constructor Mk.2','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'hidden':true,'input_slots':1,'output_slots':1,'id':8,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.2','rank':1,'representation':'II','hidden':false,'id':2},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}}],'id':3,'x':0,'y':0,'overclock':100,'open_in_slots':1,'open_out_slot':1,'index':3,'vy':0,'vx':0},
-        {'data':{'recipe':{'hidden':false,'id':5,'machine_class':{'name':'Container','plural':'Containers','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','hidden':false,'id':6},'spring_type':{'name':'Container','hidden':false,'id':1}}},'machine':{'name':'Container','plural':'Containers','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','hidden':false,'id':6},'allowedIn':[],'allowedOut':[],'instance':{'name':'Container','speed':999999,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','input_slots':1,'output_slots':1,'hidden':false,'id':0,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Container','plural':'Containers','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','hidden':false,'id':6}},'upgradeTypes':[{'name':'Container','speed':999999,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','input_slots':1,'output_slots':1,'hidden':false,'id':0,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Container','plural':'Containers','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','hidden':false,'id':6}}],'id':3,'x':0,'y':0,'overclock':100,'open_in_slots':1,'open_out_slot':1,'index':0,'vy':0,'vx':0}
-      ],
+      nodes: nodes,
+      links: links
     };
+
+    this.id = Math.max(...(this.graphData.nodes.map(elem => elem.id))) + 1;
+    if (this.id === Number.NEGATIVE_INFINITY) {
+      this.id = 0;
+    }
     this.inputSvg = inputSvg;
-    this.graphData.nodes.forEach(elem => {
-      elem.id = (this.id++);
-    });
-
-    const getter = id => {
-      return this.graphData.nodes[id];
-    };
-
-    this.graphData.links = [
-      {'source': getter(0), 'target': getter(1)},
-    ];
 
     //add encompassing group for the zoom
     this.svgGroup = inputSvg.append('g')
@@ -195,9 +189,66 @@ class GraphSvg extends Component {
     updateGraph.call(this, this.simulation, this.graphNodesGroup, this.graphLinksGroup);
   }
 
-  componentDidMount() {
-    const svg = d3.select('#mainRender');
+  clearGraphDataRaw() {
+    const parent = d3.select(d3.select('#mainRender').node().parentElement);
+    d3.select('#mainRender').selectAll('*').remove();
+    d3.select('#mainRender').remove();
+
+    return parent.append('svg').attr('id', 'mainRender');
+  }
+  clearGraphData() {
+    const svg = this.clearGraphDataRaw();
     this.createGraph(svg);
+  }
+
+  loadGraphData(data) {
+    const svg = this.clearGraphDataRaw();
+    //nodes, links, data
+    this.createGraph(svg, data.graphData.nodes, data.graphData.links);
+  }
+
+  compressGraphData() {
+    const compressedData = {
+      version: 0.01,
+      graphData: this.graphData,
+      playerData: {},
+      secret: {}
+    };
+    return Base64.btoa(pako.deflate(stringify(compressedData), { to: 'string' }));
+  }
+
+  inflateGraphData(data) {
+    return parse(pako.inflate(Base64.atob(data),  { to: 'string' }));
+  }
+
+
+  componentDidMount() {
+    console.log(this);
+    const svg = d3.select('#mainRender');
+
+    let id = 0;
+    const graphData = {
+      'nodes': [
+        {'data':{'recipe':{'name':'Iron Ingot','inputs':[{'quantity':1,'item':{'name':'Iron Ore','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ore.png','hidden':false,'id':1}}],'time':2,'power':4,'quantity':1,'hidden':false,'id':0,'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3},'item':{'name':'Iron Ingot','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png','hidden':false,'id':4}}},'machine':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3},'allowedIn':[1],'allowedOut':[4],'instance':{'name':'Smelter Mk.1','speed':100,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','input_slots':1,'output_slots':1,'hidden':false,'id':5,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}},'upgradeTypes':[{'name':'Smelter Mk.1','speed':100,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','input_slots':1,'output_slots':1,'hidden':false,'id':5,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}},{'name':'Smelter Mk.2','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','speed':100,'hidden':true,'input_slots':1,'output_slots':1,'id':6,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.2','rank':1,'representation':'II','hidden':false,'id':2},'machine_class':{'name':'Smelter','plural':'Smelters','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Smelter.png','hidden':false,'id':3}}],'id':3,'x':0,'y':0,'overclock':100,'open_in_slots':1,'open_out_slot':1,'index':1,'vy':0,'vx':0},
+        {'data':{'recipe':{'name':'Iron Plate','inputs':[{'quantity':12,'item':{'name':'Iron Ingot','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Ingot.png','hidden':false,'id':4}}],'time':4,'power':4,'quantity':1,'hidden':false,'id':3,'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0},'item':{'name':'Iron Plate','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Iron_Plate.png','hidden':false,'id':6}}},'machine':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0},'allowedIn':[4],'allowedOut':[6],'instance':{'name':'Constructor Mk.1','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'input_slots':1,'output_slots':1,'hidden':false,'id':7,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}},'upgradeTypes':[{'name':'Constructor Mk.1','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'input_slots':1,'output_slots':1,'hidden':false,'id':7,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}},{'name':'Constructor Mk.2','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','speed':100,'hidden':true,'input_slots':1,'output_slots':1,'id':8,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.2','rank':1,'representation':'II','hidden':false,'id':2},'machine_class':{'name':'Constructor','plural':'Constructors','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Constructor.png','hidden':false,'id':0}}],'id':3,'x':0,'y':0,'overclock':100,'open_in_slots':1,'open_out_slot':1,'index':3,'vy':0,'vx':0},
+        {'data':{'recipe':{'hidden':false,'id':5,'machine_class':{'name':'Container','plural':'Containers','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','hidden':false,'id':6},'spring_type':{'name':'Container','hidden':false,'id':1}}},'machine':{'name':'Container','plural':'Containers','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','hidden':false,'id':6},'allowedIn':[],'allowedOut':[],'instance':{'name':'Container','speed':999999,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','input_slots':1,'output_slots':1,'hidden':false,'id':0,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Container','plural':'Containers','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','hidden':false,'id':6}},'upgradeTypes':[{'name':'Container','speed':999999,'icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','input_slots':1,'output_slots':1,'hidden':false,'id':0,'node_type':{'name':'Machine Node','hidden':false,'id':0},'machine_version':{'name':'Mk.1','rank':0,'representation':'I','hidden':false,'id':1},'machine_class':{'name':'Container','plural':'Containers','icon':'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/Storage_Container_MK1.png','hidden':false,'id':6}}],'id':3,'x':0,'y':0,'overclock':100,'open_in_slots':1,'open_out_slot':1,'index':0,'vy':0,'vx':0}
+      ],
+    };
+
+    graphData.nodes.forEach(elem => {
+      elem.id = (id++);
+    });
+
+    const getter = id => {
+      return graphData.nodes[id];
+    };
+
+    graphData.links = [
+      {'source': getter(0), 'target': getter(1)},
+    ];
+
+    this.createGraph(svg, graphData.nodes, graphData.links);
+    this.compressGraphData();
   }
 
   render() {
@@ -206,5 +257,3 @@ class GraphSvg extends Component {
 }
 
 export default GraphSvg;
-
-// export default withStyles(styles)(GraphSvg);

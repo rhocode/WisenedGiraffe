@@ -9,6 +9,7 @@ import Grow from '@material-ui/core/Grow';
 
 import InnerNestedSidebarButton from './InnerNestedSidebarButton';
 import ClickAwayListenerV2 from "./ClickAwayListenerV2";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 const styles = theme => ({
   root: {},
@@ -79,7 +80,7 @@ class NestedSidebarButton extends React.Component {
                 style={{transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'}}
               >
                 <Paper>
-                  <ClickAwayListenerV2 onClickAway={this.handleClose} clobberedElement={'#mainRender'}>
+                  <ClickAwayListener onClickAway={this.handleClose}>
                     <MenuList>
                       {Object.keys(listItems).map(key => {
                         const returnDivList = [];
@@ -91,7 +92,7 @@ class NestedSidebarButton extends React.Component {
                         return returnDivList;
                       })}
                     </MenuList>
-                  </ClickAwayListenerV2>
+                  </ClickAwayListener>
                 </Paper>
               </Grow>
             )}

@@ -20,7 +20,6 @@ class ClickAwayListenerV2 extends React.Component {
 
     for(let elem of document.querySelectorAll('*')) {
       this.clobberList.push(elem);
-      console.log(elem);
       elem.addEventListener('click',  this.props.onClickAway, true);
     }
   }

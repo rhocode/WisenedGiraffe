@@ -26,7 +26,7 @@ class PopupDialog extends React.Component {
   }
 
   render() {
-    const {classes, title, contents, open, handleModalClose} = this.props;
+    const {classes, title, contents, open, handleModalClose, children} = this.props;
     return (
       <Dialog
         open={Boolean(open)}
@@ -35,7 +35,7 @@ class PopupDialog extends React.Component {
       >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>
-          {contents}
+          {children}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleModalClose} color='secondary'>Close</Button>

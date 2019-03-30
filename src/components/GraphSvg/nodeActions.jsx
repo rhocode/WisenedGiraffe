@@ -171,7 +171,6 @@ export const updateOverclock = function(textElement) {
 
 export const updateNodeTier = function(textElement) {
   textElement.text(function (d) {
-    console.log(d);
     return d.instance.machine_version.representation;
   });
 };
