@@ -1,16 +1,18 @@
 import constants from './constants';
 import * as d3 from 'd3';
 import {
-  addNodeImage,
   addEfficiencyArc,
+  addNodeImage,
+  insertComponents,
   insertNodeOverclock,
+  insertNodeTier,
   node_clicked,
   node_mouse_down,
   node_mouse_out,
   node_mouse_over,
   node_mouse_up,
   remove_select_from_nodes,
-  wheelZoomCalculation, insertNodeTier, insertComponents
+  wheelZoomCalculation
 } from './nodeActions';
 import {drag_drag, drag_end, drag_start} from './mouseEvents';
 import {pathMouseClick, recalculateStorageContainers} from './edgeActions';
@@ -31,8 +33,8 @@ export const initSimulation = () => {
     .force('collision', d3.forceCollide().radius(function (d) {
       return 120;
     }))
-    .force('y', d3.forceY())
-    .force('x', d3.forceX());
+    .force('x', d3.forceX().x(function(d){return width/2;}))
+    .force('y', d3.forceY().y(function(d){return height/2;}));
 };
 
 export const updateGraph = function (simulation, graphNodesGroup, graphLinksGroup) {

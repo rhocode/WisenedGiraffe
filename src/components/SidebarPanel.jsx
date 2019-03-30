@@ -6,7 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import ShuffleIcon from '@material-ui/icons/Shuffle';
 import ReplayIcon from '@material-ui/icons/Replay';
 import UndoIcon from '@material-ui/icons/Undo';
-import { withStyles } from '@material-ui/core';
+import {withStyles} from '@material-ui/core';
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';

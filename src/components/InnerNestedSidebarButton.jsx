@@ -2,11 +2,11 @@ import React from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 
 import {withStyles} from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
 import Grow from '@material-ui/core/Grow';
+import ClickAwayListenerV2 from "./ClickAwayListenerV2";
 
 const styles = theme => ({
   root: {},
@@ -77,7 +77,7 @@ class InnerNestedSidebarButton extends React.Component {
               style={{transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'}}
             >
               <Paper>
-                <ClickAwayListener onClickAway={this.handleClose}>
+                <ClickAwayListenerV2 onClickAway={this.handleClose} clobberedElement={'#mainRender'}>
                   <MenuList>
                     {
                       listItems.map((item) => {
@@ -108,7 +108,7 @@ class InnerNestedSidebarButton extends React.Component {
                       })
                     }
                   </MenuList>
-                </ClickAwayListener>
+                </ClickAwayListenerV2>
               </Paper>
             </Grow>
           )}

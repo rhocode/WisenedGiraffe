@@ -1,5 +1,6 @@
 import React from 'react';
 import {withStyles} from '@material-ui/core';
+import * as d3 from 'd3';
 
 const loading = [
   'Loading...',
@@ -26,7 +27,7 @@ class Loader extends React.Component {
   componentDidUpdate(previousProps, previousState) {
     if (this.props.ready === true && !previousProps.ready) {
       this.props.parentState.setState({isReady: true}, () => {
-        console.info('App set as "Ready"');
+        console.info('App set as "Ready"', d3);
       });
     }
   }

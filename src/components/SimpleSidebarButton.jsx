@@ -4,10 +4,10 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import Popper from '@material-ui/core/Popper';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import { withStyles } from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
 import Grow from '@material-ui/core/Grow';
+import ClickAwayListenerV2 from "./ClickAwayListenerV2";
 
 const styles = theme => ({
   root: {
@@ -76,7 +76,7 @@ class SimpleSidebarButton extends React.Component {
               style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
             >
               <Paper>
-                <ClickAwayListener onClickAway={this.handleClose}>
+                <ClickAwayListenerV2 onClickAway={this.handleClose} clobberedElement={'#mainRender'}>
                   <MenuList>
                     {Object.keys(listItems).map(key => {
                       const returnDivList = [];
@@ -130,7 +130,7 @@ class SimpleSidebarButton extends React.Component {
                       return returnDivList;
                     })}
                   </MenuList>
-                </ClickAwayListener>
+                </ClickAwayListenerV2>
               </Paper>
             </Grow>
           )}

@@ -3,7 +3,6 @@ import {svgKeyDown, svgKeyUp} from './keyboardEvents';
 import {node_clicked, node_mouse_down, node_mouse_out, node_mouse_over, node_mouse_up} from './mouseEvents';
 import {deselect_path_and_nodes, initSimulation, updateGraph, zoom_actions} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
-import {withStyles} from '@material-ui/core';
 
 import * as d3 from 'd3';
 import {add_node} from './nodeActions';
@@ -100,6 +99,7 @@ class GraphSvg extends Component {
     const graphObjects = this.svgGroup;
 
     const t = this;
+
     inputSvg.on('click', function (d) {
       deselect_path_and_nodes.call(this, t);
     });

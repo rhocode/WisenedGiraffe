@@ -1,5 +1,5 @@
 import constants from './constants';
-import {addEdge, addPath, removeEdge, removePath, removeSelectFromEdge} from './edgeActions';
+import {addPath, removePath} from './edgeActions';
 import * as d3 from 'd3';
 import {deselect_path_and_nodes} from './graphActions';
 
@@ -203,7 +203,13 @@ export const updateComponents = function(elementsToUpdate) {
         itemAccessor.filter(findItem => item === findItem.id)[0]
       );
 
+      const outputtedItems = new Set();
+
       fetchRemainingIn.forEach((remaining, i) => {
+        if (outputtedItems.has(remaining.icon)) {
+          return;
+        }
+        outputtedItems.add(remaining.icon);
         element.append('svg:image')
           .classed(constants.nodeRequirementsSubIconClass, true)
           .on('mousedown', function(d) {
@@ -251,7 +257,13 @@ export const updateComponents = function(elementsToUpdate) {
         itemAccessor.filter(findItem => item === findItem.id)[0]
       );
 
+      const outputtedItemsIn = new Set();
+
       fetchRemainingOut.forEach((remaining, i) => {
+        if (outputtedItemsIn.has(remaining.icon)) {
+          return;
+        }
+        outputtedItemsIn.add(remaining.icon);
         element.append('svg:image')
           .classed(constants.nodeRequirementsSubIconClass, true)
           .on('mousedown', function(d) {
@@ -316,22 +328,26 @@ export const insertComponents = function(parentElement) {
     if (d.machine && ['Container', 'Logistic'].includes(d.machine.name)) {
       const nodeThis = d3.select(this);
       nodeThis.selectAll('.' + constants.nodeProducesClass).remove();
-      if (d.containedItems && d.containedItems.length) {
+      const outputtedItems = new Set();
+      (d.containedItems || []).forEach((containedItem, index) => {
+        if (outputtedItems.has(containedItem.icon)) {
+          return;
+        }
+        outputtedItems.add(containedItem.icon);
         nodeThis.append('svg:image')
           .classed(constants.nodeProducesClass, true)
           .attr('xlink:href', function (d) {
-            //TODO: fix this static containedItem
-            return d.containedItems[0].icon;
+            return d.containedItems[index].icon;
           })
           .attr('x', function (d) {
             return -55;
           })
           .attr('y', function (d) {
-            return 18;
+            return 18 + (30 * index);
           })
           .attr('height', 40)
           .attr('width', 40);
-      }
+      });
     }
   });
 

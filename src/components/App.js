@@ -17,12 +17,9 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-// import * as d3 from 'd3';
-
 import Loader from './Loader';
 import createDatabase from './newData';
 import GraphSvg from './GraphSvg';
-import {addNode} from './GraphSvg/nodeActions';
 
 import SidebarButton from './SidebarButton';
 import FabPopup from './FabPopup';
@@ -32,7 +29,7 @@ import NestedSidebarButton from './NestedSidebarButton';
 import SimpleSidebarButton from './SimpleSidebarButton';
 import SidebarPanel from './SidebarPanel';
 import SelectorPanel from './SelectorPanel';
-
+// import * as d3 from 'd3';
 
 /* global d3 */
 
