@@ -29,12 +29,12 @@ export const initSimulation = () => {
       return d.id;
     }).distance(50))
     .force('charge', d3.forceManyBody().strength(20))
-    .force('center', d3.forceCenter(width / 2, height / 2))
+    // .force('center', d3.forceCenter(width / 2, height / 2))
     .force('collision', d3.forceCollide().radius(function (d) {
       return 120;
     }))
-    .force('x', d3.forceX().x(function(d){return width/2;}))
-    .force('y', d3.forceY().y(function(d){return height/2;}));
+    .force('x', d3.forceX().strength(0.1).x(function(d){return width/2;}))
+    .force('y', d3.forceY().strength(0.1).y(function(d){return height/2;}));
 };
 
 export const updateGraph = function (simulation, graphNodesGroup, graphLinksGroup) {
