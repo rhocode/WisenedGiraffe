@@ -29,7 +29,9 @@ class FabPopup extends React.Component {
           <HelpIcon/>
         </Fab>
         <PopupDialog title={title} open={this.state.modalOpen}
-                     handleModalClose={() => this.setState({modalOpen: false})} contents={contents}/>
+          handleModalClose={() => this.setState({modalOpen: false})}>
+          {contents}
+        </PopupDialog>
       </React.Fragment>
     );
   }

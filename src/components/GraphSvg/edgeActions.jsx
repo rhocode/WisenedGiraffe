@@ -241,11 +241,12 @@ export const recalculateStorageContainers = function() {
 
   // retuires nodeOutput array
   const cycled_components = (graph) => {
-    return new Set(simple_cycle(graph).reduce((a, b) => {
+    const tmp = simple_cycle(graph);
+    return {raw: tmp, set: new Set(tmp.reduce((a, b) => {
       const inputA = a.map(elem => parseInt(elem));
       const inputB = b.map(elem => parseInt(elem));
       return new Set([...inputA, ...inputB]);
-    }));
+    }))};
   };
 
   // how to remove dups
@@ -279,9 +280,9 @@ export const recalculateStorageContainers = function() {
 
           const vertexChildProvides = new Set((vertex.childProvides || []).map(provideMap => provideMap.source));
           myChildProvides.forEach(provide=>{
-            console.log("Processing provide", provide, vertexChildProvides);
+            console.log('Processing provide', provide, vertexChildProvides);
             if (!vertexChildProvides.has(provide.source)) {
-              console.log("Pushing provide")
+              console.log('Pushing provide');
               vertex.childProvides.push(provide);
             }
           });
@@ -291,7 +292,7 @@ export const recalculateStorageContainers = function() {
             edgesToDeleteFromNodes.add(vertex.id);
             const outs = nodeOut[vertex.id];
             if (!outs) {
-              throw new Error("Why are there no outs for node" + vertex.id + ' ' + JSON.stringify(nodeOut));
+              throw new Error('Why are there no outs for node' + vertex.id + ' ' + JSON.stringify(nodeOut));
             } else {
               outs.filter(out => !visited.has(out)).map(elem => nodeLookupArray[elem]).forEach(elem => stack.push(elem));
             }
@@ -300,7 +301,7 @@ export const recalculateStorageContainers = function() {
       }
     }
     return edgesToDeleteFromNodes;
-  }
+  };
 
   while (myTinyQueue.size() > 0) {
     const elem = myTinyQueue.pop();
@@ -311,9 +312,9 @@ export const recalculateStorageContainers = function() {
         cycleNodes = cycled_components(nodeOutShallow); // TODO: maybe nodeOutShallowCopy?
       }
       // propagate myself to all nodes part of a cycle
-      const otherProps = propagate(elem, nodeOutShallow, cycleNodes, nodeLookupArray, true);
+      const otherProps = propagate(elem, nodeOutShallow, cycleNodes.set, nodeLookupArray, true);
       Array.from(otherProps).filter(id => id !== elem.id).map(i => nodeLookupArray[i]).forEach(prop => {
-        propagate(prop, nodeOutShallow, cycleNodes, nodeLookupArray, false);
+        propagate(prop, nodeOutShallow, cycleNodes.set, nodeLookupArray, false);
         console.log(JSON.stringify(prop, null, 4));
       });
 
@@ -336,6 +337,7 @@ export const recalculateStorageContainers = function() {
           nodeInShallow[element].splice(nodeInShallow[element].indexOf(sourceMapper), 1);
         });
       });
+      reverseTraversal.push(elem);
       myTinyQueue.reheapify();
     } else {
       reverseTraversal.push(elem);
@@ -386,7 +388,7 @@ const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLook
       if (node.childProvides.length) {
         node.containedItems = node.childProvides.map(elem => elem.item.item);
         propagateSplitterData(node, outgoingEdges);
-        console.log("Had child provides!", node.containedItems, JSON.stringify(node.childProvides), node);
+        console.log('Had child provides!', node.containedItems, JSON.stringify(node.childProvides), node);
       }
     }
   } else {
@@ -477,7 +479,7 @@ export const addPath = function (passedThis, source, target) {
     || (!specialSource && !specialTarget))
   {
     //checked
-    console.log("Checked Flow!");
+    console.log('Checked Flow!');
     const newEdge = {source: source, target: target};
 
     // Check if there are items you can shove in
@@ -559,7 +561,7 @@ export const pathMouseClick = function (d, t) {
   // const styledLine = parentElement.select('.' + constants.lineStylingPathClass);
   // const styledMarker = parentElement.select('.' + constants.lineStylingArrowClass);
 
-  if (t.state && t.state.selectedPath && t.state.selectedPath == d) {
+  if (t.state && t.state.selectedPath && t.state.selectedPath === d) {
     // set the new selected one to this one
     deselect_path_and_nodes.call(this, t);
   } else {

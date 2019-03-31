@@ -28,9 +28,9 @@ import NestedSidebarButton from './NestedSidebarButton';
 import SimpleSidebarButton from './SimpleSidebarButton';
 import SidebarPanel from './SidebarPanel';
 import SelectorPanel from './SelectorPanel';
-import ClearButton from "./ClearButton";
-import ShareButton from "./ShareButton";
-import LoadButton from "./LoadButton";
+import ClearButton from './ClearButton';
+import ShareButton from './ShareButton';
+import LoadButton from './LoadButton';
 // import * as d3 from 'd3';
 
 /* global d3 */
@@ -383,7 +383,7 @@ class App extends Component {
           </React.Fragment>
         }/>
 
-        <SelectorPanel label='Splitters'/>
+        {/*<SelectorPanel label='Splitters'/>*/}
 
         <Drawer
           className={classes.drawer}
@@ -405,13 +405,11 @@ class App extends Component {
           <Divider/>
 
           <List>
-            <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers' contents={
-              <React.Fragment>
-                <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a href="https://github.com/thinkaliker">Adam</a> (<a href="https://twitter.com/thinkaliker">@thinkaliker</a>).</Typography>
-                <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain Studios AB, or THQ Nordic AB.</Typography>
-                <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from Coffee Stain Studios AB's Satisfactory.</Typography>
-              </React.Fragment>
-            } />
+            <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers'>
+              <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a href="https://github.com/thinkaliker">Adam</a> (<a href="https://twitter.com/thinkaliker">@thinkaliker</a>).</Typography>
+              <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain Studios AB, or THQ Nordic AB.</Typography>
+              <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from Coffee Stain Studios AB's Satisfactory.</Typography>
+            </SidebarPopup>
           </List>
         </Drawer>
         <main className={classes.content}>

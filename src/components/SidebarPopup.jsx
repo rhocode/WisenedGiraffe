@@ -28,7 +28,9 @@ class SidebarPopup extends React.Component {
           <ListItemText primary={label}/>
         </ListItem>
         <PopupDialog title={title} open={this.state.modalOpen}
-                     handleModalClose={() => this.setState({modalOpen: false})} contents={contents}/>
+                     handleModalClose={() => this.setState({modalOpen: false})}>
+          {this.props.children}
+        </PopupDialog>
       </React.Fragment>
     );
   }
