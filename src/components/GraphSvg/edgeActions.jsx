@@ -2,6 +2,8 @@ import constants from './constants';
 import {deselect_path_and_nodes} from './graphActions';
 import * as d3 from 'd3';
 import TinyQueue from '../TinyQueue';
+import {simple_cycle} from './algorithms';
+import {spliceUtil} from "./util";
 
 export const recalculateStorageContainers = function() {
   const nodeInShallow = {};
@@ -33,6 +35,8 @@ export const recalculateStorageContainers = function() {
     }
   });
 
+  console.error(JSON.parse(JSON.stringify(nodeUnionArray)));
+
   nodeUnionArray.forEach((value, index) => {
     nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
     nodeUnionArray[index].childProvides = [];
@@ -44,10 +48,6 @@ export const recalculateStorageContainers = function() {
   const myTinyQueue = new TinyQueue(nodeUnionArray, (a, b) => {
     const incomingEdgesA = nodeInShallow[a.id.toString()];
     const incomingEdgesB = nodeInShallow[b.id.toString()];
-
-    if (a.instance.name === 'Merger' || b.instance.name === 'Merger') {
-      console.log('Stop here');
-    }
 
     if ((!incomingEdgesA || !incomingEdgesA.length) && (!incomingEdgesB || !incomingEdgesB.length)) {
       if (!['Container', 'Logistic'].includes(a.machine.name)) {
@@ -91,154 +91,6 @@ export const recalculateStorageContainers = function() {
   const nodeOutShallowCopy = JSON.parse(JSON.stringify(nodeOutShallow));
   const nodeInShallowCopy = JSON.parse(JSON.stringify(nodeInShallow));
 
-  const strongly_connected_components = function(graph) {
-    const index_counter = ['0'];
-    const stack = [];
-    const lowlink = {};
-    const index = {};
-    const result = [];
-
-    const _strong_connect = function(node) {
-      index[node] = index_counter[0];
-      lowlink[node] = index_counter[0];
-      index_counter[0] = (parseInt(index_counter[0]) + 1).toString();
-      stack.push(node);
-
-      const successors = graph[node] || [];
-      successors.forEach(successor => {
-        if(!Object.keys(index).includes(successor)) {
-          _strong_connect(successor);
-          if (lowlink[node] === undefined || lowlink[successor] === undefined) {
-            throw new Error('Not defined: ' + node + ' ' + successor + ' '  + JSON.stringify(lowlink));
-          }
-          lowlink[node] = Math.min(parseInt(lowlink[node]),parseInt(lowlink[successor])).toString();
-        } else if (stack.includes(successor)) {
-          if (lowlink[node] === undefined || lowlink[successor] === undefined) {
-            throw new Error('Not defined: ' + node + ' ' + successor + ' '  + JSON.stringify(lowlink) + ' ' + JSON.stringify(index));
-          }
-          lowlink[node] = Math.min(parseInt(lowlink[node]),parseInt(index[successor])).toString();
-        }
-      });
-
-      if (lowlink[node] === index[node]) {
-        const connected_component = [];
-        /*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
-        while(true) {
-          const successor = stack.pop();
-          connected_component.push(successor);
-          if (successor === node) break;
-        }
-        result.push(connected_component.slice());
-      }
-    };
-    Object.keys(graph).forEach(node => {
-      if (!Object.keys(index).includes(node)) {
-        _strong_connect(node);
-      }
-    });
-
-    return result;
-  };
-
-  const remove_node = function(G, target) {
-    delete G[target];
-    const values = Object.keys(G).map(key => G[key]);
-    values.forEach(value => {
-      value.delete(target);
-    });
-  };
-
-  const subgraphs = function(G, vertices) {
-    const returnMap = {};
-    vertices.forEach(v => {
-      const gvarray = Array.from(G[v]);
-      const filtered = gvarray.filter(elem => vertices.has(elem));
-
-
-      returnMap[v] = new Set(filtered);
-    });
-    return returnMap;
-  };
-
-  const simple_cycle = function(Ginput) {
-    const _unblock = function(thisnode, blocked, B) {
-      const stack = new Set([thisnode]);
-      while(stack.size) {
-        const node =  stack.values().next().value;
-        stack.delete(node);
-        if (blocked.has(node)) {
-          blocked.delete(node);
-          if (!B[node]) {
-            B[node] = new Set();
-          }
-          B[node].forEach(elem => {
-            stack.add(elem);
-          });
-          B[node].clear();
-        }
-      }
-    };
-
-
-    const G = {};
-    Object.keys(Ginput).forEach(key => {
-      G[key] = new Set(Ginput[key].map(elem => elem.toString()));
-    });
-
-    const sccs = strongly_connected_components(G);
-    const returnValues = [];
-    while(sccs.length) {
-      const scc = sccs.pop();
-      const startnode = scc.pop();
-      const path = [startnode];
-      const blocked = new Set();
-      const closed = new Set();
-      blocked.add(startnode);
-      const B = {};
-      const stack = [  [ startnode, Array.from(G[startnode] || new Set())] ];
-      while(stack.length) {
-        const [thisnode, nbrs] = stack[stack.length - 1];
-        if (nbrs && nbrs.length) {
-          const nextnode = nbrs.pop();
-          if (nextnode === startnode) {
-            returnValues.push(path.slice().map(elem => parseInt(elem)));
-            path.forEach(node => {
-              closed.add(node);
-            });
-          } else if (!blocked.has(nextnode)) {
-            path.push(nextnode);
-            stack.push([ nextnode, Array.from(G[nextnode] || new Set())  ]);
-            closed.delete(nextnode);
-            blocked.add(nextnode);
-          }
-        } else {
-          if (closed.has(thisnode)) {
-            _unblock(thisnode, blocked, B);
-          } else {
-            (G[thisnode] || []).forEach(nbr => {
-              B[nbr] = B[nbr] || new Set();
-              if(!B[nbr].has(nbr)) {
-                B[nbr].add(thisnode);
-              }
-            });
-          }
-
-          stack.pop();
-          path.pop();
-        }
-      }
-
-
-      remove_node(G, startnode);
-      const H = subgraphs(G, new Set(scc));
-      const toAdd = strongly_connected_components(H);
-      toAdd.forEach(elem => {
-        sccs.push(elem);
-      });
-    }
-    return returnValues;
-  };
-
   // retuires nodeOutput array
   const cycled_components = (graph) => {
     const tmp = simple_cycle(graph);
@@ -249,15 +101,7 @@ export const recalculateStorageContainers = function() {
     }))};
   };
 
-  // how to remove dups
 
-  //to generate the specific indexes
-  // pos = myArray.map(function(e) { return e.hello; }).indexOf('stevie');
-
-
-  // var a = [1, 2, 3], b = [101, 2, 1, 10];
-  // var c = a.concat(b);
-  // var d = c.filter(function (item, pos) {return c.indexOf(item) == pos});
   let cycleNodes = null;
 
   let propagate = function(node, nodeOut, cycleNodes, nodeLookupArray, firstRun) {
@@ -270,7 +114,10 @@ export const recalculateStorageContainers = function() {
       vertexLookup[provide.source] = provide;
     });
 
-    const edgesToDeleteFromNodes = new Set([node.id]);
+    const combinedChildProvides = [];
+    // const childProvideProcessedList = new Set();
+
+    const nodesToPropagateData = [];
 
     if (myChildProvides.length || firstRun) {
       while(stack.length) {
@@ -278,18 +125,17 @@ export const recalculateStorageContainers = function() {
         if (!visited.has(vertex.id)) {
           visited.add(vertex.id);
 
-          const vertexChildProvides = new Set((vertex.childProvides || []).map(provideMap => provideMap.source));
-          myChildProvides.forEach(provide=>{
-            console.log('Processing provide', provide, vertexChildProvides);
-            if (!vertexChildProvides.has(provide.source)) {
-              console.log('Pushing provide');
-              vertex.childProvides.push(provide);
-            }
+          console.log('Visiting', vertex.instance.name, vertex.id);
+
+          // const vertexChildProvides = new Set((vertex.childProvides || []).map(provideMap => provideMap.source));
+          (vertex.childProvides || []).forEach(provide=>{
+            console.log('It has', provide.item.item.name);
+            combinedChildProvides.push(provide);
           });
 
           //If it's part of the cycle, propagate the original edges.
           if (cycleNodes.has(vertex.id)) {
-            edgesToDeleteFromNodes.add(vertex.id);
+            nodesToPropagateData.push(vertex);
             const outs = nodeOut[vertex.id];
             if (!outs) {
               throw new Error('Why are there no outs for node' + vertex.id + ' ' + JSON.stringify(nodeOut));
@@ -300,53 +146,57 @@ export const recalculateStorageContainers = function() {
         }
       }
     }
-    return edgesToDeleteFromNodes;
+
+    // console.log(JSON.stringify(combinedChildProvides..name, null, 4));
+
+    // nodesToPropagateData.forEach(node => {
+    //   node.childProvides = combinedChildProvides;
+    // });
+
+    return nodesToPropagateData;
   };
 
+
+  console.error('RUN ==========');
   while (myTinyQueue.size() > 0) {
     const elem = myTinyQueue.pop();
     console.log('Processing node: ' + elem.instance.name + ' ' + elem.id, d3);
     const outgoing = nodeOutShallow[elem.id.toString()] || [];
     if ((nodeInShallow[elem.id.toString()] || []).length) {
+      console.log('PROPAGATION ZS', JSON.parse(JSON.stringify(nodeUnionArray.map(elem => elem.id ))));
       if (!cycleNodes) {
         cycleNodes = cycled_components(nodeOutShallow); // TODO: maybe nodeOutShallowCopy?
       }
       // propagate myself to all nodes part of a cycle
-      const otherProps = propagate(elem, nodeOutShallow, cycleNodes.set, nodeLookupArray, true);
-      Array.from(otherProps).filter(id => id !== elem.id).map(i => nodeLookupArray[i]).forEach(prop => {
-        propagate(prop, nodeOutShallow, cycleNodes.set, nodeLookupArray, false);
-        console.log(JSON.stringify(prop, null, 4));
-      });
+      console.error('Propagating');
+      const nodesToOperateOn = propagate(elem, nodeOutShallow, cycleNodes.set, nodeLookupArray, true);
 
-      Array.from(otherProps).map(i => nodeLookupArray[i]).forEach(nodeElement => {
-        const outgoingMapper = nodeOutShallow[nodeElement.id.toString()] || [];
-        processCurrentNode.call(this, nodeElement, outgoingMapper.map(i => nodeLookupArray[i]), nodeInShallow, nodeLookupArray, nodeInShallowCopy, this.props.parentAccessor);
-
-      });
+      console.log('Nodes to remove:', JSON.parse(JSON.stringify(nodesToOperateOn.map(elem => elem.id ))));
 
 
-      const source = elem.id;
-      outgoing.forEach(element => {
-        nodeInShallow[element].splice(nodeInShallow[element].indexOf(source), 1);
-      });
 
-      Array.from(otherProps).map(i => nodeLookupArray[i]).forEach(nodeElement => {
-        const outgoingMapper = nodeOutShallow[nodeElement.id.toString()] || [];
-        const sourceMapper = nodeElement.id;
-        outgoingMapper.forEach(element => {
-          nodeInShallow[element].splice(nodeInShallow[element].indexOf(sourceMapper), 1);
+
+      nodesToOperateOn.forEach(item => {
+        myTinyQueue.remove(item);
+        const sourceMapper = item.id;
+
+        Object.keys(nodeOutShallow).forEach(key => {
+          const outList = nodeOutShallow[key];
+          spliceUtil(outList, sourceMapper);
         });
       });
-      reverseTraversal.push(elem);
+
+      console.log('PROPAGATION ZSSSSS', JSON.parse(JSON.stringify(nodeUnionArray.map(elem => elem.id ))));
+      reverseTraversal.push(nodesToOperateOn);
       myTinyQueue.reheapify();
     } else {
-      reverseTraversal.push(elem);
+      reverseTraversal.push([elem]);
       processCurrentNode.call(this, elem, outgoing.map(i => nodeLookupArray[i]), nodeInShallow, nodeLookupArray, nodeInShallowCopy, this.props.parentAccessor);
 
-      if (outgoing) {
+      if (outgoing.length) {
         const source = elem.id;
         outgoing.forEach(element => {
-          nodeInShallow[element].splice(nodeInShallow[element].indexOf(source), 1);
+          spliceUtil(nodeInShallow[element], source);
         });
         myTinyQueue.reheapify(); // should we reheapify later?
       }
@@ -366,6 +216,7 @@ const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLook
     // update downstream
     outgoingEdges.forEach(elem => {
       if (!elem.childProvides.filter(entry => entry.source === node.id).length) {
+        console.log('Pushing to id', elem.id, node.data.recipe.item.name);
         elem.childProvides.push({item: node.data.recipe, source: node.id});
       }
     }); // wow, we're literally only going to have one outgoing edge.
@@ -425,7 +276,7 @@ const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLook
 
         const unresolvedQueries = parent.otherNodes.filter(node => node.allowedOut.length === 0 && ['Container', 'Logistic'].includes(node.machine.name));
         childrenAllowedOut.forEach(item => {
-          allowedIn.splice(allowedIn.indexOf(item), 1);
+          spliceUtil(allowedIn, item);
         });
 
         if (allowedIn.length === unresolvedQueries.length + 1) {
@@ -579,10 +430,9 @@ export const removePath = function (d, t) {
   }
   const outgoing = d.source.id;
   const incoming = d.target.id;
-
-  t.nodeOut[outgoing].splice(t.nodeOut[outgoing].indexOf(d.target), 1);
-  t.nodeIn[incoming].splice(t.nodeIn[incoming].indexOf(d.source), 1);
-  t.graphData.links.splice(t.graphData.links.indexOf(d), 1);
+  spliceUtil(t.nodeOut[outgoing], d.target);
+  spliceUtil(t.nodeIn[incoming], d.source);
+  spliceUtil(t.graphData.links, d);
 };
 
 
@@ -624,7 +474,7 @@ export const addEdgeToGraph = function (edgeData) {
 };
 
 export const removeEdge = function (graphRef, l) {
-  graphRef.edges.splice(graphRef.edges.indexOf(l), 1);
+  spliceUtil(graphRef.edges, l);
   removeEdgeFromGraph.call(graphRef, l);
 };
 

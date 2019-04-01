@@ -2,6 +2,7 @@ import constants from './constants';
 import {addPath, removePath} from './edgeActions';
 import * as d3 from 'd3';
 import {deselect_path_and_nodes} from './graphActions';
+import {spliceUtil} from "./util";
 
 export const add_node = (d, t) => {
   d.id = d.id || t.id++;
@@ -25,8 +26,7 @@ export const delete_node = function (d, t) {
   toSplice.map(function (l) {
     removePath(l, t);
   });
-
-  t.graphData.nodes.splice(t.graphData.nodes.indexOf(selectedNode), 1);
+  spliceUtil(t.graphData.nodes, selectedNode);
 };
 
 
@@ -182,7 +182,7 @@ export const updateComponents = function(elementsToUpdate) {
     const allowedInRemaining = d.allowedIn.slice();
     const provided = t.nodeIn[d.id] || [];
     const actualIn = provided.map(node => node.allowedOut).flat(1);
-    new Set(actualIn).forEach(id => { allowedInRemaining.splice(allowedInRemaining.indexOf(id), 1); });
+    new Set(actualIn).forEach(id => {    spliceUtil(allowedInRemaining, id); });
     const element = d3.select(this);
 
     element.selectAll('.' + constants.nodeRequirementsSubIconClass).remove();
@@ -239,7 +239,7 @@ export const updateComponents = function(elementsToUpdate) {
     const allowedOutRemaining = d.allowedOut.slice();
     const provides = t.nodeOut[d.id] || [];
     const actualOut = provides.map(node => node.allowedIn).flat(1);
-    new Set(actualOut).forEach(id => { allowedOutRemaining.splice(allowedOutRemaining.indexOf(id), 1); });
+    new Set(actualOut).forEach(id => {   spliceUtil(allowedOutRemaining, id); });
 
     if (allowedOutRemaining.length > 0) {
       element.append('text').attr('class', 'fas fa-arrow-right')

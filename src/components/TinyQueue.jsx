@@ -1,3 +1,5 @@
+import {spliceUtil} from "./GraphSvg/util";
+
 export default class TinyQueue {
   constructor(data = [], compare = defaultCompare) {
     this.data = data;
@@ -15,6 +17,11 @@ export default class TinyQueue {
 
   size() {
     return this.data.length;
+  }
+
+  remove(item) {
+    spliceUtil(this.data, item);
+    this.length = this.data.length;
   }
 
   push(item) {
