@@ -297,7 +297,6 @@ export const updateComponents = function(elementsToUpdate) {
 
 export const forceUpdateComponentLabel = function() {
   updateComponents.call(this, d3.selectAll('.' + constants.nodeRequirementsIconClass));
-
 };
 
 
@@ -330,6 +329,7 @@ export const insertComponents = function(parentElement) {
       const nodeThis = d3.select(this);
       nodeThis.selectAll('.' + constants.nodeProducesClass).remove();
       const outputtedItems = new Set();
+      let i = 0;
       (d.containedItems || []).forEach((containedItem, index) => {
         if (outputtedItems.has(containedItem.icon)) {
           return;
@@ -344,14 +344,13 @@ export const insertComponents = function(parentElement) {
             return -55;
           })
           .attr('y', function (d) {
-            return 18 + (30 * index);
+            return 18 + (30 * i++);
           })
           .attr('height', 40)
           .attr('width', 40);
       });
     }
   });
-
 
   forceUpdateComponentLabel.call(this);
 };
@@ -360,7 +359,6 @@ export const insertNodeTier = (gEl) => {
   // const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
   const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', 0);
   // el.append('circle').attr('r', 17).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
-
   const backgroundText = el.append('text')
     .attr('fill', 'white')
     .attr('class', 'overclockFont')
@@ -394,41 +392,4 @@ export const insertNodeOverclock = (gEl) => {
     .attr('font-size', 20);
 
   updateOverclock(tspan);
-};
-
-
-export const generateNodeDef = (x, y, id, data) => {
-  return {id, x, y, data};
-};
-
-export const addNode = (graphRef, machine, x = null, y = null) => {
-  var bodyEl = document.getElementById('mainRender');
-  var width = bodyEl.clientWidth,
-    height = bodyEl.clientHeight;
-  const d = generateNodeDef(x || width / 2, y || height / 2, graphRef.idct++, {});
-  graphRef.nodes.push(d);
-  addNodeToGraph(graphRef, d);
-
-  graphRef.updateGraph();
-};
-
-export const addNodeToGraph = (graphRef, d) => {
-  // const nodeId = graphRef.idct - 1;
-  // this.nodes[nodeId] = d;
-  // this.outputEdges[nodeId] = {};
-  // this.inputEdges[nodeId] = {};
-};
-
-
-export const removeSelectFromNode = function () {
-  if (!this.selectedNode) {
-    return;
-  }
-
-  const outerThis = this;
-
-  this.circles.filter(function (cd) {
-    return cd.id === outerThis.selectedNode.id;
-  }).classed(constants.selectedClass, false);
-  this.selectedNode = null;
 };

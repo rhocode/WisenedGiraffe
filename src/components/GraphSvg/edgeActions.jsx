@@ -137,6 +137,8 @@ export const recalculateStorageContainers = function() {
           } else {
             outs.filter(out => !visited.has(out)).map(elem => nodeLookupArray[elem]).forEach(elem => stack.push(elem));
           }
+        } else {
+
         }
       }
     }
