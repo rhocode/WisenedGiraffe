@@ -3,7 +3,48 @@ import {deselect_path_and_nodes} from './graphActions';
 import * as d3 from 'd3';
 import TinyQueue from '../TinyQueue';
 import {simple_cycle} from './algorithms';
-import {spliceUtil} from "./util";
+import {spliceUtil} from './util';
+
+const nodeComparator = (nodeInShallow) => (a, b) => {
+  const incomingEdgesA = nodeInShallow[a.id.toString()];
+  const incomingEdgesB = nodeInShallow[b.id.toString()];
+
+  if ((!incomingEdgesA || !incomingEdgesA.length) && (!incomingEdgesB || !incomingEdgesB.length)) {
+    if (!['Container', 'Logistic'].includes(a.machine.name)) {
+      return -1;
+    } else if (!['Container', 'Logistic'].includes(b.machine.name)) {
+      return 1;
+    } else if (['Container', 'Logistic'].includes(a.machine.name) && a.containedItems) {
+      return -1;
+    } else if (['Container', 'Logistic'].includes(b.machine.name) && b.containedItems) {
+      return 1;
+    } else {
+      //TODO: splitters?
+      //Save on a sort cycle;
+      return -1;
+    }
+  } else if ((!incomingEdgesB || !incomingEdgesB.length)) {
+    return 1;
+  } else if ((!incomingEdgesA || !incomingEdgesA.length)) {
+    return -1;
+  } else {
+    if (['Container', 'Logistic'].includes(a.machine.name) && a.containedItems) {
+      return -1;
+    } else if (['Container', 'Logistic'].includes(b.machine.name) && b.containedItems) {
+      return 1;
+    } else if (['Container', 'Logistic'].includes(a.machine.name) && a.childProvides.length) {
+      return -1;
+    } else if (['Container', 'Logistic'].includes(b.machine.name) && b.childProvides.length) {
+      return 1;
+    } else if (['Container', 'Logistic'].includes(a.machine.name)) {
+      return -1;
+    } else if (['Container', 'Logistic'].includes(b.machine.name)) {
+      return 1;
+    } else {
+      return -1;
+    }
+  }
+};
 
 export const recalculateStorageContainers = function() {
   const nodeInShallow = {};
@@ -18,24 +59,25 @@ export const recalculateStorageContainers = function() {
     nodeOutShallow[key] = value.map(elem => elem.id);
   });
 
+  const nodeOutShallowCopy = JSON.parse(JSON.stringify(nodeOutShallow));
+
   const nodeUnion = new Set(Object.keys(nodeInShallow));
   Object.keys(nodeOutShallow).forEach(node => nodeUnion.add(node));
   const nodeUnionArray = Array.from(nodeUnion);
 
   const nodeLookupArray = {};
 
-  // force reset all containers!
+  // force reset all specials!
   this.graphData.nodes.forEach(node => {
     if (node.containedItems) {
       node.containedItems = null;
       node.containedRecipes = null;
       node.allowedIn = [];
       node.allowedOut = [];
+      node.possibleAllowedIn = [];
       node.hasError = null;
     }
   });
-
-  console.error(JSON.parse(JSON.stringify(nodeUnionArray)));
 
   nodeUnionArray.forEach((value, index) => {
     nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
@@ -45,51 +87,8 @@ export const recalculateStorageContainers = function() {
   });
 
 
-  const myTinyQueue = new TinyQueue(nodeUnionArray, (a, b) => {
-    const incomingEdgesA = nodeInShallow[a.id.toString()];
-    const incomingEdgesB = nodeInShallow[b.id.toString()];
-
-    if ((!incomingEdgesA || !incomingEdgesA.length) && (!incomingEdgesB || !incomingEdgesB.length)) {
-      if (!['Container', 'Logistic'].includes(a.machine.name)) {
-        return -1;
-      } else if (!['Container', 'Logistic'].includes(b.machine.name)){
-        return 1;
-      } else if (['Container', 'Logistic'].includes(a.machine.name ) && a.containedItems) {
-        return -1;
-      }  else if (['Container', 'Logistic'].includes(b.machine.name ) && b.containedItems) {
-        return 1;
-      } else {
-        //TODO: splitters?
-        //Save on a sort cycle;
-        return -1;
-      }
-    } else if ((!incomingEdgesB || !incomingEdgesB.length)) {
-      return 1;
-    } else if ((!incomingEdgesA || !incomingEdgesA.length)) {
-      return -1;
-    } else {
-      if (['Container', 'Logistic'].includes(a.machine.name) && a.containedItems) {
-        return -1;
-      } else if (['Container', 'Logistic'].includes(b.machine.name) && b.containedItems) {
-        return 1;
-      } else if (['Container', 'Logistic'].includes(a.machine.name) && a.childProvides.length) {
-        return -1;
-      } else if (['Container', 'Logistic'].includes(b.machine.name) && b.childProvides.length) {
-        return 1;
-      } else if (['Container', 'Logistic'].includes(a.machine.name)) {
-        return -1;
-      } else if (['Container', 'Logistic'].includes(b.machine.name)) {
-        return 1;
-      } else {
-        return -1;
-      }
-    }
-  });
+  const myTinyQueue = new TinyQueue(nodeUnionArray, nodeComparator(nodeInShallow));
   const reverseTraversal = [];
-
-  //
-  const nodeOutShallowCopy = JSON.parse(JSON.stringify(nodeOutShallow));
-  const nodeInShallowCopy = JSON.parse(JSON.stringify(nodeInShallow));
 
   // retuires nodeOutput array
   const cycled_components = (graph) => {
@@ -104,54 +103,49 @@ export const recalculateStorageContainers = function() {
 
   let cycleNodes = null;
 
-  let propagate = function(node, nodeOut, cycleNodes, nodeLookupArray, firstRun) {
+  let propagate = function(node, nodeOut, cycleNodes, nodeLookupArray) {
     const visited = new Set();
     const stack = [node];
 
-    const myChildProvides = new Set((node.childProvides || []));
     const vertexLookup = {};
     (node.childProvides || []).forEach(provide => {
       vertexLookup[provide.source] = provide;
     });
 
     const combinedChildProvides = [];
-    // const childProvideProcessedList = new Set();
 
     const nodesToPropagateData = [];
 
-    if (myChildProvides.length || firstRun) {
-      while(stack.length) {
-        const vertex = stack.pop();
-        if (!visited.has(vertex.id)) {
-          visited.add(vertex.id);
+    while(stack.length) {
+      const vertex = stack.pop();
+      if (!visited.has(vertex.id)) {
+        visited.add(vertex.id);
 
-          console.log('Visiting', vertex.instance.name, vertex.id);
+        console.log('Visiting', vertex.instance.name, vertex.id);
 
-          // const vertexChildProvides = new Set((vertex.childProvides || []).map(provideMap => provideMap.source));
-          (vertex.childProvides || []).forEach(provide=>{
-            console.log('It has', provide.item.item.name);
-            combinedChildProvides.push(provide);
-          });
+        (vertex.childProvides || []).forEach(provide=>{
+          console.log('It has', provide.item.item.name);
+          combinedChildProvides.push(provide);
+        });
 
-          //If it's part of the cycle, propagate the original edges.
-          if (cycleNodes.has(vertex.id)) {
-            nodesToPropagateData.push(vertex);
-            const outs = nodeOut[vertex.id];
-            if (!outs) {
-              throw new Error('Why are there no outs for node' + vertex.id + ' ' + JSON.stringify(nodeOut));
-            } else {
-              outs.filter(out => !visited.has(out)).map(elem => nodeLookupArray[elem]).forEach(elem => stack.push(elem));
-            }
+        //If it's part of the cycle, propagate the original edges.
+        if (cycleNodes.has(vertex.id)) {
+          nodesToPropagateData.push(vertex);
+          const outs = nodeOut[vertex.id];
+          if (!outs) {
+            throw new Error('Why are there no outs for node' + vertex.id + ' ' + JSON.stringify(nodeOut));
+          } else {
+            outs.filter(out => !visited.has(out)).map(elem => nodeLookupArray[elem]).forEach(elem => stack.push(elem));
           }
         }
       }
     }
 
-    // console.log(JSON.stringify(combinedChildProvides..name, null, 4));
+    nodesToPropagateData.forEach(node => {
+      node.childProvides = combinedChildProvides;
+    });
 
-    // nodesToPropagateData.forEach(node => {
-    //   node.childProvides = combinedChildProvides;
-    // });
+    console.error(combinedChildProvides);
 
     return nodesToPropagateData;
   };
@@ -173,10 +167,10 @@ export const recalculateStorageContainers = function() {
 
       console.log('Nodes to remove:', JSON.parse(JSON.stringify(nodesToOperateOn.map(elem => elem.id ))));
 
-
-
-
       nodesToOperateOn.forEach(item => {
+        const localOutgoing = nodeOutShallow[item] || [];
+
+        processCurrentNode.call(this, item, localOutgoing.map(i => nodeLookupArray[i]), false);
         myTinyQueue.remove(item);
         const sourceMapper = item.id;
 
@@ -186,13 +180,13 @@ export const recalculateStorageContainers = function() {
         });
       });
 
-      console.log('PROPAGATION ZSSSSS', JSON.parse(JSON.stringify(nodeUnionArray.map(elem => elem.id ))));
       reverseTraversal.push(nodesToOperateOn);
       myTinyQueue.reheapify();
     } else {
       reverseTraversal.push([elem]);
-      processCurrentNode.call(this, elem, outgoing.map(i => nodeLookupArray[i]), nodeInShallow, nodeLookupArray, nodeInShallowCopy, this.props.parentAccessor);
+      processCurrentNode.call(this, elem, outgoing.map(i => nodeLookupArray[i]));
 
+      // If there's outgoing edges, let's go ahead and remove those
       if (outgoing.length) {
         const source = elem.id;
         outgoing.forEach(element => {
@@ -204,43 +198,74 @@ export const recalculateStorageContainers = function() {
   }
 
   // reset the edgegraph
-  // reverseTraversal.reverse();
-  // reverseTraversal.forEach(elem => {
-  //   const outgoing = nodeOutShallowCopy[elem.id.toString()] || [];
-  //   processCurrentNode.call(this, elem, outgoing.map(i => nodeLookupArray[i]), nodeInShallowCopy, nodeLookupArray, nodeInShallowCopy, this.props.parentAccessor);
-  // });
+  reverseTraversal.reverse();
+  reverseTraversal.forEach(elemList => {
+    if (elemList.length > 1) return;
+
+    const elem = elemList[0];
+
+    const outgoing = nodeOutShallowCopy[elem.id.toString()] || [];
+    reverseProcessCurrentNode.call(this, elem, outgoing.map(i => nodeLookupArray[i]));
+  });
 };
 
-const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLookupArray, immutableNodeInShallow, mainGraphAccessor) {
+
+const reverseProcessCurrentNode = function(node, outgoingEdges) {
+  if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
+    console.log('This is a normal node, skipping!');
+  } else {
+    if (node.instance.name === 'Splitter' || node.instance.name === 'Merger' || node.machine.name === 'Container') {
+      if (node.allowedIn.length) {
+        return;
+      }
+      const acceptableInput = new Set();
+      outgoingEdges.forEach(connectedNode => {
+        (connectedNode.allowedIn || []).forEach(elem => acceptableInput.add(elem));
+      });
+      node.allowedIn = Array.from(new Set([...node.allowedIn, ...acceptableInput]));
+    } else {
+      throw new Error('Not implemented!');
+    }
+  }
+};
+
+const processCurrentNode = function(node, outgoingEdges, shouldPushEdges = true) {
   if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
     // update downstream
-    outgoingEdges.forEach(elem => {
-      if (!elem.childProvides.filter(entry => entry.source === node.id).length) {
-        console.log('Pushing to id', elem.id, node.data.recipe.item.name);
-        elem.childProvides.push({item: node.data.recipe, source: node.id});
-      }
-    }); // wow, we're literally only going to have one outgoing edge.
+    if (shouldPushEdges) {
+      outgoingEdges.forEach(elem => {
+        if (!elem.childProvides.filter(entry => entry.source === node.id).length) {
+          console.log('Pushing to id', elem.id, node.data.recipe.item.name);
+          elem.childProvides.push({item: node.data.recipe, source: node.id});
+        }
+      }); // wow, we're literally only going to have one outgoing edge.
+    }
   } else if (node.machine.name ==='Logistic') {
     if (node.instance.name === 'Splitter' || (node.instance.name === 'Merger')) {
       const propagateSplitterData = (node, outgoingEdges) => {
         node.allowedIn = node.containedItems.map(elem => elem.id);
         node.allowedOut = node.containedItems.map(elem => elem.id);
 
-        outgoingEdges.forEach(connectedNode => {
-          const alreadyHasElems = new Set(connectedNode.childProvides.map(entry => entry.source));
-          node.childProvides.forEach(myChildProvides => {
-            if (!alreadyHasElems.has(myChildProvides.source)) {
-              connectedNode.childProvides.push(myChildProvides);
-            }
+        if (shouldPushEdges) {
+          outgoingEdges.forEach(connectedNode => {
+            const alreadyHasElems = new Set(connectedNode.childProvides.map(entry => entry.source));
+            node.childProvides.forEach(myChildProvides => {
+              if (!alreadyHasElems.has(myChildProvides.source)) {
+                connectedNode.childProvides.push(myChildProvides);
+              }
+            });
           });
-        });
+        }
       };
 
       if (node.childProvides.length) {
         node.containedItems = node.childProvides.map(elem => elem.item.item);
-        propagateSplitterData(node, outgoingEdges);
-        console.log('Had child provides!', node.containedItems, JSON.stringify(node.childProvides), node);
+        if (shouldPushEdges) {
+          propagateSplitterData(node, outgoingEdges);
+        }
       }
+    } else {
+      throw new Error('Not implemented!');
     }
   } else {
     //it's a container.
@@ -261,72 +286,27 @@ const processCurrentNode = function(node, outgoingEdges, nodeInShallow, nodeLook
     if (node.childProvides.length) {
       // I have items!!
       node.containedItems = node.childProvides.map(elem => elem.item.item);
-      propagateContainerData(node, outgoingEdges);
-    } else {
-      // deduce what your upstream needs:
-      const parents = outgoingEdges.map(elem =>
-        ({type: elem.machine.name, allowedIn: elem.allowedIn, node: elem, has: elem.childProvides, otherNodes: immutableNodeInShallow[elem.id].map(nodeId => nodeLookupArray[nodeId]).filter(other => node.id !== other.id)    })
-      );  // wow, we're literally only going to have one outgoing edge.
-
-      const remainingDeps = [];
-      const recipes = {};
-      parents.forEach(parent => {
-        const allowedIn = parent.allowedIn.slice();
-        const childrenAllowedOut = parent.otherNodes.map(node => node.allowedOut).flat();
-
-        const unresolvedQueries = parent.otherNodes.filter(node => node.allowedOut.length === 0 && ['Container', 'Logistic'].includes(node.machine.name));
-        childrenAllowedOut.forEach(item => {
-          spliceUtil(allowedIn, item);
-        });
-
-        if (allowedIn.length === unresolvedQueries.length + 1) {
-          // """"smart"""" linking. We can find the least common denominator
-          allowedIn.forEach(id => recipes[id] = mainGraphAccessor.state.recipe.item[id]);
-          remainingDeps.push(allowedIn);
-        }
-      });
-      //
-      //
-      // // Try best fit, otherwise, FUCK it and just pick whatever.
-      // remainingDeps.sort(function(a, b) {
-      //   return a.length - b.length;
-      // });
-      // const shiftedArray = remainingDeps.slice().shift() || [];
-      // const commonElements = shiftedArray.filter(function(v) {
-      //   return remainingDeps.every(function(a) {
-      //     return a.indexOf(v) !== -1;
-      //   });
-      // });
-      //
-      // if (commonElements.length > 0) {
-      //   //pick one. May change later...but most likely not.
-      //   console.log('We can pick');
-      //   // In theory we COULD pick multiple.
-      //   node.containedItems = [  recipes[commonElements[0]]  ];
-      //   console.log(commonElements, node.containedItems);
-      //   propagateContainerData(node, outgoingEdges);
-      // } else {
-      //   // No common elements...
-      //   console.error('No common elements!!!');
-      //   node.hasError = {error: 'What the fuck, why is this connected? It has no common links', type: 'NO_COMMON_LINKS'};
-      // }
+      if (shouldPushEdges) {
+        propagateContainerData(node, outgoingEdges);
+      }
     }
   }
 };
 
 export const addPath = function (passedThis, source, target) {
 
-  const sourceChecker = (source.containedItems || []).length > 0;
-  const targetChecker = (target.containedItems || []).length > 0;
+  const sourceChecker = (source.allowedIn || []).length > 0 || (source.allowedOut || []).length > 0;
+  const targetChecker = (target.allowedIn || []).length > 0 || (target.allowedOut || []).length > 0;
   const specialSource = ['Container', 'Logistic'].includes(source.machine.name);
   const specialTarget = ['Container', 'Logistic'].includes(target.machine.name);
   const targetSlotsUsed = target.instance.input_slots === (passedThis.nodeIn[target.id] ? passedThis.nodeIn[target.id].length : 0);
 
-  console.log(sourceChecker, targetChecker, specialSource, specialTarget, targetSlotsUsed);
+  console.error(sourceChecker, targetChecker, specialSource, specialTarget, targetSlotsUsed);
 
   if ((specialSource && specialTarget && sourceChecker && targetChecker)
     || (specialSource && !specialTarget && sourceChecker)
     || (!specialSource && specialTarget && targetChecker && targetSlotsUsed)
+    || (sourceChecker && targetChecker)
     || (!specialSource && !specialTarget))
   {
     //checked

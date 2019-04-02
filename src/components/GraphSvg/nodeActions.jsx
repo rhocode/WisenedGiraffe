@@ -204,7 +204,8 @@ export const updateComponents = function(elementsToUpdate) {
 
       const outputtedItems = new Set();
 
-      fetchRemainingIn.forEach((remaining, i) => {
+      let index = 0;
+      fetchRemainingIn.forEach((remaining) => {
         if (outputtedItems.has(remaining.icon)) {
           return;
         }
@@ -227,7 +228,7 @@ export const updateComponents = function(elementsToUpdate) {
             return remaining.icon;
           })
           .attr('x', function (d) {
-            return 58 + 28 + (28 * i);
+            return 58 + 28 + (28 * index++);
           })
           .attr('y', function (d) {
             return -28;
@@ -258,7 +259,8 @@ export const updateComponents = function(elementsToUpdate) {
 
       const outputtedItemsIn = new Set();
 
-      fetchRemainingOut.forEach((remaining, i) => {
+      let index = 0;
+      fetchRemainingOut.forEach((remaining) => {
         if (outputtedItemsIn.has(remaining.icon)) {
           return;
         }
@@ -281,7 +283,7 @@ export const updateComponents = function(elementsToUpdate) {
             return remaining.icon;
           })
           .attr('x', function (d) {
-            return 56 + 28 + (28 * i);
+            return 56 + 28 + (28 * index++);
           })
           .attr('y', function (d) {
             return 3;
