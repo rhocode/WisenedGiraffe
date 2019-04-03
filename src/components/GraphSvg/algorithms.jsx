@@ -1,4 +1,6 @@
-const strongly_connected_components = function(graph) {
+export const strongly_connected_components = function(graph) {
+  console.error(graph);
+  throw new Error('JKNFDKJNFDJN');
   const index_counter = ['0'];
   const stack = [];
   const lowlink = {};
@@ -65,6 +67,55 @@ const subgraphs = function(G, vertices) {
     returnMap[v] = new Set(filtered);
   });
   return returnMap;
+};
+
+export const strongly_connected_components_standalone = function(graph) {
+  const index_counter = ['0'];
+  const stack = [];
+  const lowlink = {};
+  const index = {};
+  const result = [];
+
+  const _strong_connect = function(node) {
+    index[node] = index_counter[0];
+    lowlink[node] = index_counter[0];
+    index_counter[0] = (parseInt(index_counter[0], 10) + 1).toString();
+    stack.push(node);
+
+    const successors = graph[node] || [];
+    successors.forEach(successor => {
+      if(!Object.keys(index).includes(successor)) {
+        _strong_connect(successor);
+        if (lowlink[node] === undefined || lowlink[successor] === undefined) {
+          throw new Error('Not defined: ' + node + ' ' + successor + ' '  + JSON.stringify(lowlink));
+        }
+        lowlink[node] = Math.min(parseInt(lowlink[node], 10),parseInt(lowlink[successor], 10)).toString();
+      } else if (stack.includes(successor)) {
+        if (lowlink[node] === undefined || lowlink[successor] === undefined) {
+          throw new Error('Not defined: ' + node + ' ' + successor + ' '  + JSON.stringify(lowlink) + ' ' + JSON.stringify(index));
+        }
+        lowlink[node] = Math.min(parseInt(lowlink[node], 10),parseInt(index[successor], 10)).toString();
+      }
+    });
+
+    if (lowlink[node] === index[node]) {
+      const connected_component = [];
+      /*eslint no-constant-condition: ["error", { "checkLoops": false }]*/
+      while(true) {
+        const successor = stack.pop();
+        connected_component.push(successor);
+        if (successor === node) break;
+      }
+      result.push(connected_component.slice());
+    }
+  };
+  Object.keys(graph).forEach(node => {
+    if (!Object.keys(index).includes(node)) {
+      _strong_connect(node);
+    }
+  });
+
+  return result;
 };
 
 export const simple_cycle = function(Ginput) {
