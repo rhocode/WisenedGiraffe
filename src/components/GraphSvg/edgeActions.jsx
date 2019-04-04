@@ -4,6 +4,7 @@ import * as d3 from 'd3';
 import TinyQueue from '../TinyQueue';
 import {strongly_connected_components_standalone} from './algorithms';
 import {spliceUtil} from './util';
+import {updateNodeTierExternal} from "./nodeActions";
 
 export const recalculateStorageContainers = function() {
 
@@ -254,14 +255,6 @@ export const addPath = function (passedThis, source, target) {
   }
 };
 
-export const pathMouseOver = function (d) {
-
-};
-
-export const pathMouseOut = function (d) {
-
-};
-
 export const pathMouseClick = function (d, t) {
   d3.event.stopImmediatePropagation();
   const parentElement = d3.select(this.parentElement);
@@ -292,52 +285,6 @@ export const removePath = function (d, t) {
 };
 
 
-export const removeSelectFromEdge = function () {
-  if (!this.selectedEdge) {
-    return;
-  }
-
-  const outerThis = this;
-  this.paths.filter(function (cd) {
-    return cd === outerThis.selectedEdge;
-  }).selectAll('path').classed(constants.selectedClass, false);
-
-  this.selectedEdge = null;
-};
-
-export const addEdge = function (graphRef, edgeData) {
-  const newEdge = {source: edgeData.from, target: edgeData.to};
-
-  const filterResult = graphRef.paths.filter(function (d) {
-    if (d.source === newEdge.target && d.target === newEdge.source) {
-      removeEdge(graphRef, d);
-    }
-    return d.source === newEdge.source && d.target === newEdge.target;
-  });
-
-  //Todo: make nodes not connect if they dont provide the right resources
-
-  // Filter if it doesn't resolve
-  if (!filterResult[0].length) {
-    graphRef.edges.push(newEdge);
-    addEdgeToGraph.call(graphRef, edgeData);
-    graphRef.updateGraph();
-  }
-};
-
-export const addEdgeToGraph = function (edgeData) {
-
-};
-
-export const removeEdge = function (graphRef, l) {
-  spliceUtil(graphRef.edges, l);
-  removeEdgeFromGraph.call(graphRef, l);
-};
-
-export const removeEdgeFromGraph = function (edgeData) {
-
-};
-
 export const calculatePathTooltipPosition = function (link_label, d3) {
   link_label.attr('x', function (d) {
     const node = d3.select(link_label.node().parentElement).selectAll('path').node();
@@ -350,30 +297,34 @@ export const calculatePathTooltipPosition = function (link_label, d3) {
 };
 
 
-// GraphCreator.prototype.calculateLabelPosition = function (link_label, text) {
-//   text.attr('x', function (d) {
-//     var node = d3.select(link_label.node().parentElement).selectAll('path').node();
-//     var pathLength = node.getTotalLength();
-//     d.point = node.getPointAtLength(pathLength / 2);
-//     return d.point.x;
-//   }).attr('y', function (d) {
-//     return d.point.y;
-//   });
-// };
+export const calculateLabelPositions = function (link_label) {
+  const text = link_label.selectAll('.' + constants.nodeVersionTextClass);
+  text.attr('x', function (d) {
+    const node = d3.select(d3.select(this).node().parentElement.parentElement).select('path').node();
+    const pathLength = node.getTotalLength();
+    d.point = node.getPointAtLength(pathLength / 2 * 0.9);
+    return d.point.x;
+  }).attr('y', function (d) {
+    return d.point.y;
+  });
+};
 
-export const insertEdgeLabel = function (gEl) {
+
+
+
+export const insertEdgeLabel = function (elem) {
+
   // Perhapos not needed!
-  // var link_label = gEl.append('g').attr('class', 'textLabel');
-  //
+  const link_label = elem.append('g').attr('class', 'textLabel');
+
+  updateNodeTierExternal(link_label, 0, 0);
+
   // const text =  link_label.append('text')
   //   .style('text-anchor', 'middle')
   //   .style('dominant-baseline', 'central')
   //   .attr('class', 'edge-label').text("WHAT");
-  //
-  // this.calculateLabelPosition(link_label, text);
 
-  const thisGraph = this;
-  const {classes} = this.props;
+  // calculateLabelPosition(link_label, text);
   //
   // var div_label = gEl.append('foreignObject').attr({
   //   'width': '200px',

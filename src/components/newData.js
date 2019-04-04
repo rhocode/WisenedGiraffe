@@ -315,9 +315,9 @@ const data = [
       {name: 'Mk.1', rank: 0, representation: 'I'},
       {name: 'Mk.2', rank: 1, representation: 'II'},
       {name: 'Mk.3', rank: 2, representation: 'III'},
-      {name: 'Mk.4', rank: 3, representation: 'VI'},
+      {name: 'Mk.4', rank: 3, representation: 'IV'},
       {name: 'Mk.5', rank: 4, representation: 'V'},
-      {name: 'Mk.6', rank: 5, representation: 'IV'},
+      {name: 'Mk.6', rank: 5, representation: 'VI'},
       {name: 'S', rank: 6, representation: 'S'}, // For Splitters
       {name: 'M', rank: 7, representation: 'M'},
     ]

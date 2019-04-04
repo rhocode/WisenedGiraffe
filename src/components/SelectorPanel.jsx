@@ -79,6 +79,8 @@ class SelectorPanel extends React.Component {
       updateNodeTierExternal(el);
     } else {
       // it's a path
+      const el = d3.select('#' + 'path-parent' + this.props.selected.source.id + '-' + this.props.selected.target.id);
+      updateNodeTierExternal(el);
     }
   }
 
