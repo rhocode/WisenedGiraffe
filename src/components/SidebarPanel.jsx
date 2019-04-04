@@ -102,49 +102,49 @@ class SidebarPanel extends React.Component {
     return (
       <Paper className={classes.paper}>
         <Typography variant="h5">Settings</Typography>
-        <TextField
-          label='Default Conveyor Speed'
-          type='number'
-          className={classes.textField}
-          fullWidth
-        >
-        </TextField>
+        {/*<TextField*/}
+          {/*label='Default Conveyor Speed'*/}
+          {/*type='number'*/}
+          {/*className={classes.textField}*/}
+          {/*fullWidth*/}
+        {/*>*/}
+        {/*</TextField>*/}
 
-        <FormControl className={classes.formControl}>
-          <InputLabel htmlFor="select-multiple-chip">Hard Drives</InputLabel>
-          <Select
-            multiple
-            value={this.state.selectedDrives}
-            onChange={this.handleChangeMultiple}
-            input={<Input id="select-multiple-chip" />}
-            MenuProps={MenuProps}
-            renderValue={selected => (
-              <div className={classes.chips}>
-                {selected.map(value => (
-                  <Chip key={value} label={value} className={classes.chip} />
-                ))}
-              </div>
-            )}
-          >
-            {this.state.playerUnlock.map(drive => {
-              return (<Tooltip key={drive.name+drive.id+'toolip'} className={classes.tooltip} placement="right" title={
-                this.state.recipe[drive.id].inputs.map((element, index) => {
-                  return (
-                    <React.Fragment key={element.item.id}>
-                      <img src={element.item.icon} className={index === 0 ? classes.tooltipIconFirst : classes.tooltipIcon}/>
-                      <div className={classes.tooltipText}>{element.quantity}</div>
-                    </React.Fragment>
-                  );
-                })
-              }>
-                <MenuItem key={drive.name+drive.id} value={drive.name}>
-                  <Checkbox checked={this.state.selectedDrives.indexOf(drive.name) !== -1} color="primary" />
-                  <ListItemText primary={drive.name} />
-                </MenuItem>
-              </Tooltip>);
-            })}
-          </Select>
-        </FormControl>
+        {/*<FormControl className={classes.formControl}>*/}
+          {/*<InputLabel htmlFor="select-multiple-chip">Hard Drives</InputLabel>*/}
+          {/*<Select*/}
+            {/*multiple*/}
+            {/*value={this.state.selectedDrives}*/}
+            {/*onChange={this.handleChangeMultiple}*/}
+            {/*input={<Input id="select-multiple-chip" />}*/}
+            {/*MenuProps={MenuProps}*/}
+            {/*renderValue={selected => (*/}
+              {/*<div className={classes.chips}>*/}
+                {/*{selected.map(value => (*/}
+                  {/*<Chip key={value} label={value} className={classes.chip} />*/}
+                {/*))}*/}
+              {/*</div>*/}
+            {/*)}*/}
+          {/*>*/}
+            {/*{this.state.playerUnlock.map(drive => {*/}
+              {/*return (<Tooltip key={drive.name+drive.id+'toolip'} className={classes.tooltip} placement="right" title={*/}
+                {/*this.state.recipe[drive.id].inputs.map((element, index) => {*/}
+                  {/*return (*/}
+                    {/*<React.Fragment key={element.item.id}>*/}
+                      {/*<img src={element.item.icon} className={index === 0 ? classes.tooltipIconFirst : classes.tooltipIcon}/>*/}
+                      {/*<div className={classes.tooltipText}>{element.quantity}</div>*/}
+                    {/*</React.Fragment>*/}
+                  {/*);*/}
+                {/*})*/}
+              {/*}>*/}
+                {/*<MenuItem key={drive.name+drive.id} value={drive.name}>*/}
+                  {/*<Checkbox checked={this.state.selectedDrives.indexOf(drive.name) !== -1} color="primary" />*/}
+                  {/*<ListItemText primary={drive.name} />*/}
+                {/*</MenuItem>*/}
+              {/*</Tooltip>);*/}
+            {/*})}*/}
+          {/*</Select>*/}
+        {/*</FormControl>*/}
 
         <Button className={classes.button} fullWidth onClick={() => {
           parentState.graphSvg.jiggle();

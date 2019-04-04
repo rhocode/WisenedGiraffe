@@ -53,6 +53,7 @@ schemaBuilder.createTable('path_type')
   .addPrimaryKey(['id'])
   .addColumn('name', lf.Type.STRING)
   .addColumn('speed', lf.Type.INTEGER)
+  .addColumn('rank', lf.Type.INTEGER)
   .addColumn('machine_class_id', lf.Type.INTEGER)
   .addNullable(['machine_class_id'])
   .addColumn('hidden', lf.Type.BOOLEAN);
@@ -327,37 +328,44 @@ const data = [
       {
         name: 'Item Belt Mk 1',
         speed: 60,
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1')
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+        rank: 0
       },
       {
         name: 'Item Belt Mk 2',
         speed: 120,
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2')
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
+        rank: 1
       },
       {
         name: 'Item Belt Mk 3',
         speed: 270,
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.3')
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.3'),
+        rank: 2
       },
       {
         name: 'Item Belt Mk 4',
         speed: 450,
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.4')
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.4'),
+        rank: 3
       },
       {
         name: 'Item Belt Mk 5',
         speed: 6600,
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.5')
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.5'),
+        rank: 4
       },
       {
         name: 'Item Belt Mk 6',
         speed: 900,
-        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.6')
+        machine_version_id: getTableEntryIdByName('machine_version', 'Mk.6'),
+        rank: 5
       },
       {
         name: 'internal',
         speed: 9999999,
-        machine_version_id: getTableEntryIdByName('machine_version', 'internal')
+        machine_version_id: getTableEntryIdByName('machine_version', 'internal'),
+        rank: -1
       },
     ]
   },

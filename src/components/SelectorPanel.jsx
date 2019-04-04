@@ -8,6 +8,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import TextField from '@material-ui/core/TextField';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Radio from '@material-ui/core/Radio';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import IconButton from '@material-ui/core/IconButton';
 
 const drawerWidth = 310;
 
@@ -23,17 +29,12 @@ const styles = theme => ({
     bottom: 20,
     margin: 16,
     padding: 12,
-    display: 'flex',
-    flexDirection: 'column',
-    flexShrink: 0,
     minWidth: drawerWidth - 100,
   },
   textField: {
     paddingBottom: 10,
   },
   button: {
-    flex: 1,
-    marginTop: 10,
   },
   label: {
     paddingLeft: 10,
@@ -68,93 +69,78 @@ class SelectorPanel extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { in : [], out : [],  nameIn: '', nameOut: ''};
+    this.state = { dummy: false};
   }
 
-  handleChangeIn = event => {
-    event.stopPropagation();
-    this.setState({ in: event.target.value });
-  };
+  upgrade = () => {
+    const instance = this.props.selected.instance
+    let index = this.props.selected.upgradeTypes.indexOf(instance);
+    const n = this.props.selected.upgradeTypes.length;
+    index = (index + 1) % n;
+    this.props.selected.instance = this.props.selected.upgradeTypes[index];
+    this.setState({dummy: !this.state.dummy});
+  }
 
-  handleChangeOut = event => {
-    event.stopPropagation();
-    this.setState({ out: event.target.value });
-  };
+  downgrade = () => {
+    const instance = this.props.selected.instance
+    let index = this.props.selected.upgradeTypes.indexOf(instance);
+    const n = this.props.selected.upgradeTypes.length;
+    index = (index - 1 + n) % n;
+    this.props.selected.instance = this.props.selected.upgradeTypes[index];
+    this.setState({dummy: !this.state.dummy});
+  }
 
-  handleChangeFilterIn = event => {
-    event.stopPropagation();
-    this.setState({ nameIn: event.target.value });
-  };
-
-  handleChangeFilterOut = event => {
-    event.stopPropagation();
-    this.setState({ nameOut: event.target.value });
-  };
-
-  // <SelectorPanel label='Splitter' />
   render() {
     const { classes, label } = this.props;
+    console.log(this.props.selected);
     return(
       <Paper className={classes.paper}>
         <Typography variant='h5'>{label}</Typography>
-        <Typography variant='h6'>Inputs</Typography>
-        <FormControl className={classes.formControl}>
-          <Select
-            multiple
-            value={this.state.in}
-            onChange={this.handleChangeIn}
-            input={<Input id="select-multiple-checkbox" />}
-            renderValue={selected => selected.filter(element => element).join(', ')}
-            MenuProps={MenuProps}
-          >
-            <MenuItem>
-              <TextField
-                id="standard-name"
-                label="Filter"
-                className={classes.textField}
-                value={this.state.nameIn}
-                onChange={this.handleChangeFilterIn}
-                margin="normal"
-                fullWidth
-              />
-            </MenuItem>
-            {names.filter(element => element.toLowerCase().includes((this.state.nameIn).toLowerCase())).map(name => (
-              <MenuItem key={name} value={name}>
-                <Checkbox checked={this.state.in.indexOf(name) > -1} color="primary" />
-                <ListItemText primary={name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Typography variant='h6'>Outputs</Typography>
-        <FormControl className={classes.formControl}>
-          <Select
-            multiple
-            value={this.state.out}
-            onChange={this.handleChangeOut}
-            input={<Input id="select-multiple-checkbox" />}
-            renderValue={selected => selected.filter(element => element).join(', ')}
-            MenuProps={MenuProps}
-          >
-            <MenuItem>
-              <TextField
-                id="standard-name"
-                label="Filter"
-                className={classes.textField}
-                value={this.state.nameOut}
-                onChange={this.handleChangeFilterOut}
-                margin="normal"
-                fullWidth
-              />
-            </MenuItem>
-            {names.filter(element => element.toLowerCase().includes((this.state.nameOut).toLowerCase())).map(name => (
-              <MenuItem key={name} value={name}>
-                <Checkbox checked={this.state.out.indexOf(name) > -1} color="primary" />
-                <ListItemText primary={name} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <IconButton color="primary" className={classes.button} onClick={this.upgrade}>
+          <ArrowUpwardIcon />
+        </IconButton>
+        {this.props.selected.instance.name}
+        <IconButton color="secondary" className={classes.button} onClick={this.downgrade}>
+          <ArrowDownwardIcon />
+        </IconButton>
+        {/*<FormControl className={classes.formControl}>*/}
+        {/*<RadioGroup*/}
+        {/*aria-label="Selection"*/}
+        {/*name="selection"*/}
+        {/*value={this.props.selected.instance.id.toString()}*/}
+        {/*onChange={this.handleChange}*/}
+        {/*>*/}
+        {/*{this.props.selected.upgradeTypes.filter(element => element.name.toLowerCase().includes((this.state.nameIn).toLowerCase())).map(elem => (*/}
+        {/*<FormControlLabel key={elem.id} value={elem.id.toString()} control={<Radio />} label={elem.name} />*/}
+        {/*))}*/}
+        {/*</RadioGroup>*/}
+        {/*<Select*/}
+        {/*multiple*/}
+        {/*value={this.state.in}*/}
+        {/*onChange={this.handleChangeIn}*/}
+        {/*input={<Input id="select-multiple-checkbox" />}*/}
+        {/*renderValue={selected => selected.filter(element => element).join(', ')}*/}
+        {/*MenuProps={MenuProps}*/}
+        {/*>*/}
+        {/*<MenuItem>*/}
+        {/*<TextField*/}
+        {/*id="standard-name"*/}
+        {/*label="Filter"*/}
+        {/*className={classes.textField}*/}
+        {/*value={this.state.nameIn}*/}
+        {/*onChange={this.handleChangeFilterIn}*/}
+        {/*margin="normal"*/}
+        {/*fullWidth*/}
+        {/*/>*/}
+        {/*</MenuItem>*/}
+        {/*{this.props.selected.upgradeTypes.filter(element => element.name.toLowerCase().includes((this.state.nameIn).toLowerCase())).map(elem => (*/}
+        {/*<MenuItem key={elem.name} value={elem.name}>*/}
+        {/*<Checkbox checked={this.state.in.indexOf(elem.name) > -1} color="primary" />*/}
+        {/*<ListItemText primary={elem.name} />*/}
+        {/*</MenuItem>*/}
+        {/*))}*/}
+        {/*</Select>*/}
+        {/*</FormControl>*/}
       </Paper>
     );
   }

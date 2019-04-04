@@ -40,7 +40,7 @@ class ClearButton extends React.Component {
             <Typography variant="h5">Are you sure you want to clear everything?</Typography>
             <Button color="secondary" variant="outlined" className={`${classes.dialogButton}`} onClick={
               () => {
-                this.props.t.graphSvg.clearGraphData();
+                this.props.t.graphSvg.clearGraphData(this.props.t);
                 this.handleModalClose();
               }
             }>

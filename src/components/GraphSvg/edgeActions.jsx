@@ -180,20 +180,21 @@ export const addPath = function (passedThis, source, target) {
   const specialSource = ['Container', 'Logistic'].includes(source.machine.name);
   const specialTarget = ['Container', 'Logistic'].includes(target.machine.name);
   const targetSlotsUsed = target.instance.input_slots === (passedThis.nodeIn[target.id] ? passedThis.nodeIn[target.id].length : 0);
+  const sourceSlotsUsed = source.instance.output_slots === (passedThis.nodeOut[source.id] ? passedThis.nodeOut[source.id].length : 0);
 
   console.error(sourceChecker, targetChecker, specialSource, specialTarget, targetSlotsUsed);
 
-  if ((specialSource && specialTarget && sourceChecker && targetChecker)
-    || (specialSource && !specialTarget && sourceChecker)
-    || (!specialSource && specialTarget && targetChecker && targetSlotsUsed)
-    || (sourceChecker && targetChecker)
-    || (!specialSource && !specialTarget))
-  {
-    //checked
-    const newEdge = {source: source, target: target};
+  const path_type = passedThis.props.parentAccessor.state.path_type.path_type;
+  path_type.sort((path1, path2) => path1.rank - path2.rank);
+  const upgrades = path_type.filter(path => path.rank >= 0 );
 
-    // Check if there are items you can shove in
-    const sharedItems =  target.allowedIn.filter(value => source.allowedOut.includes(value));
+  // TODO: Set the correct instance by default
+  const instance = upgrades[0];
+
+  const newEdge = {source: source, target: target, instance, upgradeTypes: upgrades};
+
+  if (((specialSource && !sourceChecker) || (specialTarget && !targetChecker))) {
+    // special handling if the source is a container
 
     // check if there are open slots
     const outgoing = source.id;
@@ -202,10 +203,8 @@ export const addPath = function (passedThis, source, target) {
     const usedOut = (passedThis.nodeOut[outgoing] ? passedThis.nodeOut[outgoing].length : 0);
     const usedIn = (passedThis.nodeIn[incoming] ? passedThis.nodeIn[incoming].length : 0);
 
-    // return early if we can't do anything with this node.
-    if ( usedOut >= source.instance.output_slots || usedIn >= target.instance.input_slots ||
-      sharedItems.length <= 0)
-    {
+    // return early if we can't do anything with this node,
+    if (usedOut >= source.instance.output_slots || usedIn >= target.instance.input_slots) {
       passedThis.updateGraphHelper();
       return;
     }
@@ -222,11 +221,10 @@ export const addPath = function (passedThis, source, target) {
     }
     passedThis.updateGraphHelper();
   } else {
-    // special handling if the source is a container
-    const newEdge = {source: source, target: target};
-    //
-    // // Check if there are items you can shove in
-    // const sharedItems =  target.allowedIn.filter(value => source.allowedOut.includes(value));
+    //checked
+
+    // Check if there are items you can shove in
+    const sharedItems = target.allowedIn.filter(value => source.allowedOut.includes(value));
 
     // check if there are open slots
     const outgoing = source.id;
@@ -235,9 +233,9 @@ export const addPath = function (passedThis, source, target) {
     const usedOut = (passedThis.nodeOut[outgoing] ? passedThis.nodeOut[outgoing].length : 0);
     const usedIn = (passedThis.nodeIn[incoming] ? passedThis.nodeIn[incoming].length : 0);
 
-    // return early if we can't do anything with this node,
-    if ( usedOut >= source.instance.output_slots || usedIn >= target.instance.input_slots)
-    {
+    // return early if we can't do anything with this node.
+    if (usedOut >= source.instance.output_slots || usedIn >= target.instance.input_slots ||
+      sharedItems.length <= 0) {
       passedThis.updateGraphHelper();
       return;
     }

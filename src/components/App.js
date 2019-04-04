@@ -27,6 +27,7 @@ import SidebarPanel from './SidebarPanel';
 import ClearButton from './ClearButton';
 import ShareButton from './ShareButton';
 import LoadButton from './LoadButton';
+import SelectorPanel from "./SelectorPanel";
 // import * as d3 from 'd3';
 
 /* global d3 */
@@ -258,8 +259,12 @@ class App extends Component {
                 this.setState({machine_node}, () => {
                   return this.generateRecursiveStructure('spring').then(spring => {
                     this.setState({spring}, () => {
-                      return this.generateRecursiveStructure('purity_type').then(purity_type => {
-                        this.setState({purity_type, isLoaded: true});
+                      return this.generateRecursiveStructure('path_type').then(path_type => {
+                        this.setState({path_type}, () => {
+                          return this.generateRecursiveStructure('purity_type').then(purity_type => {
+                            this.setState({purity_type, isLoaded: true});
+                          });
+                        });
                       });
                     });
                   });
@@ -332,13 +337,14 @@ class App extends Component {
     );
   }
 
-
   render() {
     const {classes} = this.props;
     if (!this.state.isReady) {
       return <Loader ready={this.state.isLoaded} parentState={this}/>;
     }
     const t = this;
+
+    console.log(this.state);
 
     return <div className={classes.root}>
       <CssBaseline/>
@@ -377,9 +383,7 @@ class App extends Component {
             <Typography variant="body1">TODO</Typography>
           </React.Fragment>
         }/>
-
-        {/*<SelectorPanel label='Splitters'/>*/}
-
+        {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ? <SelectorPanel label='Version' graphSvg={this.graphSvg} selected={this.state.selectedNode || this.state.selectedPath} /> : null}
         <Drawer
           className={classes.drawer}
           variant="permanent"
