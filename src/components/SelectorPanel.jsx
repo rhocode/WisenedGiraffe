@@ -86,7 +86,8 @@ class SelectorPanel extends React.Component {
     const instance = this.props.selected.instance
     let index = this.props.selected.upgradeTypes.indexOf(instance);
     const n = this.props.selected.upgradeTypes.length;
-    index = (index + 1) % n;
+    index = (index + 1);
+    if (index >= n) return;
     this.props.selected.instance = this.props.selected.upgradeTypes[index];
     this.update();
 
@@ -97,7 +98,10 @@ class SelectorPanel extends React.Component {
     const instance = this.props.selected.instance
     let index = this.props.selected.upgradeTypes.indexOf(instance);
     const n = this.props.selected.upgradeTypes.length;
-    index = (index - 1 + n) % n;
+    index = index - 1;
+
+    if (index < 0) return;
+
     this.props.selected.instance = this.props.selected.upgradeTypes[index];
     this.update();
 
