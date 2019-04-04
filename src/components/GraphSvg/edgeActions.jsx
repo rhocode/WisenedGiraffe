@@ -2,12 +2,7 @@ import constants from './constants';
 import {deselect_path_and_nodes} from './graphActions';
 import * as d3 from 'd3';
 import TinyQueue from '../TinyQueue';
-import {
-  simple_cycle,
-  strongly_connected_components,
-  strongly_connected_components_nostring,
-  strongly_connected_components_standalone
-} from './algorithms';
+import {strongly_connected_components_standalone} from './algorithms';
 import {spliceUtil} from './util';
 
 export const recalculateStorageContainers = function() {

@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import AddBoxIcon from '@material-ui/icons/AddBox';
 import Popper from '@material-ui/core/Popper';
-import { withStyles } from '@material-ui/core';
+import {withStyles} from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
 import Grow from '@material-ui/core/Grow';
 import ClickAwayListenerV2 from "./ClickAwayListenerV2";

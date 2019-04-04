@@ -11,23 +11,19 @@ import Divider from '@material-ui/core/Divider';
 import InfoIcon from '@material-ui/icons/Info';
 
 import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
-import InputIcon from '@material-ui/icons/Input';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import Loader from './Loader';
 import createDatabase from './newData';
 import GraphSvg from './GraphSvg';
 
 import SidebarButton from './SidebarButton';
 import FabPopup from './FabPopup';
-import ToolbarPopup from './ToolbarPopup';
 import SidebarPopup from './SidebarPopup';
 import NestedSidebarButton from './NestedSidebarButton';
 import SimpleSidebarButton from './SimpleSidebarButton';
 import SidebarPanel from './SidebarPanel';
-import SelectorPanel from './SelectorPanel';
 import ClearButton from './ClearButton';
 import ShareButton from './ShareButton';
 import LoadButton from './LoadButton';

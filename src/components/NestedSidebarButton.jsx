@@ -8,7 +8,6 @@ import MenuList from '@material-ui/core/MenuList';
 import Grow from '@material-ui/core/Grow';
 
 import InnerNestedSidebarButton from './InnerNestedSidebarButton';
-import ClickAwayListenerV2 from "./ClickAwayListenerV2";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 const styles = theme => ({

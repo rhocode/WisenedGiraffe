@@ -3,7 +3,6 @@ import Button from '@material-ui/core/Button';
 
 import PopupDialog from './PopupDialog';
 import {withStyles} from '@material-ui/core';
-import ShareIcon from '@material-ui/icons/Share';
 import InputIcon from '@material-ui/icons/Input';
 import TextField from '@material-ui/core/TextField';
 
