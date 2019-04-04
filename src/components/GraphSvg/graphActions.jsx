@@ -34,8 +34,8 @@ export const initSimulation = () => {
     .force('collision', d3.forceCollide().radius(function (d) {
       return 120;
     }))
-    .force('xAxis', d3.forceX().strength(0.3).x(function(d){return width/2;}))
-    .force('yAxis', d3.forceY().strength(0.3).y(function(d){return height/2;}));
+    .force('xAxis', d3.forceX().strength(0.1).x(function(d){return width/2;}))
+    .force('yAxis', d3.forceY().strength(0.5).y(function(d){return height/2;}));
 };
 
 export const updateGraph = function (simulation, graphNodesGroup, graphLinksGroup) {

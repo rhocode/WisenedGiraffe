@@ -10,161 +10,7 @@ import {
 } from './algorithms';
 import {spliceUtil} from './util';
 
-const nodeComparator = (nodeInShallow) => (a, b) => {
-  const incomingEdgesA = nodeInShallow[a.id.toString()];
-  const incomingEdgesB = nodeInShallow[b.id.toString()];
-
-  if ((!incomingEdgesA || !incomingEdgesA.length) && (!incomingEdgesB || !incomingEdgesB.length)) {
-    if (!['Container', 'Logistic'].includes(a.machine.name)) {
-      return -1;
-    } else if (!['Container', 'Logistic'].includes(b.machine.name)) {
-      return 1;
-    } else if (['Container', 'Logistic'].includes(a.machine.name) && a.containedItems) {
-      return -1;
-    } else if (['Container', 'Logistic'].includes(b.machine.name) && b.containedItems) {
-      return 1;
-    } else {
-      //TODO: splitters?
-      //Save on a sort cycle;
-      return -1;
-    }
-  } else if ((!incomingEdgesB || !incomingEdgesB.length)) {
-    return 1;
-  } else if ((!incomingEdgesA || !incomingEdgesA.length)) {
-    return -1;
-  } else {
-    if (['Container', 'Logistic'].includes(a.machine.name) && a.containedItems) {
-      return -1;
-    } else if (['Container', 'Logistic'].includes(b.machine.name) && b.containedItems) {
-      return 1;
-    } else if (['Container', 'Logistic'].includes(a.machine.name) && a.childProvides.length) {
-      return -1;
-    } else if (['Container', 'Logistic'].includes(b.machine.name) && b.childProvides.length) {
-      return 1;
-    } else if (['Container', 'Logistic'].includes(a.machine.name)) {
-      return -1;
-    } else if (['Container', 'Logistic'].includes(b.machine.name)) {
-      return 1;
-    } else {
-      return -1;
-    }
-  }
-};
-
-
-export const recalculateStorageContainers3 = function() {
-  const nodeInShallow = {};
-  Object.keys(this.nodeIn).forEach(key => {
-    const value = this.nodeIn[key];
-    nodeInShallow[key] = value.map(elem => elem.id);
-  });
-
-  const nodeOutShallow = {};
-  Object.keys(this.nodeOut).forEach(key => {
-    const value = this.nodeOut[key];
-    nodeOutShallow[key] = value.map(elem => elem.id);
-  });
-
-  const nodeUnion = new Set(Object.keys(nodeInShallow));
-  Object.keys(nodeOutShallow).forEach(node => nodeUnion.add(node));
-  const nodeUnionArray = Array.from(nodeUnion);
-
-  const nodeLookupArray = {};
-
-  // force reset all specials!
-  this.graphData.nodes.forEach(node => {
-    if (node.containedItems) {
-      node.containedItems = null;
-      node.containedRecipes = null;
-      node.allowedIn = [];
-      node.allowedOut = [];
-      node.possibleAllowedIn = [];
-      node.hasError = null;
-    }
-  });
-
-  nodeUnionArray.forEach((value, index) => {
-    nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
-    nodeUnionArray[index].childProvides = [];
-    nodeUnionArray[index].logisticNeeds = [];
-    nodeLookupArray[nodeUnionArray[index].id] = nodeUnionArray[index];
-  });
-
-  const myTinyQueue = new TinyQueue(nodeUnionArray, nodeComparator(nodeInShallow));
-  const reverseTraversal = [];
-
-};
-
-
-
-
-const processNode = function(node, outgoingEdges, shouldPushEdges = true) {
-  if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
-    // update downstream
-    if (shouldPushEdges) {
-      outgoingEdges.forEach(elem => {
-        if (!elem.childProvides.filter(entry => entry.source === node.id).length) {
-          console.log('Pushing to id', elem.id, node.data.recipe.item.name);
-          elem.childProvides.push({item: node.data.recipe, source: node.id});
-        }
-      }); // wow, we're literally only going to have one outgoing edge.
-    }
-  } else if (node.machine.name ==='Logistic') {
-    if (node.instance.name === 'Splitter' || (node.instance.name === 'Merger')) {
-      const propagateSplitterData = (node, outgoingEdges) => {
-        node.allowedIn = node.containedItems.map(elem => elem.id);
-        node.allowedOut = node.containedItems.map(elem => elem.id);
-
-        if (shouldPushEdges) {
-          outgoingEdges.forEach(connectedNode => {
-            const alreadyHasElems = new Set(connectedNode.childProvides.map(entry => entry.source));
-            node.childProvides.forEach(myChildProvides => {
-              if (!alreadyHasElems.has(myChildProvides.source)) {
-                connectedNode.childProvides.push(myChildProvides);
-              }
-            });
-          });
-        }
-      };
-
-      if (node.childProvides.length) {
-        node.containedItems = node.childProvides.map(elem => elem.item.item);
-        if (shouldPushEdges) {
-          propagateSplitterData(node, outgoingEdges);
-        }
-      }
-    } else {
-      throw new Error('Not implemented!');
-    }
-  } else {
-    //it's a container.
-    const propagateContainerData = (node, outgoingEdges) => {
-      node.allowedIn = node.containedItems.map(elem => elem.id);
-      node.allowedOut = node.containedItems.map(elem => elem.id);
-
-      outgoingEdges.forEach(connectedNode => {
-        const alreadyHasElems = new Set(connectedNode.childProvides.map(entry => entry.source));
-        node.childProvides.forEach(myChildProvides => {
-          if (!alreadyHasElems.has(myChildProvides.source)) {
-            connectedNode.childProvides.push(myChildProvides);
-          }
-        });
-      });
-    };
-
-    if (node.childProvides.length) {
-      // I have items!!
-      node.containedItems = node.childProvides.map(elem => elem.item.item);
-      if (shouldPushEdges) {
-        propagateContainerData(node, outgoingEdges);
-      }
-    }
-  }
-};
-
 export const recalculateStorageContainers = function() {
-
-
 
   const nodeUnion = new Set(Object.keys(this.nodeIn));
   Object.keys(this.nodeOut).forEach(node => nodeUnion.add(node));
@@ -177,6 +23,13 @@ export const recalculateStorageContainers = function() {
     nodeLookup[nodeUnionArray[index].id] = nodeUnionArray[index];
     nodeUnionArray[index].childProvides = [];
     nodeUnionArray[index].hasSources = new Set();
+    nodeUnionArray[index].containedItems = [];
+
+    if (nodeUnionArray[index].machine.name !== 'Container' && nodeUnionArray[index].machine.name !== 'Logistic') {
+    } else {
+      nodeUnionArray[index].allowedIn = [];
+      nodeUnionArray[index].allowedOut = [];
+    }
   });
 
   const nodeOutWithSets = {};
@@ -210,7 +63,6 @@ export const recalculateStorageContainers = function() {
       derivedGraphAccessor.add(thisId);
     });
   });
-
   const derivedGraphIncoming = {};
   const immutableDerivedGraphIncoming = {};
 
@@ -220,17 +72,22 @@ export const recalculateStorageContainers = function() {
     const thisNode = lookupArray[node];
     derivedGraphIncoming[thisNode] = derivedGraphIncoming[thisNode] || new Set();
     immutableDerivedGraphIncoming[thisNode] = immutableDerivedGraphIncoming[thisNode] || new Set();
-
     ids.forEach(id => {
       const thisId = lookupArray[id];
       if (thisId === thisNode) return;
+
+      if (!derivedGraphIncoming[thisId]) {
+        derivedGraphIncoming[thisId] = new Set();
+        immutableDerivedGraphIncoming[thisId] = new Set();
+      }
+
       const derivedGraphAccessor = derivedGraphIncoming[thisId];
       derivedGraphAccessor.add(thisNode);
       immutableDerivedGraphIncoming[thisId].add(thisNode);
     });
   });
 
-  const myTinyQueue = new TinyQueue(Object.keys(derivedGraphOutgoing), (a, b) => {
+  const myTinyQueue = new TinyQueue([...Object.keys(derivedGraphOutgoing), ...Object.keys(derivedGraphIncoming)], (a, b) => {
     return derivedGraphIncoming[a].size - derivedGraphIncoming[b].size;
   });
 
@@ -238,16 +95,13 @@ export const recalculateStorageContainers = function() {
 
   const reverseTraversalStack = [];
 
-
   while(myTinyQueue.size()) {
     const node = myTinyQueue.pop();
 
     reverseTraversalStack.push(node);
 
-
     const thisNodeInflated = superNodeGraphLookupInflated[node];
-
-    const outgoing = Array.from(derivedGraphOutgoing[node]);
+    const outgoing = Array.from(derivedGraphOutgoing[node] || new Set());
     const outgoingInflated = outgoing.map(item => superNodeGraphLookupInflated[item]);
 
     const propagateNodeToEdges = (nodeGroupSource, nodeGroupTarget, origin, targets) => {
@@ -265,12 +119,10 @@ export const recalculateStorageContainers = function() {
               combinedProvidesSource.add(provide.source);
             }
           });
-          node.allowedIn = node.childProvides.map(elem => elem.item.id);
-          node.allowedOut = node.childProvides.map(elem => elem.item.id);
+          node.allowedIn = node.childProvides.map(elem => elem.item.item.id);
+          node.allowedOut = node.childProvides.map(elem => elem.item.item.id);
           node.containedItems = node.childProvides.map(elem => elem.item.item);
         }
-
-        console.log(node.id, node.instance.name, node.allowedIn, node.allowedOut, node)
       });
 
       targets.forEach(target => {
@@ -296,329 +148,33 @@ export const recalculateStorageContainers = function() {
     myTinyQueue.reheapify();
   }
 
-
   while(reverseTraversalStack.length) {
     const node = reverseTraversalStack.pop();
 
     const thisNodeInflated = superNodeGraphLookupInflated[node];
 
-    const incoming = Array.from(immutableDerivedGraphIncoming[node]);
-    const incomingInflated = incoming.map(item => superNodeGraphLookupInflated[item]);
-    console.log(incoming);
+    const outgoing = Array.from(derivedGraphOutgoing[node] || new Set());
+    const outgoingInflated = outgoing.map(item => superNodeGraphLookupInflated[item]);
+
     const propagateNodeToEdgesReversed = (nodeGroupSource, nodeGroupTarget, origin, targets) => {
-      //gather this node
-      const combinedProvides = [];
-      const combinedProvidesSource = new Set();
-      //TODO: FIX ME PLEASE GOD
+
+      const allowed = new Set();
+      nodeGroupTarget.forEach(nodeGroup => nodeGroup.forEach(node => {
+        node.allowedIn.forEach(item => allowed.add(item))
+      }));
+
       nodeGroupSource.forEach(node => {
-        console.log("Reverse traversal for", node.instance.name, origin)
         if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
-          combinedProvides.push({item: node.data.recipe, source: origin});
+          // NoOp
         } else {
-          // node.childProvides = globalProvideMap[origin]  || [];
-          // node.childProvides.forEach(provide => {
-          //   if (!combinedProvidesSource.has(provide.source)) {
-          //     combinedProvides.push(provide);
-          //     combinedProvidesSource.add(provide.source);
-          //   }
-          // });
-          console.log(node.childProvides, node.allowedIn, node.allowedOut);
-          // node.allowedIn = node.childProvides.map(elem => elem.item.id);
-          // node.allowedOut = node.childProvides.map(elem => elem.item.id);
-          // node.containedItems = node.childProvides.map(elem => elem.item.item);
-        }
-      });
-
-      // targets.forEach(target => {
-      //   console.log("Adding dep for target", target)
-      //   if (!globalProvideMap[target]) {
-      //     globalProvideMap[target] = [];
-      //   }
-      //
-      //   combinedProvides.forEach(provide => {
-      //     if (!new Set(globalProvideMap[target].map(elem => elem.source)).has(provide.source)) {
-      //       globalProvideMap[target].push(provide);
-      //     }
-      //   });
-      // });
-    };
-
-    propagateNodeToEdgesReversed(thisNodeInflated, incomingInflated, node, incoming);
-
-  }
-};
-
-export const recalculateStorageContainers99 = function() {
-  const nodeInShallow = {};
-  Object.keys(this.nodeIn).forEach(key => {
-    const value = this.nodeIn[key];
-    nodeInShallow[key] = value.map(elem => elem.id);
-  });
-
-  const nodeOutShallow = {};
-  Object.keys(this.nodeOut).forEach(key => {
-    const value = this.nodeOut[key];
-    nodeOutShallow[key] = value.map(elem => elem.id);
-  });
-
-  const nodeOutShallowCopy = JSON.parse(JSON.stringify(nodeOutShallow));
-
-  const nodeUnion = new Set(Object.keys(nodeInShallow));
-  Object.keys(nodeOutShallow).forEach(node => nodeUnion.add(node));
-  const nodeUnionArray = Array.from(nodeUnion);
-
-  const nodeLookupArray = {};
-
-  // force reset all specials!
-  this.graphData.nodes.forEach(node => {
-    if (node.containedItems) {
-      node.containedItems = null;
-      node.containedRecipes = null;
-      node.allowedIn = [];
-      node.allowedOut = [];
-      node.possibleAllowedIn = [];
-      node.hasError = null;
-    }
-  });
-
-  nodeUnionArray.forEach((value, index) => {
-    nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
-    nodeUnionArray[index].childProvides = [];
-    nodeUnionArray[index].logisticNeeds = [];
-    nodeLookupArray[nodeUnionArray[index].id] =nodeUnionArray[index];
-  });
-
-
-  const myTinyQueue = new TinyQueue(nodeUnionArray, nodeComparator(nodeInShallow));
-  const reverseTraversal = [];
-
-  // retuires nodeOutput array
-  const cycled_components = (graph) => {
-    const tmp = simple_cycle(graph);
-    return {raw: tmp, set: new Set(tmp.reduce((a, b) => {
-      const inputA = a.map(elem => parseInt(elem));
-      const inputB = b.map(elem => parseInt(elem));
-      return new Set([...inputA, ...inputB]);
-    }))};
-  };
-
-
-  let cycleNodes = null;
-
-  let propagate = function(node, nodeOut, cycleNodesRaw, nodeLookupArray, nodeOutCopy) {
-    const cycleNodes = new Set(cycleNodesRaw.raw.filter(arr => arr.indexOf(node.id) !== -1).flat());
-    const visited = new Set();
-    const stack = [node];
-
-    const vertexLookup = {};
-    (node.childProvides || []).forEach(provide => {
-      vertexLookup[provide.source] = provide;
-    });
-
-    const combinedChildProvides = [];
-
-    const nodesToPropagateData = [];
-
-    const nonCycleVisited = new Set();
-    const nonCyclePropagation = [];
-    console.log('Propagatingzzz');
-    while(stack.length) {
-      const vertex = stack.pop();
-      if (!visited.has(vertex.id)) {
-        visited.add(vertex.id);
-
-        console.log('Visiting', vertex.instance.name, vertex.id);
-
-        (vertex.childProvides || []).forEach(provide=>{
-          console.log('It has', provide.item.item.name);
-          combinedChildProvides.push(provide);
-        });
-
-        //If it's part of the cycle, propagate the original edges.
-        if (cycleNodes.has(vertex.id)) {
-          console.log('THIS IS PART OF THE CYCLE');
-          nodesToPropagateData.push(vertex);
-          const outs = nodeOutCopy[vertex.id];
-          console.log(outs);
-          if (!outs) {
-            throw new Error('Why are there no outs for node' + vertex.id + ' ' + JSON.stringify(nodeOut));
-          } else {
-            outs.filter(out => !visited.has(out)).map(elem => nodeLookupArray[elem]).forEach(elem => stack.push(elem));
-          }
-        } else {
-          // if it's not part of the cycle, add these propagated things to the edges;
-          console.log('NOT PART OF CYCLE');
-          const outs = nodeOutCopy[vertex.id];
-          if (!outs) {
-            throw new Error('Why are there no outs for node' + vertex.id + ' ' + JSON.stringify(nodeOut));
-          } else {
-            console.log(outs);
-            outs.filter(out => !visited.has(out)).map(elem => nodeLookupArray[elem]).forEach(elem => {
-              if (!nonCycleVisited.has(elem.id)) {
-                nonCycleVisited.add(elem.id);
-                nonCyclePropagation.push(elem);
-              }
-            });
+          if (node.allowedIn.length === 0 && node.allowedOut.length === 0) {
+            node.allowedIn = Array.from(allowed);
+            node.allowedOut = Array.from(allowed);
           }
         }
-      }
-    }
-
-    nodesToPropagateData.forEach(node => {
-      node.childProvides = combinedChildProvides;
-    });
-
-    nonCyclePropagation.forEach(node => {
-      combinedChildProvides.forEach(provide => {
-        console.log(provide);
-      });
-    });
-
-    console.error(combinedChildProvides);
-
-    return nodesToPropagateData;
-  };
-
-
-  console.error('RUN ==========');
-  while (myTinyQueue.size() > 0) {
-    const elem = myTinyQueue.pop();
-    console.log('Processing node: ' + elem.instance.name + ' ' + elem.id, d3);
-    const outgoing = nodeOutShallow[elem.id.toString()] || [];
-    if ((nodeInShallow[elem.id.toString()] || []).length) {
-      console.log('PROPAGATION ZS', JSON.parse(JSON.stringify(nodeUnionArray.map(elem => elem.id ))));
-      if (!cycleNodes) {
-        cycleNodes = cycled_components(nodeOutShallow); // TODO: maybe nodeOutShallowCopy?
-      }
-      // propagate myself to all nodes part of a cycle
-      console.error('Propagating');
-      const nodesToOperateOn = propagate(elem, nodeOutShallow, cycleNodes, nodeLookupArray, nodeOutShallowCopy);
-
-      console.log('Nodes to remove:', JSON.parse(JSON.stringify(nodesToOperateOn.map(elem => elem.id ))));
-
-      nodesToOperateOn.forEach(item => {
-        const localOutgoing = nodeOutShallow[item] || [];
-
-        processCurrentNode.call(this, item, localOutgoing.map(i => nodeLookupArray[i]), false);
-        myTinyQueue.remove(item);
-        const sourceMapper = item.id;
-
-        Object.keys(nodeOutShallow).forEach(key => {
-          const outList = nodeOutShallow[key];
-          spliceUtil(outList, sourceMapper);
-        });
-      });
-
-      reverseTraversal.push(nodesToOperateOn);
-      myTinyQueue.reheapify();
-    } else {
-      reverseTraversal.push([elem]);
-      processCurrentNode.call(this, elem, outgoing.map(i => nodeLookupArray[i]));
-
-      // If there's outgoing edges, let's go ahead and remove those
-      if (outgoing.length) {
-        const source = elem.id;
-        outgoing.forEach(element => {
-          spliceUtil(nodeInShallow[element], source);
-        });
-        myTinyQueue.reheapify(); // should we reheapify later?
-      }
-    }
-  }
-
-  // reset the edgegraph
-  reverseTraversal.reverse();
-  reverseTraversal.forEach(elemList => {
-    if (elemList.length > 1) return;
-
-    const elem = elemList[0];
-
-    const outgoing = nodeOutShallowCopy[elem.id.toString()] || [];
-    reverseProcessCurrentNode.call(this, elem, outgoing.map(i => nodeLookupArray[i]));
-  });
-};
-
-
-const reverseProcessCurrentNode = function(node, outgoingEdges) {
-  if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
-    console.log('This is a normal node, skipping!');
-  } else {
-    if (node.instance.name === 'Splitter' || node.instance.name === 'Merger' || node.machine.name === 'Container') {
-      if (node.allowedIn.length) {
-        return;
-      }
-      const acceptableInput = new Set();
-      outgoingEdges.forEach(connectedNode => {
-        (connectedNode.allowedIn || []).forEach(elem => acceptableInput.add(elem));
-      });
-      node.allowedIn = Array.from(new Set([...node.allowedIn, ...acceptableInput]));
-    } else {
-      throw new Error('Not implemented!');
-    }
-  }
-};
-
-const processCurrentNode = function(node, outgoingEdges, shouldPushEdges = true) {
-  if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
-    // update downstream
-    if (shouldPushEdges) {
-      outgoingEdges.forEach(elem => {
-        if (!elem.childProvides.filter(entry => entry.source === node.id).length) {
-          console.log('Pushing to id', elem.id, node.data.recipe.item.name);
-          elem.childProvides.push({item: node.data.recipe, source: node.id});
-        }
-      }); // wow, we're literally only going to have one outgoing edge.
-    }
-  } else if (node.machine.name ==='Logistic') {
-    if (node.instance.name === 'Splitter' || (node.instance.name === 'Merger')) {
-      const propagateSplitterData = (node, outgoingEdges) => {
-        node.allowedIn = node.containedItems.map(elem => elem.id);
-        node.allowedOut = node.containedItems.map(elem => elem.id);
-
-        if (shouldPushEdges) {
-          outgoingEdges.forEach(connectedNode => {
-            const alreadyHasElems = new Set(connectedNode.childProvides.map(entry => entry.source));
-            node.childProvides.forEach(myChildProvides => {
-              if (!alreadyHasElems.has(myChildProvides.source)) {
-                connectedNode.childProvides.push(myChildProvides);
-              }
-            });
-          });
-        }
-      };
-
-      if (node.childProvides.length) {
-        node.containedItems = node.childProvides.map(elem => elem.item.item);
-        if (shouldPushEdges) {
-          propagateSplitterData(node, outgoingEdges);
-        }
-      }
-    } else {
-      throw new Error('Not implemented!');
-    }
-  } else {
-    //it's a container.
-    const propagateContainerData = (node, outgoingEdges) => {
-      node.allowedIn = node.containedItems.map(elem => elem.id);
-      node.allowedOut = node.containedItems.map(elem => elem.id);
-
-      outgoingEdges.forEach(connectedNode => {
-        const alreadyHasElems = new Set(connectedNode.childProvides.map(entry => entry.source));
-        node.childProvides.forEach(myChildProvides => {
-          if (!alreadyHasElems.has(myChildProvides.source)) {
-            connectedNode.childProvides.push(myChildProvides);
-          }
-        });
       });
     };
-
-    if (node.childProvides.length) {
-      // I have items!!
-      node.containedItems = node.childProvides.map(elem => elem.item.item);
-      if (shouldPushEdges) {
-        propagateContainerData(node, outgoingEdges);
-      }
-    }
+    propagateNodeToEdgesReversed(thisNodeInflated, outgoingInflated, node, outgoing);
   }
 };
 
@@ -639,7 +195,6 @@ export const addPath = function (passedThis, source, target) {
     || (!specialSource && !specialTarget))
   {
     //checked
-    console.log('Checked Flow!');
     const newEdge = {source: source, target: target};
 
     // Check if there are items you can shove in
@@ -705,7 +260,6 @@ export const addPath = function (passedThis, source, target) {
     passedThis.updateGraphHelper();
   }
 };
-
 
 export const pathMouseOver = function (d) {
 

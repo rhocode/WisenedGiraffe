@@ -37,6 +37,7 @@ export const node_clicked = function (d, t) {
   if (previouslySelected !== d) {
     deselect_path_and_nodes(t);
     t.setState({selectedNode: d});
+
     d3.select(this).classed(constants.graphNodeHoverClass, true)
       .classed(constants.graphNodeGrabbedClass, false)
       .classed(constants.selectedNodeClass, true);

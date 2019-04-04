@@ -342,7 +342,6 @@ class App extends Component {
     if (!this.state.isReady) {
       return <Loader ready={this.state.isLoaded} parentState={this}/>;
     }
-
     const t = this;
 
     return <div className={classes.root}>
@@ -414,7 +413,6 @@ class App extends Component {
         </Drawer>
         <main className={classes.content}>
           {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
-            console.log('Loaded graphSvg main object:', graphSvg);
             t.graphSvg = graphSvg;
           }}/> : <div/>}
         </main>
