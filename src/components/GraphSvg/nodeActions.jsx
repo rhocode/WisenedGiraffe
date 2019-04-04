@@ -101,18 +101,12 @@ export const addEfficiencyArc = (parent, percentage_metric, offset, endOffset) =
     .attr('class', constants.overclockedArcClass)
     .attr('fill', 'none')
     .attr('stroke-width', 8)
-    .attr('stroke', 'darkslategray')
-    .attr('d', function (d) {
-      return overClockCalculation(d, percentage_metric, offset, endOffset);
-    });
+    .attr('stroke', 'darkslategray');
+  editEfficiencyArc(percentage_metric, offset, endOffset);
 };
 
-export const editEfficiencyArc = (parent, percentage_metric, offset, endOffset) => {
-  parent.select('.' + constants.overclockedArcClass)
-  // .attr('class', constants.overclockedArcClass)
-  // .attr('fill', 'none')
-  // .attr('stroke-width', 4)
-  // .attr('stroke', 'darkslategray')
+export const editEfficiencyArc = (percentage_metric, offset, endOffset) => {
+  d3.selectAll('.' + constants.overclockedArcClass)
     .attr('d', function (d) {
       return overClockCalculation(d, percentage_metric, offset, endOffset);
     });
@@ -161,7 +155,6 @@ export const wheelZoomCalculation = function (d) {
     d.overclock = d.overclock - 251;
   }
   updateOverclock(d3.select(this).select('.' + constants.overclockedTextClass));
-  // editEfficiencyArc(d3.select(this), 'overclock', 59, 322);
 };
 
 export const updateOverclock = function(textElement) {
@@ -244,10 +237,10 @@ export const updateComponents = function(elementsToUpdate) {
     new Set(actualOut).forEach(id => {   spliceUtil(allowedOutRemaining, id); });
 
     if (allowedOutRemaining.length > 0) {
-      element.append('text').attr('class', 'fas fa-arrow-right')
+      element.append('text').attr('class', 'fas fa-arrow-left')
         .classed(constants.nodeRequirementsSubIconClass, true)
         .attr('x', function (d) {
-          return 58;
+          return -58 - 25;
         })
         .attr('y', function (d) {
           return 3;
@@ -284,7 +277,7 @@ export const updateComponents = function(elementsToUpdate) {
             return remaining.icon;
           })
           .attr('x', function (d) {
-            return 56 + 28 + (28 * index++);
+            return -56 - 25 - 28 - (28 * index++);
           })
           .attr('y', function (d) {
             return 3;
@@ -358,16 +351,18 @@ export const insertComponents = function(parentElement) {
   forceUpdateComponentLabel.call(this);
 };
 
-export const updateNodeTierExternal = function(el) {
-  el.selectAll('text').remove();
+export const updateNodeTierExternal = function(el, x = 35, y = 35) {
+  el.selectAll('.' + constants.nodeVersionTextClass).remove();
 
   const backgroundText = el.append('text')
     .attr('fill', 'white')
     .attr('class', 'overclockFont')
     .classed(constants.nodeVersionTextClass, true)
+    .style('text-anchor', 'middle')
+    .style('dominant-baseline', 'central')
     .attr('stroke', 'black')
     .attr('stroke-width', 4)
-    .attr('x', 32).attr('dy', 46)
+    .attr('x', x).attr('y', y)
     .attr('font-size', 30);
 
   updateNodeTier(backgroundText);
@@ -375,7 +370,9 @@ export const updateNodeTierExternal = function(el) {
   const tspan = el.append('text').attr('fill', 'white')
     .attr('class', 'overclockFont')
     .classed(constants.nodeVersionTextClass, true)
-    .attr('x', 32).attr('dy', 46)
+    .style('text-anchor', 'middle')
+    .style('dominant-baseline', 'central')
+    .attr('x', x).attr('y', y)
     .attr('font-size', 30);
 
   updateNodeTier(tspan);

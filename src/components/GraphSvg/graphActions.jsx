@@ -15,7 +15,7 @@ import {
   wheelZoomCalculation
 } from './nodeActions';
 import {drag_drag, drag_end, drag_start} from './mouseEvents';
-import {pathMouseClick, recalculateStorageContainers} from './edgeActions';
+import {pathMouseClick, recalculateStorageContainers, insertEdgeLabel, calculateLabelPositions} from './edgeActions';
 
 //v2
 export const initSimulation = () => {
@@ -128,7 +128,6 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
       .attr('r', d => 50);
 
   const callbacks = [];
-
   addEfficiencyArc(graphNodesEnter, 'overclock', 59, 322);
   addNodeImage(graphNodesEnter);
   insertNodeOverclock(graphNodesEnter);
@@ -162,16 +161,18 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     .append('g')
     .attr('id', function (d) {
       return 'path-parent' + d.source.id + '-' + d.target.id;
-    });
+    })
+    .classed(constants.lineParentObjectClass, true);
+
 
   // apply styling to each selected line
-  linkFullObject.append('line')
+  linkFullObject.append('path')
     .classed(constants.lineStylingPathClass, true)
     .classed(constants.lineStylingFullClass, true)
     .attr('display', 'none')
     .attr('stroke', 'orange')
     .attr('stroke-width', 10);
-  linkFullObject.append('line')
+  linkFullObject.append('path')
     .classed(constants.lineStylingArrowClass, true)
     .classed(constants.lineStylingFullClass, true)
     .attr('display', 'none')
@@ -179,18 +180,19 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     .attr('marker-end', 'url(#highlight-path-arrow-orange)')
     .attr('stroke-width', 3);
 
-
   linkFullObject
-    .append('line')
+    .append('path')
     .classed(constants.lineObjectClass, true)
     .attr('stroke', function (d) {
       return d3.color('#000000');
     })
     .attr('marker-end', 'url(#default-path-arrow)');
 
+  insertEdgeLabel.call(this, linkFullObject);
+
   // apply styling to each selected line
   linkFullObject
-    .append('line')
+    .append('path')
     .classed(constants.lineHitboxObjectClass, true)
     .on('mouseover', function (d) {
     }).on('mouseout', function (d) {
@@ -268,6 +270,14 @@ export const handleTick = function (graphNodesData, graphLinksData, simulation) 
     .attr('y2', function (d) {
       return d.target.y;
     });
+
+  //update link positions
+  graphLinksData.selectAll('path')
+    .attr('d', function(d) {return 'M '+d.source.x+' '+d.source.y+' L '+ d.target.x +' '+d.target.y;});
+
+  calculateLabelPositions.call(this, graphLinksData);
+
+  // insertEdgeLabel.call(this, graphLinksData.selectAll('.' + constants.lineParentObjectClass));
 
   graphLinksData.selectAll('.' + constants.lineObjectClass)
     .each(function (d) {

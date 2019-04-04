@@ -1,5 +1,6 @@
 const constants = {
   lineObjectClass: 'line-object',
+  lineParentObjectClass: 'lineParentObjectClass',
   lineHitboxObjectClass: 'line-object-hitbox',
   lineStylingPathClass: 'line-object-path-styled',
   lineStylingArrowClass: 'line-object-arrow-styled',

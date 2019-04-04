@@ -10,8 +10,9 @@ import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
 import InfoIcon from '@material-ui/icons/Info';
 
+import WarningIcon from '@material-ui/icons/Warning';
+
 import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
-import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 
 import Button from '@material-ui/core/Button';
 import Loader from './Loader';
@@ -344,8 +345,6 @@ class App extends Component {
     }
     const t = this;
 
-    console.log(this.state);
-
     return <div className={classes.root}>
       <CssBaseline/>
       <MuiThemeProvider theme={theme}>
@@ -355,10 +354,10 @@ class App extends Component {
               src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
               title="logo"/>
             <div className={classes.grow}></div>
-            <Button color="inherit" >
-              <OfflineBoltIcon/>
-              <div className={classes.label}>Analyze</div>
-            </Button>
+            {/*<Button color="inherit" >*/}
+              {/*<OfflineBoltIcon/>*/}
+              {/*<div className={classes.label}>Analyze</div>*/}
+            {/*</Button>*/}
             <Button color="inherit" >
               <SettingsInputComponentIcon/>
               <div className={classes.label}>Optimize</div>
@@ -408,6 +407,11 @@ class App extends Component {
               <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a href="https://github.com/thinkaliker">Adam</a> (<a href="https://twitter.com/thinkaliker">@thinkaliker</a>).</Typography>
               <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain Studios AB, or THQ Nordic AB.</Typography>
               <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from Coffee Stain Studios AB's Satisfactory.</Typography>
+            </SidebarPopup>
+            <SidebarPopup Icon={WarningIcon} label='Known Issues' title='Known Issues'>
+              <ul>
+                <li>Resource nodes do not have purities displayed on the graph</li>
+              </ul>
             </SidebarPopup>
           </List>
         </Drawer>
