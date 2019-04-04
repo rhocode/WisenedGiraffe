@@ -14,7 +14,8 @@ import Radio from '@material-ui/core/Radio';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import IconButton from '@material-ui/core/IconButton';
-
+import {updateNodeTierExternal} from "./GraphSvg/nodeActions";
+import * as d3 from 'd3';
 const drawerWidth = 310;
 
 const styles = theme => ({
@@ -72,12 +73,23 @@ class SelectorPanel extends React.Component {
     this.state = { dummy: false};
   }
 
+  update = () => {
+    if (this.props.selected.machine)  {
+      const el = d3.select('#' + 'node-level-accessor-' + this.props.selected.id);
+      updateNodeTierExternal(el);
+    } else {
+      // it's a path
+    }
+  }
+
   upgrade = () => {
     const instance = this.props.selected.instance
     let index = this.props.selected.upgradeTypes.indexOf(instance);
     const n = this.props.selected.upgradeTypes.length;
     index = (index + 1) % n;
     this.props.selected.instance = this.props.selected.upgradeTypes[index];
+    this.update();
+
     this.setState({dummy: !this.state.dummy});
   }
 
@@ -87,6 +99,8 @@ class SelectorPanel extends React.Component {
     const n = this.props.selected.upgradeTypes.length;
     index = (index - 1 + n) % n;
     this.props.selected.instance = this.props.selected.upgradeTypes[index];
+    this.update();
+
     this.setState({dummy: !this.state.dummy});
   }
 

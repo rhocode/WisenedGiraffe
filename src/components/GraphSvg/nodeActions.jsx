@@ -2,7 +2,7 @@ import constants from './constants';
 import {addPath, removePath} from './edgeActions';
 import * as d3 from 'd3';
 import {deselect_path_and_nodes} from './graphActions';
-import {spliceUtil} from "./util";
+import {spliceUtil} from './util';
 
 export const add_node = (d, t) => {
   d.id = d.id || t.id++;
@@ -301,6 +301,8 @@ export const forceUpdateComponentLabel = function() {
 };
 
 
+
+
 export const insertComponents = function(parentElement) {
 
   const el1 = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);
@@ -356,10 +358,9 @@ export const insertComponents = function(parentElement) {
   forceUpdateComponentLabel.call(this);
 };
 
-export const insertNodeTier = (gEl) => {
-  // const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
-  const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', 0);
-  // el.append('circle').attr('r', 17).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
+export const updateNodeTierExternal = function(el) {
+  el.selectAll('text').remove();
+
   const backgroundText = el.append('text')
     .attr('fill', 'white')
     .attr('class', 'overclockFont')
@@ -378,7 +379,12 @@ export const insertNodeTier = (gEl) => {
     .attr('font-size', 30);
 
   updateNodeTier(tspan);
-  // updateOverclock(tspan);
+};
+
+export const insertNodeTier = (gEl) => {
+  // const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
+  const el = gEl.append('g').attr('id', function(d) { return 'node-level-accessor-' + d.id; });
+  updateNodeTierExternal(el);
 };
 
 export const insertNodeOverclock = (gEl) => {
