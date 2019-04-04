@@ -108,7 +108,6 @@ class SelectorPanel extends React.Component {
 
   render() {
     const { classes, label } = this.props;
-    console.log(this.props.selected);
     return(
       <Paper className={classes.paper}>
         <Typography variant='h5'>{label}</Typography>
@@ -119,44 +118,6 @@ class SelectorPanel extends React.Component {
         <IconButton color="secondary" className={classes.button} onClick={this.downgrade}>
           <ArrowDownwardIcon />
         </IconButton>
-        {/*<FormControl className={classes.formControl}>*/}
-        {/*<RadioGroup*/}
-        {/*aria-label="Selection"*/}
-        {/*name="selection"*/}
-        {/*value={this.props.selected.instance.id.toString()}*/}
-        {/*onChange={this.handleChange}*/}
-        {/*>*/}
-        {/*{this.props.selected.upgradeTypes.filter(element => element.name.toLowerCase().includes((this.state.nameIn).toLowerCase())).map(elem => (*/}
-        {/*<FormControlLabel key={elem.id} value={elem.id.toString()} control={<Radio />} label={elem.name} />*/}
-        {/*))}*/}
-        {/*</RadioGroup>*/}
-        {/*<Select*/}
-        {/*multiple*/}
-        {/*value={this.state.in}*/}
-        {/*onChange={this.handleChangeIn}*/}
-        {/*input={<Input id="select-multiple-checkbox" />}*/}
-        {/*renderValue={selected => selected.filter(element => element).join(', ')}*/}
-        {/*MenuProps={MenuProps}*/}
-        {/*>*/}
-        {/*<MenuItem>*/}
-        {/*<TextField*/}
-        {/*id="standard-name"*/}
-        {/*label="Filter"*/}
-        {/*className={classes.textField}*/}
-        {/*value={this.state.nameIn}*/}
-        {/*onChange={this.handleChangeFilterIn}*/}
-        {/*margin="normal"*/}
-        {/*fullWidth*/}
-        {/*/>*/}
-        {/*</MenuItem>*/}
-        {/*{this.props.selected.upgradeTypes.filter(element => element.name.toLowerCase().includes((this.state.nameIn).toLowerCase())).map(elem => (*/}
-        {/*<MenuItem key={elem.name} value={elem.name}>*/}
-        {/*<Checkbox checked={this.state.in.indexOf(elem.name) > -1} color="primary" />*/}
-        {/*<ListItemText primary={elem.name} />*/}
-        {/*</MenuItem>*/}
-        {/*))}*/}
-        {/*</Select>*/}
-        {/*</FormControl>*/}
       </Paper>
     );
   }

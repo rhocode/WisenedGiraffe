@@ -101,18 +101,12 @@ export const addEfficiencyArc = (parent, percentage_metric, offset, endOffset) =
     .attr('class', constants.overclockedArcClass)
     .attr('fill', 'none')
     .attr('stroke-width', 8)
-    .attr('stroke', 'darkslategray')
-    .attr('d', function (d) {
-      return overClockCalculation(d, percentage_metric, offset, endOffset);
-    });
+    .attr('stroke', 'darkslategray');
+  editEfficiencyArc(percentage_metric, offset, endOffset);
 };
 
-export const editEfficiencyArc = (parent, percentage_metric, offset, endOffset) => {
-  parent.select('.' + constants.overclockedArcClass)
-  // .attr('class', constants.overclockedArcClass)
-  // .attr('fill', 'none')
-  // .attr('stroke-width', 4)
-  // .attr('stroke', 'darkslategray')
+export const editEfficiencyArc = (percentage_metric, offset, endOffset) => {
+  d3.selectAll('.' + constants.overclockedArcClass)
     .attr('d', function (d) {
       return overClockCalculation(d, percentage_metric, offset, endOffset);
     });

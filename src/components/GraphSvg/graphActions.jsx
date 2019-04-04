@@ -128,7 +128,6 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
       .attr('r', d => 50);
 
   const callbacks = [];
-
   addEfficiencyArc(graphNodesEnter, 'overclock', 59, 322);
   addNodeImage(graphNodesEnter);
   insertNodeOverclock(graphNodesEnter);
