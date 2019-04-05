@@ -36,48 +36,98 @@ export const analyzeGraph = function() {
 
   const edges = {};
   const sources = [];
+  const sinks = [];
+  const newNodeLookup = {};
   nodeUnionArray.forEach(node => {
     if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
       const inputs = node.data.recipe.inputs;
 
       const inputNodes = [];
-      if (!inputs) {
-        // noop?!
-      } else {
-        inputs.forEach(inp => {
-          inputNodes.push(nodeIndex++);
-        });
-      }
 
       const middleNode = nodeIndex++;
+      const outputNode = nodeIndex++;
 
-      if (!inputs) {
+      // optionally, if it has no inputs? || (this.nodeIn[node.id] || []).length === 0
+      if (!inputs ) {
         // skip the initial source node.
         sources.push(middleNode);
 
         //as well as put the right recipe onto this consumption, but i'm pretty sure it's the same as everythinh else
-
+        //???
+        newNodeLookup[node.id] = {inputs: [{target: middleNode, data: null}], outputs: [{target: outputNode, data: null}]}
       } else {
         // business as usual. link input nodes to middle nodes.
-        inputs.forEach(inp => {
-          inputNodes.push(nodeIndex++);
+        const generatedInputs = inputs.map(inp => {
+          const input = nodeIndex++;
+          inputNodes.push(input);
+          return input;
         });
+
+        const populatedGeneratedInputs = generatedInputs.map(inp => {
+          //link the recipe somehow....
+
+          // Link middle node to the incoming nodes.
+          edges[inp] = [{target: middleNode}];
+          return {target: inp, data: null};
+        });
+
+        newNodeLookup[node.id] = {inputs: populatedGeneratedInputs.slice(), outputs: [outputNode]};
       }
 
-      const outputNode = nodeIndex++;
+      console.log(inputNodes, middleNode, outputNode);
+
+      // TODO: add the recipe here somehow.
+      edges[middleNode] = [{target: outputNode}];
+      const outs = this.nodeOut[node.id] || [];
+      if (!outs.length) {
+        sinks.push(outputNode);
+      }
     } else {
+      if (node.machine.name === 'Container') {
 
 
+
+        const inputNode = nodeIndex++;
+        const outputNode = nodeIndex++;
+
+
+        if ((this.nodeIn[node.id] || []).length === 0) {
+          // Containers are ineligible to be a source
+          // sources.push(inputNode);
+        }
+
+        const outs = this.nodeOut[node.id] || [];
+        if (!outs.length) {
+          sinks.push(outputNode);
+        } else {
+          // This has outputs, so let's gooooooo!!!
+          outs.forEach(out => {
+
+          })
+        }
+
+        newNodeLookup[node.id] = {inputs: [{target: inputNode, data: null}], outputs: [{target: outputNode, data: null}]}
+
+
+      } else {
+        if (node.instance.name === 'Splitter') {
+
+        } else if (node.instance.name === 'Merger') {
+
+        }
+      }
     }
+
   })
 
+  console.log(sources, sinks, edges);
 
 
-  // const nodeOutWithSets = {};
-  // Object.keys(this.nodeOut).forEach(key => {
-  //   const value = this.nodeOut[key];
-  //   nodeOutWithSets[key] = new Set(value.map(elem => elem.id.toString()));
-  // });
+  const bfs = (s, t, parent) => {
+
+  }
+
+
 
 };
 
