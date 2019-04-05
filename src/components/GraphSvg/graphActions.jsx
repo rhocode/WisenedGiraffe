@@ -17,7 +17,70 @@ import {
 import {drag_drag, drag_end, drag_start} from './mouseEvents';
 import {pathMouseClick, recalculateStorageContainers, insertEdgeLabel, calculateLabelPositions} from './edgeActions';
 
-//v2
+
+export const analyzeGraph = function() {
+  const nodeUnion = new Set(Object.keys(this.nodeIn));
+  Object.keys(this.nodeOut).forEach(node => nodeUnion.add(node));
+  const nodeUnionArray = Array.from(nodeUnion);
+
+  const nodeLookup = {};
+
+  nodeUnionArray.forEach((value, index) => {
+    nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
+    nodeLookup[nodeUnionArray[index].id] = nodeUnionArray[index];
+  });
+
+  const derivedGraph = {};
+
+  let nodeIndex = 0;
+
+  const edges = {};
+  const sources = [];
+  nodeUnionArray.forEach(node => {
+    if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
+      const inputs = node.data.recipe.inputs;
+
+      const inputNodes = [];
+      if (!inputs) {
+        // noop?!
+      } else {
+        inputs.forEach(inp => {
+          inputNodes.push(nodeIndex++);
+        });
+      }
+
+      const middleNode = nodeIndex++;
+
+      if (!inputs) {
+        // skip the initial source node.
+        sources.push(middleNode);
+
+        //as well as put the right recipe onto this consumption, but i'm pretty sure it's the same as everythinh else
+
+      } else {
+        // business as usual. link input nodes to middle nodes.
+        inputs.forEach(inp => {
+          inputNodes.push(nodeIndex++);
+        });
+      }
+
+      const outputNode = nodeIndex++;
+    } else {
+
+
+    }
+  })
+
+
+
+  // const nodeOutWithSets = {};
+  // Object.keys(this.nodeOut).forEach(key => {
+  //   const value = this.nodeOut[key];
+  //   nodeOutWithSets[key] = new Set(value.map(elem => elem.id.toString()));
+  // });
+
+};
+
 export const initSimulation = () => {
   const bodyEl = document.getElementById('mainRender');
 

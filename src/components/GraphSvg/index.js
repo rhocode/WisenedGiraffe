@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {svgKeyDown, svgKeyUp} from './keyboardEvents';
-import {deselect_path_and_nodes, initSimulation, updateGraph, zoom_actions} from './graphActions';
+import {deselect_path_and_nodes, initSimulation, updateGraph, zoom_actions, analyzeGraph} from './graphActions';
 import {appendMarkerAttributes} from './markerActions';
 
 import * as d3 from 'd3';
@@ -221,10 +221,14 @@ class GraphSvg extends Component {
     return parse(pako.inflate(Base64.atob(data),  { to: 'string' }));
   }
 
+  analyze = () =>  {
+    analyzeGraph.call(this);
+  };
 
   componentDidMount() {
     const data = "eJy1Vk1v2zgQ/SsBz47Nb4o57u7Fh24LdJFLERhcibWFyJJWotMaQf/7DilZomxp220RI4jFkfTm8c2boT+9ohfbtHlVoge8xmSF9o2pD38YZ9ADImiF6sKcbdMHKARamzbWwYKhb6tXVFaZbWHF4VaRl8/+Wvg74e8TkhBX6AmuEvj/irIOSUP4aNJDXlqfCMPSFEX1xWbb0gfIGHh/8tmIz52XrTNlGl5hsD7VQDezf53rwIF4EnkGW1mhr+iBc7wWmEmiVSKVVmKFzhBlZM31+OErVIEGaVGlz+iBYHi3qm25y8tdW1QOcEkfqU4uhAJ+Xmb2a7h6AVCyFjxREiuKFaGMaHtPGNyCJxjoijHhgnIhqNAEEsK+i+xDU73knXhEAPGDaT9WpybtIl63tCqdAYWyrbPHEFVB815DkkxF1FciUnwtIiVTESm9FZGyXkQSRIQNgVxMU62BPKcqGVQUePxo9V0Z8Y2MZJCRdDLe8zXhGmOlE51QJQgRo5D3nZKYaChmwphiM0pSfq0kFXNKUhmUbMNjsPZyO9Psg7PVlUpqRqUEjR7wSI1N8zo8rbu+MEe/Yjj00KkxhV8F/VPfbYh57Q95lllYfTZFazvZGXQNgX7hTxGKr0lbW5v10sYYeVn3ivZePblpYCYJtIJv3J07B86Mj07aDQMBMRGF08K0bdervq9D/zHpO/spdPpTLAJTExGSiQh6FIHjeRFAUi/AJxmJwMnVexNBfkIE9Qsi6CBC6B9OpyJc6EY1k8CwMeVzaIK57S4kDjm8+7jnxj0T7p3KQ6wbqJd0+mKFMIG9Pi73dyhIDxOggZ5doX9OpnS5Oy9JgmfrDfegbTwsAUro49EWDgCHq9YX0bm6fdhsGvNlvc/d4fT3qYVxAH1nS7dOq+OmOVQpyH357p9a59XmaFpA2eTH/aY1rqqK9rNJXdWcd77c7aZPs67L/Zj07t3zGhwxCCAW+glHRhS+JkMhGls3tgV6xnWKCz4PQWIIcdXCsQsv77rmZH/Akx5b/pAJhVzqxJGYmhggGQzA/48B2KzXRwN436PfoSiwRV8iNFm9tRGiVL0Zosi1IST+j3nxE5VKfqFSQTZ/9tz9BuYFpncTpiRiR4dZMV8hspA1soKMfEnVgEdn8egcnmQTPD7icTHgse85KMITEzwZjUaJB0A+C8hnAScHjExGQD3iiaWzbwavq1BTlXfbcg8/TmDyKnw7YDs7KTI/KDhgvOuw7/4Er8BTnSnRdjq4aFR9RVFU8ZuhpNh8Lnrh+6Ewzga+PObbzYOer5jHkN9uOsiTmRj1JsBi7hJF7rrlrhZ/40wxeYyZoMhht5h6WfsJpogwE4wik91gJgv1FNeYMsYc6ybmMBfqJr1vJ2O4n60J9xZ8y/Hp7bIL9u6n56XeWzTlRK9O/DcnFTw8kmKB1LZb+OHz2F97Hz92l95528e4HtHJnMjFk7xrmveNfeOzKuwL0oRdPf0LLim7Rg==";
     this.loadGraphData(this.inflateGraphData(data));
+    this.analyze();
   }
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (this.state.selectedPath !== prevState.selectedPath || this.state.selectedNode !== prevState.selectedNode) {
