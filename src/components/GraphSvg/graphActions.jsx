@@ -16,6 +16,8 @@ import {
 } from './nodeActions';
 import {drag_drag, drag_end, drag_start} from './mouseEvents';
 import {pathMouseClick, recalculateStorageContainers, insertEdgeLabel, calculateLabelPositions} from './edgeActions';
+import {strongly_connected_components_standalone} from './algorithms';
+import TinyQueue from '../TinyQueue';
 
 
 export const analyzeGraph = function() {
@@ -28,109 +30,327 @@ export const analyzeGraph = function() {
   nodeUnionArray.forEach((value, index) => {
     nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
     nodeLookup[nodeUnionArray[index].id] = nodeUnionArray[index];
+    nodeUnionArray[index].childProvides = [];
+    nodeUnionArray[index].hasSources = new Set();
+    nodeUnionArray[index].containedItems = [];
+
+    if (nodeUnionArray[index].machine.name !== 'Container' && nodeUnionArray[index].machine.name !== 'Logistic') {
+    } else {
+      nodeUnionArray[index].allowedIn = [];
+      nodeUnionArray[index].allowedOut = [];
+    }
   });
 
-  const derivedGraph = {};
+  const nodeOutWithSets = {};
+  Object.keys(this.nodeOut).forEach(key => {
+    const value = this.nodeOut[key];
+    nodeOutWithSets[key] = new Set(value.map(elem => elem.id.toString()));
+  });
 
-  let nodeIndex = 0;
+  const componentsList = strongly_connected_components_standalone(nodeOutWithSets);
+  const superNodeGraphLookup = {};
+  const superNodeGraphLookupInflated = {};
+  const lookupArray = {};
+  componentsList.forEach((list, index) => {
+    superNodeGraphLookup[index] = list;
+    superNodeGraphLookupInflated[index] = list.map(id => nodeLookup[id]);
+    list.forEach(item => {
+      lookupArray[item] = index;
+    });
+  });
+  const derivedGraphOutgoing = {};
 
-  const edges = {};
-  const sources = [];
-  const sinks = [];
-  const newNodeLookup = {};
-  nodeUnionArray.forEach(node => {
-    if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
-      const inputs = node.data.recipe.inputs;
+  // Derive a graph from this new info
+  Object.keys(this.nodeOut).forEach(node => {
+    const ids = this.nodeOut[node].map(item => item.id);
+    const thisNode = lookupArray[node];
+    derivedGraphOutgoing[thisNode] = derivedGraphOutgoing[thisNode] || new Set();
+    const derivedGraphAccessor = derivedGraphOutgoing[thisNode];
+    ids.forEach(id => {
+      const thisId = lookupArray[id];
+      if (thisId === thisNode) return;
+      derivedGraphAccessor.add(thisId);
+    });
+  });
+  const derivedGraphIncoming = {};
+  const immutableDerivedGraphIncoming = {};
 
-      const inputNodes = [];
+  // Derive a graph from this new info
+  Object.keys(this.nodeOut).forEach(node => {
+    const ids = this.nodeOut[node].map(item => item.id);
+    const thisNode = lookupArray[node];
+    derivedGraphIncoming[thisNode] = derivedGraphIncoming[thisNode] || new Set();
+    immutableDerivedGraphIncoming[thisNode] = immutableDerivedGraphIncoming[thisNode] || new Set();
+    ids.forEach(id => {
+      const thisId = lookupArray[id];
+      if (thisId === thisNode) return;
 
-      const middleNode = nodeIndex++;
-      const outputNode = nodeIndex++;
-
-      // optionally, if it has no inputs? || (this.nodeIn[node.id] || []).length === 0
-      if (!inputs ) {
-        // skip the initial source node.
-        sources.push(middleNode);
-
-        //as well as put the right recipe onto this consumption, but i'm pretty sure it's the same as everythinh else
-        //???
-        newNodeLookup[node.id] = {inputs: [{target: middleNode, data: null}], outputs: [{target: outputNode, data: null}]}
-      } else {
-        // business as usual. link input nodes to middle nodes.
-        const generatedInputs = inputs.map(inp => {
-          const input = nodeIndex++;
-          inputNodes.push(input);
-          return input;
-        });
-
-        const populatedGeneratedInputs = generatedInputs.map(inp => {
-          //link the recipe somehow....
-
-          // Link middle node to the incoming nodes.
-          edges[inp] = [{target: middleNode}];
-          return {target: inp, data: null};
-        });
-
-        newNodeLookup[node.id] = {inputs: populatedGeneratedInputs.slice(), outputs: [outputNode]};
+      if (!derivedGraphIncoming[thisId]) {
+        derivedGraphIncoming[thisId] = new Set();
+        immutableDerivedGraphIncoming[thisId] = new Set();
       }
 
-      console.log(inputNodes, middleNode, outputNode);
+      const derivedGraphAccessor = derivedGraphIncoming[thisId];
+      derivedGraphAccessor.add(thisNode);
+      immutableDerivedGraphIncoming[thisId].add(thisNode);
+    });
+  });
+  const myTinyQueue = new TinyQueue(Array.from(new Set([...Object.keys(derivedGraphOutgoing), ...Object.keys(derivedGraphIncoming)])), (a, b) => {
+    return (derivedGraphIncoming[a] || []).size - (derivedGraphIncoming[b] || []).size;
+  });
 
-      // TODO: add the recipe here somehow.
-      edges[middleNode] = [{target: outputNode}];
-      const outs = this.nodeOut[node.id] || [];
-      if (!outs.length) {
-        sinks.push(outputNode);
-      }
-    } else {
-      if (node.machine.name === 'Container') {
+  const providedThroughput = {};
+  const reverseTraversal = [];
+  while(myTinyQueue.size()) {
+    const node = myTinyQueue.pop();
 
+    const thisNodeInflated = superNodeGraphLookupInflated[node];
+    const outgoing = Array.from(derivedGraphOutgoing[node] || new Set());
+    const outgoingInflated = outgoing.map(item => superNodeGraphLookupInflated[item]);
+    reverseTraversal.push(thisNodeInflated);
 
+    const propagateNodeToEdges = (nodeGroupSource, nodeGroupTarget, origin, targets) => {
+      //gather this node
+      // console.log('Doing queue', nodeGroupSource.map(item=> item.id));
 
-        const inputNode = nodeIndex++;
-        const outputNode = nodeIndex++;
+      const nodeGroupSourceThroughput = [];
 
+      if (nodeGroupSource.length === 1) {
+        const node = nodeGroupSource[0];
+        let throughput = null;
+        let efficiency = null;
 
-        if ((this.nodeIn[node.id] || []).length === 0) {
-          // Containers are ineligible to be a source
-          // sources.push(inputNode);
-        }
+        const provided = providedThroughput[origin];
 
-        const outs = this.nodeOut[node.id] || [];
-        if (!outs.length) {
-          sinks.push(outputNode);
+        if (node.data.node) {
+          // this is a purity calculation
+          const recipe = node.data.recipe;
+          const purity = node.data.purity;
+          const fetchedPurity = recipe.purities.filter(item => item.name === purity);
+          if (fetchedPurity.length !== 1) {
+            throw new Error('Trying to get purity', purity, 'wtf?');
+          }
+          const actualPurity = fetchedPurity[0];
+
+          throughput = {quantity: actualPurity.quantity, item: recipe.item.id, time: 60, power: node.instance.power, inputs: []};
+          efficiency = 1;
         } else {
-          // This has outputs, so let's gooooooo!!!
-          outs.forEach(out => {
+          throughput = {quantity: node.data.recipe.quantity, item: node.data.recipe.item.id, time: node.data.recipe.time, power: node.data.recipe.power, inputs: node.data.recipe.inputs.map(elem => {
+            return {item: elem.item.id, quantity: elem.quantity};
+          })};
+          const resources = {};
 
-          })
+          const providedSet = new Set();
+
+          provided.forEach(provide => {
+            const q = provide.throughput.quantity;
+            const t = provide.throughput.time;
+            const e = provide.efficiency;
+            const i = provide.throughput.item;
+
+            providedSet.add(i);
+
+            const itemPerSec = q/t * e;
+            resources[i] = resources[i] || 0;
+            resources[i] += itemPerSec * 60;
+          });
+
+          const missing = new Set();
+          const efficiencies = [Infinity];
+          throughput.inputs.forEach(inp => {
+            const item = inp.item;
+            const quantity = inp.quantity;
+
+            if (!providedSet.has(item)) {
+              missing.add(item);
+            } else {
+              // todo: overclock
+
+              const maxThroughput = (throughput.quantity / throughput.time * 60);
+
+              const expectedThroughput = (resources[item] / quantity) / maxThroughput;
+              console.error(resources[item], quantity, maxThroughput, expectedThroughput);
+              //TODO: store the overclock percentage!!!!!
+              const optimalOverClockPercentage = Math.min(250, expectedThroughput);
+              efficiencies.push(Math.min(1, expectedThroughput));
+            }
+          });
+
+          if (missing.size > 0) {
+            efficiency = 0;
+          } else {
+            efficiency = Math.min(...efficiencies);
+          }
+
+          console.log(throughput, efficiency);
         }
 
-        newNodeLookup[node.id] = {inputs: [{target: inputNode, data: null}], outputs: [{target: outputNode, data: null}]}
-
-
+        nodeGroupSourceThroughput.push({throughput, efficiency, source: origin});
       } else {
-        if (node.instance.name === 'Splitter') {
-
-        } else if (node.instance.name === 'Merger') {
-
-        }
+        nodeGroupSource.forEach(node => {
+          if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
+          } else {
+            // node.childProvides = globalProvideMap[origin]  || [];
+            // node.childProvides.forEach(provide => {
+            //   if (!combinedProvidesSource.has(proBvide.source)) {
+            //     combinedProvides.push(provide);
+            //     combinedProvidesSource.add(provide.source);
+            //   }
+            // });
+            // node.allowedIn = node.childProvides.map(elem => elem.item.item.id);
+            // node.allowedOut = node.childProvides.map(elem => elem.item.item.id);
+            // node.containedItems = node.childProvides.map(elem => elem.item.item);
+          }
+        });
       }
-    }
 
-  })
+      (derivedGraphOutgoing[origin] || []).forEach(elem => {
+        providedThroughput[elem] = providedThroughput[elem] || [];
+        nodeGroupSourceThroughput.forEach(item => {
+          providedThroughput[elem].push(item);
+        });
+      });
+    };
 
-  console.log(sources, sinks, edges);
+    propagateNodeToEdges(thisNodeInflated, outgoingInflated, node, outgoing);
 
+    Object.keys(derivedGraphIncoming).forEach(key => {
+      const accessor = derivedGraphIncoming[key];
+      accessor.delete(parseInt(node, 10));
+    });
 
-  const bfs = (s, t, parent) => {
-
+    myTinyQueue.reheapify();
   }
+
+  // const nodeUnion = new Set(Object.keys(this.nodeIn));
+  // Object.keys(this.nodeOut).forEach(node => nodeUnion.add(node));
+  // const nodeUnionArray = Array.from(nodeUnion);
+  //
+  // const nodeLookup = {};
+  //
+  // nodeUnionArray.forEach((value, index) => {
+  //   nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
+  //   nodeLookup[nodeUnionArray[index].id] = nodeUnionArray[index];
+  // });
+  //
+  // const derivedGraph = {};
+  //
+  // let nodeIndex = 0;
+  //
+  // const edges = {};
+  // const sources = [];
+  // const sinks = [];
+  // const newNodeLookup = {};
+  // nodeUnionArray.forEach(node => {
+  //   if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
+  //     const inputs = node.data.recipe.inputs;
+  //
+  //     const inputNodes = [];
+  //
+  //     const middleNode = nodeIndex++;
+  //     const outputNode = nodeIndex++;
+  //
+  //     // optionally, if it has no inputs? || (this.nodeIn[node.id] || []).length === 0
+  //     if (!inputs ) {
+  //       // skip the initial source node.
+  //       sources.push(middleNode);
+  //
+  //       //as well as put the right recipe onto this consumption, but i'm pretty sure it's the same as everythinh else
+  //       //???
+  //       newNodeLookup[node.id] = {inputs: [{target: middleNode, data: null}], outputs: [{target: outputNode, data: null}]}
+  //     } else {
+  //       // business as usual. link input nodes to middle nodes.
+  //       const generatedInputs = inputs.map(inp => {
+  //         const input = nodeIndex++;
+  //         inputNodes.push(input);
+  //         return input;
+  //       });
+  //
+  //       const populatedGeneratedInputs = generatedInputs.map(inp => {
+  //         //link the recipe somehow....
+  //
+  //         // Link middle node to the incoming nodes.
+  //         edges[inp] = [{target: middleNode}];
+  //         return {target: inp, data: null};
+  //       });
+  //
+  //       newNodeLookup[node.id] = {inputs: populatedGeneratedInputs.slice(), outputs: [outputNode]};
+  //     }
+  //
+  //     console.log(inputNodes, middleNode, outputNode);
+  //
+  //     // TODO: add the recipe here somehow.
+  //     edges[middleNode] = [{target: outputNode}];
+  //     const outs = this.nodeOut[node.id] || [];
+  //     if (!outs.length) {
+  //       sinks.push(outputNode);
+  //     }
+  //   } else {
+  //     if (node.machine.name === 'Container') {
+  //
+  //
+  //
+  //       const inputNode = nodeIndex++;
+  //       const outputNode = nodeIndex++;
+  //
+  //
+  //       if ((this.nodeIn[node.id] || []).length === 0) {
+  //         // Containers are ineligible to be a source
+  //         // sources.push(inputNode);
+  //       }
+  //
+  //       const outs = this.nodeOut[node.id] || [];
+  //       if (!outs.length) {
+  //         sinks.push(outputNode);
+  //       } else {
+  //         // This has outputs, so let's gooooooo!!!
+  //         outs.forEach(out => {
+  //
+  //         })
+  //       }
+  //
+  //       newNodeLookup[node.id] = {inputs: [{target: inputNode, data: null}], outputs: [{target: outputNode, data: null}]}
+  //
+  //
+  //     } else {
+  //       if (node.instance.name === 'Splitter') {
+  //
+  //       } else if (node.instance.name === 'Merger') {
+  //
+  //       }
+  //     }
+  //   }
+  //
+  // })
+  //
+  // console.log(sources, sinks, edges);
+  //
+  //
+  // const bfs = (capacities, s, t, parent, outEdges) => {
+  //   const visited = new Set();
+  //   const q = [];
+  //   q.push(s);
+  //   visited.add(s);
+  //   parent[s] = -1;
+  //   while(q.length) {
+  //     const u = q.pop();
+  //     const outgoing = outEdges[u];
+  //     outgoing.forEach(elem => {
+  //       // SHOULD ALSO CHECK THE RESIDUALS!!!!
+  //       if(!visited.has(elem) && capacities[u][elem]) {
+  //         q.push(elem);
+  //         visited.add(elem);
+  //         parent[elem] = u;
+  //       }
+  //     });
+  //   }
+  //
+  //   return visited.has(t);
+  // };
 
 
 
 };
-
 export const initSimulation = () => {
   const bodyEl = document.getElementById('mainRender');
 

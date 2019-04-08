@@ -83,8 +83,8 @@ export const recalculateStorageContainers = function() {
     });
   });
 
-  const myTinyQueue = new TinyQueue([...Object.keys(derivedGraphOutgoing), ...Object.keys(derivedGraphIncoming)], (a, b) => {
-    return derivedGraphIncoming[a].size - derivedGraphIncoming[b].size;
+  const myTinyQueue = new TinyQueue(Array.from(new Set([...Object.keys(derivedGraphOutgoing), ...Object.keys(derivedGraphIncoming)])), (a, b) => {
+    return (derivedGraphIncoming[a] || []).size - (derivedGraphIncoming[b] || []).size;
   });
 
   const globalProvideMap = {};

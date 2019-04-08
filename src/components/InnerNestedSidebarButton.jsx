@@ -88,15 +88,15 @@ class InnerNestedSidebarButton extends React.Component {
                               machine_nodes.sort((node1, node2) => node1.rank - node2.rank);
                               const upgrades = machine_nodes.filter(node => node.machine_class.id === resource.machine_class.id );
                               const instance = upgrades[0];
-
+                              console.log("YES, ITS TRIGGERED", item.name);
                               appObject.graphSvg.addNode(
                                 {
-                                  data: {machine: resource, node: item, recipe: resource},
+                                  data: {machine: resource, node: item, recipe: resource, purity: item.name},
                                   machine: resource.machine_class,
                                   allowedIn: [],
                                   allowedOut: [resource.item.id],
                                   instance: instance,
-                                  upgradeTypes: upgrades
+                                  upgradeTypes: upgrades,
                                 }
                               );
                               this.handleClose();
