@@ -83,18 +83,19 @@ export const node_mouse_up = function (d, graphSvg) {
 
 const overClockCalculation = (d, percentage_metric, offset, endOffsetRaw) => {
   const endOffset = endOffsetRaw + offset;
-  const percentage = d[percentage_metric];
+  const percentage = d[percentage_metric] * 100 || 0;
   const arc = d3.arc()
     .innerRadius(50)
     .outerRadius(50);
 
-  const m = (endOffset - offset) / 250;
+  const m = (endOffset - offset) / 100;
   const b = offset;
 
   const start = b / 180 * Math.PI;
   const end = (m * percentage + b) / 180 * Math.PI;
   return arc({startAngle: start, endAngle: end});
 };
+
 
 export const addEfficiencyArc = (parent, percentage_metric, offset, endOffset) => {
   parent.append('path')
@@ -347,6 +348,88 @@ export const insertComponents = function(parentElement) {
       });
     }
   });
+
+
+  const el2 = parentElement.append('g').classed(constants.nodeSurplusIconClass, true);
+
+  el2.each(function(d){
+    if (d.machine && ['Container', 'Logistic'].includes(d.machine.name)) {
+      // save this for later...
+    } else {
+      // d3.select(this).append('svg:image')
+      //   .classed(constants.nodeProducesClass, true)
+      //   .attr('xlink:href', function (d) {
+      //     return d.data.recipe.item.icon;
+      //   })
+      //   .attr('x', function (d) {
+      //     return -55;
+      //   })
+      //   .attr('y', function (d) {
+      //     return 18;
+      //   })
+      //   .attr('height', 40)
+      //   .attr('width', 40);
+    }
+  });
+
+  d3.selectAll('.' + constants.nodeSurplusIconClass).each(function(d) {
+    // if (d.machine && ['Container', 'Logistic'].includes(d.machine.name)) {
+    const nodeThis = d3.select(this);
+    nodeThis.selectAll('.' + constants.nodeProducesPerMinText).remove();
+    // const outputtedItems = new Set();
+    // let i = 0;
+    // (d.containedItems || []).forEach((containedItem, index) => {
+    //   if (outputtedItems.has(containedItem.icon)) {
+    //     return;
+    //   }
+    //   outputtedItems.add(containedItem.icon);
+
+
+    nodeThis.append('text')
+      .attr('fill', 'white')
+      .attr('class', 'overclockFont')
+      .classed(constants.nodeProducesPerMinText, true)
+      .style('text-anchor', 'end')
+      .style('dominant-baseline', 'central')
+      .attr('stroke', 'black')
+      .attr('stroke-width', 4)
+      .attr('x', -5).attr('y', -37)
+      .attr('font-size', 30)
+      .text(function(d) {
+        console.log(d.itemsPerMinute, d.instance.name);
+        return ((Math.round(d.itemsPerMinute * 100) / 100) || 0) + '/m';
+      });
+
+
+    nodeThis.append('text').attr('fill', 'white')
+      .attr('class', 'overclockFont')
+      .classed(constants.nodeProducesPerMinText, true)
+      .style('text-anchor', 'end')
+      .style('dominant-baseline', 'central')
+      .attr('x', -5).attr('y', -37)
+      .attr('font-size', 30)
+      .text(function(d) {
+        // console.log(d.itemsPerMinute);
+        return ((Math.round(d.itemsPerMinute * 100) / 100) || 0) + '/m';
+      });
+
+    //   nodeThis.append('svg:image')
+    //     .classed(constants.nodeProducesClass, true)
+    //     .attr('xlink:href', function (d) {
+    //       return d.containedItems[index].icon;
+    //     })
+    //     .attr('x', function (d) {
+    //       return -55;
+    //     })
+    //     .attr('y', function (d) {
+    //       return 18 + (30 * i++);
+    //     })
+    //     .attr('height', 40)
+    //     .attr('width', 40);
+    // });
+  });
+  // });
+
 
   forceUpdateComponentLabel.call(this);
 };

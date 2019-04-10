@@ -8,8 +8,11 @@ const constants = {
   overclockedTextClass: 'overclockedTextClass',
   nodeVersionTextClass: 'nodeVersionTextClass',
   nodeRequirementsIconClass: 'nodeRequirementsIconClass',
+  nodeSurplusIconClass: 'nodeSurplusIconClass',
   nodeRequirementsSubIconClass: 'nodeRequirementsSubIconClass',
   nodeProducesClass: 'nodeProducesClass',
+  nodeSurplusClass: 'nodeSurplusClass',
+  nodeProducesPerMinText: 'nodeProducesPerMinText',
 
   selectedClass: 'selected',
   selectedNodeClass: 'selected-node',

@@ -358,9 +358,9 @@ class App extends Component {
               {/*<OfflineBoltIcon/>*/}
               {/*<div className={classes.label}>Analyze</div>*/}
             {/*</Button>*/}
-            <Button color="inherit" >
+            <Button color="inherit" onClick={() => t.graphSvg.analyze()}>
               <SettingsInputComponentIcon/>
-              <div className={classes.label}>Optimize</div>
+              <div className={classes.label}>Analyze</div>
             </Button>
             <ShareButton t={t} />
             <LoadButton t={t} />

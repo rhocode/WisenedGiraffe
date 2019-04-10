@@ -2,7 +2,7 @@ import constants from './constants';
 import * as d3 from 'd3';
 import {
   addEfficiencyArc,
-  addNodeImage,
+  addNodeImage, editEfficiencyArc,
   insertComponents,
   insertNodeOverclock,
   insertNodeTier,
@@ -26,6 +26,7 @@ export const analyzeGraph = function() {
   const nodeUnionArray = Array.from(nodeUnion);
 
   const nodeLookup = {};
+
 
   nodeUnionArray.forEach((value, index) => {
     nodeUnionArray[index] = this.graphData.nodes.filter(elem => elem.id.toString() === value)[0];
@@ -101,6 +102,23 @@ export const analyzeGraph = function() {
 
   const providedThroughput = {};
   const reverseTraversal = [];
+
+
+
+  this.graphData.nodes.forEach(node => {
+    delete node.efficiency;
+    delete node.optimalOverclock;
+    delete node.itemThroughPut;
+    delete node.itemsPerMinute;
+  });
+
+  this.graphData.links.forEach(link => {
+    delete link.itemThroughPut;
+  });
+
+
+
+
   while(myTinyQueue.size()) {
     const node = myTinyQueue.pop();
 
@@ -122,6 +140,9 @@ export const analyzeGraph = function() {
 
         const provided = providedThroughput[origin];
 
+        const nodeSpeed = node.instance.speed / 100;
+        const overclock = node.overclock / 100;
+
         if (node.data.node) {
           // this is a purity calculation
           const recipe = node.data.recipe;
@@ -132,10 +153,25 @@ export const analyzeGraph = function() {
           }
           const actualPurity = fetchedPurity[0];
 
-          throughput = {quantity: actualPurity.quantity, item: recipe.item.id, time: 60, power: node.instance.power, inputs: []};
+
+
+          throughput = {speed: nodeSpeed, overclock, quantity: actualPurity.quantity, item: recipe.item.id, time: 60, power: node.instance.power, inputs: []};
           efficiency = 1;
+
+
+
+
+          const maxThroughput = (throughput.quantity / throughput.time) * 60 * node.instance.speed / 100 * throughput.overclock;
+          console.log(throughput.quantity, throughput.time, node.instance.speed, throughput.overclock)
+          nodeGroupSource.forEach(node => {
+            node.efficiency = efficiency;
+            node.itemsPerMinute = maxThroughput;
+            node.optimalOverclock = node.optimalOverclock || [];
+            node.optimalOverclock.push(100);
+          });
+
         } else {
-          throughput = {quantity: node.data.recipe.quantity, item: node.data.recipe.item.id, time: node.data.recipe.time, power: node.data.recipe.power, inputs: node.data.recipe.inputs.map(elem => {
+          throughput = {speed: nodeSpeed, overclock, quantity: node.data.recipe.quantity, item: node.data.recipe.item.id, time: node.data.recipe.time, power: node.data.recipe.power, inputs: node.data.recipe.inputs.map(elem => {
             return {item: elem.item.id, quantity: elem.quantity};
           })};
           const resources = {};
@@ -143,14 +179,12 @@ export const analyzeGraph = function() {
           const providedSet = new Set();
 
           provided.forEach(provide => {
-            const q = provide.throughput.quantity;
-            const t = provide.throughput.time;
-            const e = provide.efficiency;
             const i = provide.throughput.item;
 
             providedSet.add(i);
 
-            const itemPerSec = q/t * e;
+            const itemPerSec = provide.itemPerSec;
+
             resources[i] = resources[i] || 0;
             resources[i] += itemPerSec * 60;
           });
@@ -166,13 +200,62 @@ export const analyzeGraph = function() {
             } else {
               // todo: overclock
 
-              const maxThroughput = (throughput.quantity / throughput.time * 60);
 
-              const expectedThroughput = (resources[item] / quantity) / maxThroughput;
-              console.error(resources[item], quantity, maxThroughput, expectedThroughput);
-              //TODO: store the overclock percentage!!!!!
-              const optimalOverClockPercentage = Math.min(250, expectedThroughput);
-              efficiencies.push(Math.min(1, expectedThroughput));
+
+              const maxThroughput = (throughput.quantity / throughput.time) * 60 * node.instance.speed / 100 * throughput.overclock;
+
+              console.log(node.instance.name, maxThroughput);
+
+
+              const maxThroughputWithoutOverclock = (throughput.quantity / throughput.time) * 60 * node.instance.speed / 100;
+
+
+              const resourceThroughputNeeded = maxThroughput * quantity;
+
+
+
+
+              const expectedThroughput = maxThroughput * (Math.min(resourceThroughputNeeded, resources[item]) / resourceThroughputNeeded);
+              console.error("BLAHHHHH", resourceThroughputNeeded, )
+              console.log(maxThroughput, resourceThroughputNeeded, resources[item], resourceThroughputNeeded)
+              console.error(maxThroughput * (Math.min(resourceThroughputNeeded, resources[item]) / resourceThroughputNeeded), "AAA2");
+
+              const maxThroughputPerItem = resourceThroughputNeeded;
+              const actualItemThroughput = resources[item] || 0;
+
+              node.itemThroughPut = node.itemThroughPut || {};
+
+              node.itemThroughPut[item] = node.itemThroughPut[item] || {max: 0, actual: 0};
+              node.itemThroughPut[item].max += maxThroughputPerItem;
+              node.itemThroughPut[item].actual += actualItemThroughput;
+
+
+              const efficiency = expectedThroughput / maxThroughput;
+              const efficiencyWithoutOverclock = expectedThroughput / maxThroughputWithoutOverclock;
+
+              const rounder = expectedThroughput === maxThroughputWithoutOverclock ? 0 : 0.5;
+              const optimalOverClockPercentage = Math.min(250, Math.round(efficiencyWithoutOverclock * 100 + rounder));
+
+              efficiencies.push(Math.min(1, efficiency));
+
+
+              console.error("AAA", expectedThroughput);
+              nodeGroupSource.forEach(node => {
+                console.log(node.efficiency, node.itemsPerMinute);
+                if (node.efficiency === undefined) {
+                  node.efficiency = Infinity;
+                }
+
+                if (node.itemsPerMinute === undefined) {
+                  node.itemsPerMinute = Infinity;
+                }
+                node.efficiency = Math.min(node.efficiency, efficiency);
+                node.itemsPerMinute = Math.min(node.itemsPerMinute, expectedThroughput);
+                node.optimalOverclock = node.optimalOverclock || [];
+                node.optimalOverclock.push(optimalOverClockPercentage);
+              });
+
+              console.error(node.efficiency, node.itemsPerMinute, node.instance.name);
             }
           });
 
@@ -182,10 +265,61 @@ export const analyzeGraph = function() {
             efficiency = Math.min(...efficiencies);
           }
 
-          console.log(throughput, efficiency);
         }
 
         nodeGroupSourceThroughput.push({throughput, efficiency, source: origin});
+
+
+
+        (derivedGraphOutgoing[origin] || []).forEach(elem => {
+          const source = nodeGroupSource.map(node=> node.id)[0];
+          const target = superNodeGraphLookupInflated[elem].map(node=>node.id)[0];
+
+          if (!source || !target) {
+            throw new Error('Why the frick does this not work? There is no source, target combo of ', source, target, nodeGroupSource.map(node=> node.id), superNodeGraphLookupInflated[elem].map(node=>node.id));
+          }
+
+          const link = this.graphData.links.filter(link => link.source.id === source && link.target.id === target);
+          let foundLink = null;
+          if (link && link.length === 1) {
+            foundLink = link[0];
+          } else {
+            throw new Error('No link found, or too many links found!!!');
+          }
+
+          const limitedSpeed = foundLink.instance.speed;
+
+          //TODO: send an exception?? :D
+
+          providedThroughput[elem] = providedThroughput[elem] || [];
+          nodeGroupSourceThroughput.forEach(item => {
+            console.error("WHO", item);
+
+            const q = item.throughput.quantity;
+            const t = item.throughput.time;
+            const e = item.efficiency;
+            const o = item.throughput.overclock;
+            const s = item.throughput.speed;
+            const i = item.throughput.item;
+
+            const itemPerSec = q/t * e * o * s || 0;
+
+            const limitedItemPerSec = limitedSpeed / 60;
+
+            foundLink.itemThroughPut = foundLink.itemThroughPut || {};
+
+            foundLink.itemThroughPut[i] = foundLink.itemThroughPut[i] || {max: 0, actual: 0};
+            foundLink.itemThroughPut[i].max += limitedItemPerSec * 60;
+            foundLink.itemThroughPut[i].actual += itemPerSec * 60;
+
+            item.itemPerSec = Math.min(limitedItemPerSec, itemPerSec);
+
+            providedThroughput[elem].push(item);
+          });
+        });
+
+
+
       } else {
         nodeGroupSource.forEach(node => {
           if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
@@ -202,14 +336,18 @@ export const analyzeGraph = function() {
             // node.containedItems = node.childProvides.map(elem => elem.item.item);
           }
         });
+
+
+        (derivedGraphOutgoing[origin] || []).forEach(elem => {
+          providedThroughput[elem] = providedThroughput[elem] || [];
+          nodeGroupSourceThroughput.forEach(item => {
+            providedThroughput[elem].push(item);
+          });
+        });
+
       }
 
-      (derivedGraphOutgoing[origin] || []).forEach(elem => {
-        providedThroughput[elem] = providedThroughput[elem] || [];
-        nodeGroupSourceThroughput.forEach(item => {
-          providedThroughput[elem].push(item);
-        });
-      });
+
     };
 
     propagateNodeToEdges(thisNodeInflated, outgoingInflated, node, outgoing);
@@ -221,6 +359,20 @@ export const analyzeGraph = function() {
 
     myTinyQueue.reheapify();
   }
+
+
+
+  this.graphData.nodes.forEach(node => {
+    console.log(node, node.instance.name)
+  });
+
+  this.graphData.links.forEach(link => {
+    console.log(link)
+  });
+
+
+
+  editEfficiencyArc('efficiency', 59, 322);
 
   // const nodeUnion = new Set(Object.keys(this.nodeIn));
   // Object.keys(this.nodeOut).forEach(node => nodeUnion.add(node));
@@ -461,7 +613,7 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
       .attr('r', d => 50);
 
   const callbacks = [];
-  addEfficiencyArc(graphNodesEnter, 'overclock', 59, 322);
+  addEfficiencyArc(graphNodesEnter, 'efficiency', 59, 322);
   addNodeImage(graphNodesEnter);
   insertNodeOverclock(graphNodesEnter);
   insertNodeTier(graphNodesEnter);
