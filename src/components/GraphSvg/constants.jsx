@@ -13,6 +13,11 @@ const constants = {
   nodeProducesClass: 'nodeProducesClass',
   nodeSurplusClass: 'nodeSurplusClass',
   nodeProducesPerMinText: 'nodeProducesPerMinText',
+  nodeLimitingThroughputText: 'nodeLimitingThroughputText',
+  nodeLimitingThroughputClass: 'nodeLimitingThroughputClass',
+
+  lineLimitedThroughputText: 'lineLimitedThroughputText',
+  lineLimitedThroughputClass: 'lineLimitedThroughputClass',
 
   selectedClass: 'selected',
   selectedNodeClass: 'selected-node',

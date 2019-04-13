@@ -350,39 +350,11 @@ export const insertComponents = function(parentElement) {
   });
 
 
-  const el2 = parentElement.append('g').classed(constants.nodeSurplusIconClass, true);
-
-  el2.each(function(d){
-    if (d.machine && ['Container', 'Logistic'].includes(d.machine.name)) {
-      // save this for later...
-    } else {
-      // d3.select(this).append('svg:image')
-      //   .classed(constants.nodeProducesClass, true)
-      //   .attr('xlink:href', function (d) {
-      //     return d.data.recipe.item.icon;
-      //   })
-      //   .attr('x', function (d) {
-      //     return -55;
-      //   })
-      //   .attr('y', function (d) {
-      //     return 18;
-      //   })
-      //   .attr('height', 40)
-      //   .attr('width', 40);
-    }
-  });
+  parentElement.append('g').classed(constants.nodeSurplusIconClass, true);
 
   d3.selectAll('.' + constants.nodeSurplusIconClass).each(function(d) {
-    // if (d.machine && ['Container', 'Logistic'].includes(d.machine.name)) {
     const nodeThis = d3.select(this);
     nodeThis.selectAll('.' + constants.nodeProducesPerMinText).remove();
-    // const outputtedItems = new Set();
-    // let i = 0;
-    // (d.containedItems || []).forEach((containedItem, index) => {
-    //   if (outputtedItems.has(containedItem.icon)) {
-    //     return;
-    //   }
-    //   outputtedItems.add(containedItem.icon);
 
 
     nodeThis.append('text')
@@ -396,8 +368,14 @@ export const insertComponents = function(parentElement) {
       .attr('x', -5).attr('y', -37)
       .attr('font-size', 30)
       .text(function(d) {
-        console.log(d.itemsPerMinute, d.instance.name);
-        return ((Math.round(d.itemsPerMinute * 100) / 100) || 0) + '/m';
+        console.log(d);
+
+        let combinedSum = 0;
+        Object.keys(d.itemsPerMinute).forEach(item => {
+          combinedSum += d.itemsPerMinute[item];
+        });
+
+        return ((Math.round(combinedSum * 100) / 100) || 0) + '/m';
       });
 
 
@@ -409,27 +387,67 @@ export const insertComponents = function(parentElement) {
       .attr('x', -5).attr('y', -37)
       .attr('font-size', 30)
       .text(function(d) {
-        // console.log(d.itemsPerMinute);
-        return ((Math.round(d.itemsPerMinute * 100) / 100) || 0) + '/m';
+        let combinedSum = 0;
+        Object.keys(d.itemsPerMinute).forEach(item => {
+          combinedSum += d.itemsPerMinute[item];
+        });
+
+        return ((Math.round(combinedSum * 100) / 100) || 0) + '/m';
       });
-
-    //   nodeThis.append('svg:image')
-    //     .classed(constants.nodeProducesClass, true)
-    //     .attr('xlink:href', function (d) {
-    //       return d.containedItems[index].icon;
-    //     })
-    //     .attr('x', function (d) {
-    //       return -55;
-    //     })
-    //     .attr('y', function (d) {
-    //       return 18 + (30 * i++);
-    //     })
-    //     .attr('height', 40)
-    //     .attr('width', 40);
-    // });
   });
-  // });
 
+  const el3 = parentElement.append('g').classed(constants.nodeLimitingThroughputClass, true);
+
+
+  d3.selectAll('.' + constants.nodeLimitingThroughputClass).each(function(d) {
+    const nodeThis = d3.select(this);
+    nodeThis.selectAll('.' + constants.nodeLimitingThroughputText).remove();
+
+    Object.keys(d.itemThroughPut || {}).forEach((key, index) => {
+      const item = d.itemThroughPut[key];
+
+      if (item.actual === item.max || !d.itemIconLookup) return;
+      const icon = d.itemIconLookup[key];
+
+      nodeThis.append('svg:image')
+        .classed(constants.nodeLimitingThroughputText, true)
+        .attr('xlink:href', function (d) {
+          return icon
+        })
+        .attr('x', -49).attr('y', 59 + (index * 20))
+        .attr('height', 20)
+        .attr('width', 20);
+
+      nodeThis.append('text')
+        .attr('fill', 'black')
+        .attr('class', 'overclockFont')
+        .classed(constants.nodeLimitingThroughputText, true)
+        .style('text-anchor', 'start')
+        .style('dominant-baseline', 'central')
+        .attr('stroke', 'black')
+        .attr('stroke-width', 4)
+        .attr('x', -25).attr('y', 68 + (index * 20))
+        .attr('font-size', 20)
+        .text(function(d) {
+          return Math.round(item.actual * 100) / 100 + '/' + Math.round(item.max * 100) / 100;
+        });
+
+
+      nodeThis.append('text').attr('fill', 'LightCoral')
+        .attr('class', 'overclockFont')
+        .classed(constants.nodeLimitingThroughputText, true)
+        .style('text-anchor', 'start')
+        .style('dominant-baseline', 'central')
+        .attr('x', -25).attr('y', 68 + (index * 20))
+        .attr('font-size', 20)
+        .text(function(d) {
+          // console.log(d.itemsPerMinute);
+          return Math.round(item.actual * 100) / 100 + '/' + Math.round(item.max * 100) / 100;
+        });
+
+    });
+
+  });
 
   forceUpdateComponentLabel.call(this);
 };
@@ -459,6 +477,11 @@ export const updateNodeTierExternal = function(el, x = 35, y = 35) {
     .attr('font-size', 30);
 
   updateNodeTier(tspan);
+
+
+
+
+
 };
 
 export const insertNodeTier = (gEl) => {

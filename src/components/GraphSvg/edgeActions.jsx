@@ -302,22 +302,115 @@ export const calculateLabelPositions = function (link_label) {
   text.attr('x', function (d) {
     const node = d3.select(d3.select(this).node().parentElement.parentElement).select('path').node();
     const pathLength = node.getTotalLength();
-    d.point = node.getPointAtLength(pathLength / 2 * 0.9);
+    d.point = node.getPointAtLength(pathLength / 2);
     return d.point.x;
   }).attr('y', function (d) {
     return d.point.y;
   });
-};
 
+  const image = link_label.selectAll('.' + constants.lineLimitedThroughputClass);
+  image.attr('x', function (d) {
+    const node = d3.select(d3.select(this).node().parentElement.parentElement).select('path').node();
+    const pathLength = node.getTotalLength();
+    d.point = node.getPointAtLength(pathLength / 2);
+    return d.point.x - 44;
+  }).attr('y', function (d) {
+    return d.point.y + d.tempIndex * 20 + 15;
+  });
+
+  const secondarytext = link_label.selectAll('.' + constants.lineLimitedThroughputText);
+  secondarytext.attr('x', function (d) {
+    const node = d3.select(d3.select(this).node().parentElement.parentElement).select('path').node();
+    const pathLength = node.getTotalLength();
+    d.point = node.getPointAtLength(pathLength / 2);
+    return d.point.x - 20;
+  }).attr('y', function (d) {
+    return d.point.y + d.tempIndex * 20 + 24;
+  });
+
+
+};
 
 
 
 export const insertEdgeLabel = function (elem) {
 
-  // Perhapos not needed!
+  // Perhaps not needed!
   const link_label = elem.append('g').attr('class', 'textLabel');
 
+
   updateNodeTierExternal(link_label, 0, 0);
+
+  const link_label2 = elem.append('g').attr('class', 'resourceThroughput');
+
+  d3.selectAll('.' + constants.lineLimitedThroughputText).remove();
+  d3.selectAll('.' + constants.lineLimitedThroughputClass).remove();
+
+  d3.selectAll('.resourceThroughput').each(function(d) {
+
+    const edgeThis = d3.select(this);
+
+    Object.keys(d.itemThroughPut || {}).forEach((key, index) => {
+      const item = d.itemThroughPut[key];
+
+      d.tempIndex = index;
+
+      if (!d.itemIconLookup) return;
+      // item.actual <= item.max ||
+
+      const icon = d.itemIconLookup[key];
+
+      edgeThis.append('svg:image')
+        .classed(constants.lineLimitedThroughputClass, true)
+        .attr('xlink:href', function (d) {
+          return icon;
+        })
+        .attr('height', 20)
+        .attr('width', 20);
+
+
+      edgeThis.append('text')
+        .attr('fill', 'black')
+        .attr('class', 'overclockFont')
+        .classed(constants.lineLimitedThroughputText, true)
+        .style('text-anchor', 'start')
+        .style('dominant-baseline', 'central')
+        .attr('stroke', 'black')
+        .attr('stroke-width', 4)
+        .attr('font-size', 20)
+        .text(function(d) {
+          return Math.round(item.actual * 100) / 100 + '/' + Math.round(item.max * 100) / 100;
+        });
+
+      edgeThis.append('text').attr('fill', 'LightCoral')
+        .attr('class', 'overclockFont')
+        .classed(constants.lineLimitedThroughputText, true)
+        .style('text-anchor', 'start')
+        .style('dominant-baseline', 'central')
+        .attr('font-size', 20)
+        .text(function(d) {
+          return Math.round(item.actual * 100) / 100 + '/' + Math.round(item.max * 100) / 100;
+        });
+
+    });
+
+
+
+
+  });
+
+  // const backgroundText = link_label2.append('g')
+  //   .attr('fill', 'white')
+  //   .attr('class', 'overclockFont')
+  //   .classed(constants.nodeVersionTextClass, true)
+  //   .append('text').text("KNDFGKLNSG");
+
+
+
+
+
+
+
 
   // const text =  link_label.append('text')
   //   .style('text-anchor', 'middle')
