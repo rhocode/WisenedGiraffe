@@ -300,8 +300,6 @@ export const forceUpdateComponentLabel = function() {
 };
 
 
-
-
 export const insertComponents = function(parentElement) {
 
   const el1 = parentElement.append('g').classed(constants.nodeRequirementsIconClass, true);

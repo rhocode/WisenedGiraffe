@@ -213,7 +213,6 @@ export const analyzeGraph = function() {
             const itemPerSec = provide.calculatedItemPerSecond;
             resources[i] = resources[i] || 0;
             resources[i] += itemPerSec * 60;
-            console.log(provide);
             nodeGroupSourceThroughput.push(provide);
           });
 
@@ -225,8 +224,7 @@ export const analyzeGraph = function() {
               const resourceCount = resources[providedItem];
               node.itemsPerMinute[providedItem] = resourceCount;
               node.itemThroughPut[providedItem] = {max: resourceCount, actual: resourceCount};
-            })
-            console.log(node);
+            });
           });
         } else if (node.machine.name === 'Container' ) {
             const resources = {};

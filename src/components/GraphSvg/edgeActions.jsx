@@ -115,7 +115,6 @@ export const recalculateStorageContainers = function() {
               combinedProvidesSource.add(provide.source);
             }
           });
-          console.log(node)
           node.allowedIn = node.childProvides.map(elem => elem.item.item.id);
           node.allowedOut = node.childProvides.map(elem => elem.item.item.id);
           node.containedItems = node.childProvides.map(elem => elem.item.item);
