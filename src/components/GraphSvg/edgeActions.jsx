@@ -115,6 +115,7 @@ export const recalculateStorageContainers = function() {
               combinedProvidesSource.add(provide.source);
             }
           });
+          console.log(node)
           node.allowedIn = node.childProvides.map(elem => elem.item.item.id);
           node.allowedOut = node.childProvides.map(elem => elem.item.item.id);
           node.containedItems = node.childProvides.map(elem => elem.item.item);
@@ -180,6 +181,8 @@ export const addPath = function (passedThis, source, target) {
   const targetChecker = (target.allowedIn || []).length > 0 || (target.allowedOut || []).length > 0;
   const specialSource = ['Container', 'Logistic'].includes(source.machine.name);
   const specialTarget = ['Container', 'Logistic'].includes(target.machine.name);
+  const mergerTarget = ['Logistic'].includes(source.machine.name) && ['Merger'].includes(source.instance.name);
+  const mergerSource = ['Logistic'].includes(target.machine.name) && ['Merger'].includes(target.instance.name);
   const targetSlotsUsed = target.instance.input_slots === (passedThis.nodeIn[target.id] ? passedThis.nodeIn[target.id].length : 0);
   const sourceSlotsUsed = source.instance.output_slots === (passedThis.nodeOut[source.id] ? passedThis.nodeOut[source.id].length : 0);
 
@@ -194,7 +197,8 @@ export const addPath = function (passedThis, source, target) {
 
   const newEdge = {source: source, target: target, instance, upgradeTypes: upgrades};
 
-  if (((specialSource && !sourceChecker) || (specialTarget && !targetChecker))) {
+  if (((specialSource && !sourceChecker) || (specialTarget && !targetChecker))  || (mergerTarget || mergerSource) ) {
+    console.log("Special Handling")
     // special handling if the source is a container
 
     // check if there are open slots
@@ -315,7 +319,7 @@ export const calculateLabelPositions = function (link_label) {
     d.point = node.getPointAtLength(pathLength / 2);
     return d.point.x - 44;
   }).attr('y', function (d) {
-    return d.point.y + d.tempIndex * 20 + 15;
+    return d.point.y + d.tempIndex[d3.select(this).attr('data-key')]* 20 + 15;
   });
 
   const secondarytext = link_label.selectAll('.' + constants.lineLimitedThroughputText);
@@ -325,7 +329,7 @@ export const calculateLabelPositions = function (link_label) {
     d.point = node.getPointAtLength(pathLength / 2);
     return d.point.x - 20;
   }).attr('y', function (d) {
-    return d.point.y + d.tempIndex * 20 + 24;
+    return d.point.y + d.tempIndex[d3.select(this).attr('data-key')] * 20 + 24;
   });
 
 
@@ -350,13 +354,21 @@ export const insertEdgeLabel = function (elem) {
 
     const edgeThis = d3.select(this);
 
-    Object.keys(d.itemThroughPut || {}).forEach((key, index) => {
+    let index = 0;
+    d.tempIndex = {};
+    Object.keys(d.itemThroughPut || {}).forEach((key) => {
       const item = d.itemThroughPut[key];
 
-      d.tempIndex = index;
-
       if (!d.itemIconLookup) return;
-      // item.actual <= item.max ||
+
+      // d.tempIndex
+      d.tempIndex[key] = index++;
+
+      let definedColor = 'LightCoral';
+
+      if (item.actual <= item.max) {
+        definedColor = 'white';
+      }
 
       const icon = d.itemIconLookup[key];
 
@@ -365,6 +377,7 @@ export const insertEdgeLabel = function (elem) {
         .attr('xlink:href', function (d) {
           return icon;
         })
+        .attr('data-key', key)
         .attr('height', 20)
         .attr('width', 20);
 
@@ -378,78 +391,21 @@ export const insertEdgeLabel = function (elem) {
         .attr('stroke', 'black')
         .attr('stroke-width', 4)
         .attr('font-size', 20)
+        .attr('data-key', key)
         .text(function(d) {
           return Math.round(item.actual * 100) / 100 + '/' + Math.round(item.max * 100) / 100;
         });
 
-      edgeThis.append('text').attr('fill', 'LightCoral')
+      edgeThis.append('text').attr('fill', definedColor)
         .attr('class', 'overclockFont')
         .classed(constants.lineLimitedThroughputText, true)
         .style('text-anchor', 'start')
         .style('dominant-baseline', 'central')
         .attr('font-size', 20)
+        .attr('data-key', key)
         .text(function(d) {
           return Math.round(item.actual * 100) / 100 + '/' + Math.round(item.max * 100) / 100;
         });
-
     });
-
-
-
-
   });
-
-  // const backgroundText = link_label2.append('g')
-  //   .attr('fill', 'white')
-  //   .attr('class', 'overclockFont')
-  //   .classed(constants.nodeVersionTextClass, true)
-  //   .append('text').text("KNDFGKLNSG");
-
-
-
-
-
-
-
-
-  // const text =  link_label.append('text')
-  //   .style('text-anchor', 'middle')
-  //   .style('dominant-baseline', 'central')
-  //   .attr('class', 'edge-label').text("WHAT");
-
-  // calculateLabelPosition(link_label, text);
-  //
-  // var div_label = gEl.append('foreignObject').attr({
-  //   'width': '200px',
-  //   'height': '200px',
-  //   'class': 'path-tooltip'
-  // });
-  //
-  // div_label.append('xhtml:div').attr({
-  //   'class': 'path-tooltip-div'
-  // })
-  //   .append('div')
-  //   .attr({
-  //     'class': 'tooltip'
-  //   }).append('p')
-  //   .attr('class', 'lead')
-  //   .attr('id', function (d) {
-  //     return thisGraph.nodeNaming(d);
-  //   }).html(function (d) {
-  //     /*eslint-disable react/no-unknown-property*/
-  //     return jsxToString(<div>
-  //       <div><img class={classes.pathIcon}
-  //         src="https://i.imgur.com/oBmfK3w.png" title="logo"/>
-  //       <div class={classes.pathText}>Hello there!</div>
-  //       </div>
-  //     </div>);
-  //   /*eslint-enable  react/no-unknown-property*/
-  //   }).attr('dummy_attr', function (d) {
-  //     const node = d3.select(this).node();
-  //     d3.select(d3.select(this).node().parentElement.parentElement.parentElement)
-  //       .attr('width', node.clientWidth + 0.5).attr('height', node.clientHeight + 0.5);
-  //     return 'meep';
-  //   });
-  //
-  // this.calculatePathTooltipPosition(div_label);
 };

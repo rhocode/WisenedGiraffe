@@ -113,11 +113,13 @@ export const analyzeGraph = function() {
     delete node.efficiency;
     delete node.itemThroughPut;
     delete node.itemsPerMinute;
+    delete node.hiddenDisplayModifier;
     node.itemIconLookup = itemLookup;
   });
 
   this.graphData.links.forEach(link => {
     delete link.itemThroughPut;
+    delete link.tempIndex;
     link.itemIconLookup = itemLookup;
   });
 
@@ -130,7 +132,270 @@ export const analyzeGraph = function() {
     const outgoingInflated = outgoing.map(item => superNodeGraphLookupInflated[item]);
     reverseTraversal.push(thisNodeInflated);
 
+    const propagateNodeToEdgesRevised = (nodeGroupSource, nodeGroupTarget, origin, targets) => {
+      const nodeGroupSourceThroughput = [];
+      if (nodeGroupSource.length === 1) {
+        const node = nodeGroupSource[0];
+        let throughput = null;
+        let efficiency = null;
 
+        const nodeSpeed = node.instance.speed / 100;
+        const overclock = node.overclock / 100;
+
+        const provided = providedThroughput[origin] || [];
+
+        if (node.data.node) {
+          // this is a purity calculation
+          const recipe = node.data.recipe;
+          const purity = node.data.purity;
+          const fetchedPurity = recipe.purities.filter(item => item.name === purity);
+
+          if (fetchedPurity.length !== 1) {
+            throw new Error('Trying to get purity', purity, 'wtf?');
+          }
+          const actualPurity = fetchedPurity[0];
+
+          throughput = {
+            speed: nodeSpeed,
+            overclock,
+            quantity: actualPurity.quantity,
+            item: recipe.item.id,
+            time: 60,
+            power: node.instance.power,
+            inputs: []
+          };
+          efficiency = 1;
+
+          const maxThroughput = (throughput.quantity / throughput.time) * 60 * node.instance.speed / 100 * throughput.overclock;
+          nodeGroupSourceThroughput.push({throughput, efficiency, source: origin});
+
+          nodeGroupSource.forEach(node => {
+            node.efficiency = efficiency;
+            node.itemsPerMinute = {[throughput.item] : maxThroughput};
+
+            // Comment this out if we should remove the display from nodes
+            node.itemThroughPut = {[throughput.item] : {max: maxThroughput, actual: maxThroughput}};
+          });
+        } else if (node.machine.name === 'Logistic' && node.instance.name === 'Splitter') {
+          const resources = {};
+          const providedSet = new Set();
+          provided.forEach(provideRaw => {
+            const provide = JSON.parse(JSON.stringify(provideRaw));
+
+            //TODO: change the 3 to the actual number of links out
+            provide.maxItemsPerSecLimiter = provide.calculatedItemPerSecond / ((this.nodeOut[nodeGroupSource[0].id] || []).length || 1);
+            const i = provide.throughput.item;
+            providedSet.add(i);
+            const itemPerSec = provide.calculatedItemPerSecond;
+            resources[i] = resources[i] || 0;
+            resources[i] += itemPerSec * 60;
+
+            nodeGroupSourceThroughput.push(provide);
+          });
+
+          nodeGroupSource.forEach(node => {
+            node.efficiency = 1;
+            node.itemsPerMinute = {};
+            node.itemThroughPut = {};
+            providedSet.forEach(providedItem => {
+              const resourceCount = resources[providedItem];
+              node.itemsPerMinute[providedItem] = resourceCount;
+              node.itemThroughPut[providedItem] = {max: resourceCount, actual: resourceCount};
+            })
+          });
+        } else if (node.machine.name === 'Logistic' && node.instance.name === 'Merger') {
+          const resources = {};
+          const providedSet = new Set();
+          provided.forEach(provideRaw => {
+            const provide = JSON.parse(JSON.stringify(provideRaw));
+            const i = provide.throughput.item;
+            providedSet.add(i);
+            const itemPerSec = provide.calculatedItemPerSecond;
+            resources[i] = resources[i] || 0;
+            resources[i] += itemPerSec * 60;
+            console.log(provide);
+            nodeGroupSourceThroughput.push(provide);
+          });
+
+          nodeGroupSource.forEach(node => {
+            node.efficiency = 1;
+            node.itemsPerMinute = {};
+            node.itemThroughPut = {};
+            providedSet.forEach(providedItem => {
+              const resourceCount = resources[providedItem];
+              node.itemsPerMinute[providedItem] = resourceCount;
+              node.itemThroughPut[providedItem] = {max: resourceCount, actual: resourceCount};
+            })
+            console.log(node);
+          });
+        } else if (node.machine.name === 'Container' ) {
+            const resources = {};
+            const providedSet = new Set();
+            provided.forEach(provide => {
+              const i = provide.throughput.item;
+              providedSet.add(i);
+              const itemPerSec = provide.calculatedItemPerSecond;
+              resources[i] = resources[i] || 0;
+              resources[i] += itemPerSec * 60;
+              nodeGroupSourceThroughput.push(provide);
+            });
+
+            nodeGroupSource.forEach(node => {
+              node.efficiency = 1;
+              node.itemsPerMinute = {};
+              providedSet.forEach(providedItem => {
+                const resourceCount = resources[providedItem];
+                node.itemsPerMinute[providedItem] = resourceCount;
+                node.itemThroughPut = {[providedItem] : {max: resourceCount, actual: resourceCount}};
+              })
+            });
+          } else {
+          throughput = {
+            speed: nodeSpeed,
+            overclock,
+            quantity: node.data.recipe.quantity,
+            item: node.data.recipe.item.id,
+            time: node.data.recipe.time,
+            power: node.data.recipe.power,
+            inputs: node.data.recipe.inputs.map(elem => {
+              return {item: elem.item.id, quantity: elem.quantity};
+            })
+          };
+
+          const resources = {};
+
+          const providedSet = new Set();
+
+          provided.forEach(provide => {
+            const i = provide.throughput.item;
+
+            providedSet.add(i);
+
+            const itemPerSec = provide.calculatedItemPerSecond;
+
+            resources[i] = resources[i] || 0;
+            resources[i] += itemPerSec * 60;
+          });
+
+          const missing = new Set();
+          const efficiencies = [Infinity];
+
+          const maxThroughput = (throughput.quantity / throughput.time) * 60 * node.instance.speed / 100 * throughput.overclock;
+
+          throughput.inputs.forEach(inp => {
+            const item = inp.item;
+            const quantity = inp.quantity;
+            const providedQuantity = resources[item] || 0;
+            if (!providedSet.has(item)) {
+              missing.add(item);
+            }
+
+            const resourceThroughputNeeded = maxThroughput * (quantity / throughput.quantity);
+
+            // console.log("Debug: Producing ", node.data.recipe.quantity, "of", node.data.recipe.item.name, "from", quantity, "of", item)
+            // console.log("Looking like we will need ", throughput.time, throughput.quantity);
+            const calculatedThroughput = maxThroughput * (Math.min(resourceThroughputNeeded, providedQuantity ) / resourceThroughputNeeded);
+
+            const maxThroughputPerItem = resourceThroughputNeeded;
+
+            node.itemThroughPut = node.itemThroughPut || {};
+            node.itemThroughPut[item] = node.itemThroughPut[item] || {max: 0, actual: 0};
+            node.itemThroughPut[item].max += maxThroughputPerItem;
+            node.itemThroughPut[item].actual += providedQuantity;
+
+            const efficiency = calculatedThroughput / maxThroughput;
+
+            efficiencies.push(Math.min(1, efficiency));
+
+          });
+
+          if (missing.size > 0) {
+            efficiency = 0;
+          } else {
+            efficiency = Math.min(...efficiencies);
+          }
+
+          nodeGroupSourceThroughput.push({throughput, efficiency, source: origin});
+
+          nodeGroupSource.forEach(node => {
+            node.efficiency = efficiency;
+            node.itemsPerMinute = {[throughput.item]: maxThroughput * efficiency};
+          });
+        }
+
+
+        (derivedGraphOutgoing[origin] || []).forEach(outgoingNode => {
+          const source = nodeGroupSource.map(node => node.id)[0];
+          const target = superNodeGraphLookupInflated[outgoingNode].map(node => node.id)[0];
+
+          if (source === undefined || target === undefined) {
+            throw new Error(['Why the heck does this not work? There is no source, target combo of ', source, target, nodeGroupSource.map(node=> node.id), superNodeGraphLookupInflated[outgoingNode].map(node=>node.id)].join(' '));
+          }
+
+          const link = this.graphData.links.filter(link => link.source.id === source && link.target.id === target);
+
+          let foundLink = null;
+          if (link && link.length === 1) {
+            foundLink = link[0];
+          } else {
+            throw new Error('No link found, or too many links found!!!');
+          }
+
+          providedThroughput[outgoingNode] = providedThroughput[outgoingNode] || [];
+
+          let totalItemPerSec = 0;
+
+          nodeGroupSourceThroughput.forEach(item => {
+
+            const q = item.throughput.quantity;
+            const t = item.throughput.time;
+            const e = item.efficiency;
+            const o = item.throughput.overclock;
+            const s = item.throughput.speed;
+
+            //check propagated limited
+            const maxItemsPerSecLimiter = item.maxItemsPerSecLimiter === undefined ? Infinity : item.maxItemsPerSecLimiter;
+            let itemPerSec = Math.min(q / t * e * o * s|| 0, maxItemsPerSecLimiter);
+            totalItemPerSec += itemPerSec;
+          });
+
+          // Now totalItemPerSec contains the actual throughput of items
+          const limitedSpeed = foundLink.instance.speed;
+
+          nodeGroupSourceThroughput.forEach(itemRaw => {
+
+            const throughput = JSON.parse(JSON.stringify(itemRaw));
+
+            const q = throughput.throughput.quantity;
+            const t = throughput.throughput.time;
+            const e = throughput.efficiency;
+            const o = throughput.throughput.overclock;
+            const s = throughput.throughput.speed;
+            const i = throughput.throughput.item;
+
+            //check propagated limited
+            const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
+
+            const limitedItemPerSecByBelt = limitedSpeed / 60;
+
+            let itemPerSecBeforeBeltLimiting = Math.min(q / t * e * o * s|| 0, maxItemsPerSecLimiter);
+
+            throughput.maxItemsPerSecLimiter = Math.min(limitedItemPerSecByBelt, maxItemsPerSecLimiter);
+
+            throughput.calculatedItemPerSecond = Math.min(itemPerSecBeforeBeltLimiting, throughput.maxItemsPerSecLimiter);
+
+            foundLink.itemThroughPut = foundLink.itemThroughPut || {};
+            foundLink.itemThroughPut[i] = foundLink.itemThroughPut[i] || {max: 0, actual: 0};
+            foundLink.itemThroughPut[i].max = limitedItemPerSecByBelt * 60;
+            foundLink.itemThroughPut[i].actual += itemPerSecBeforeBeltLimiting * 60;
+
+            providedThroughput[outgoingNode].push(throughput);
+          });
+        });
+      } else {
+        alert("Looks like you made a cycle! Cycles are disabled for now :(")
+      }
+    };
 
 
     const propagateNodeToEdges2 = (nodeGroupSource, nodeGroupTarget, origin, targets) => {
@@ -174,17 +439,10 @@ export const analyzeGraph = function() {
             node.efficiency = efficiency;
             node.itemsPerMinute = {[throughput.item]: maxThroughput};
           });
+          nodeGroupSourceThroughput.push({throughput, efficiency, source: origin});
         } else if (node.machine.name === 'Container' || (node.machine.name === 'Logistic' && node.instance.name === 'Splitter')) {
-          const resources = {};
-
-          const providedSet = new Set();
-
           provided.forEach(provide => {
-            const i = provide.throughput.item;
-            providedSet.add(i);
-            const itemPerSec = provide.itemPerSec;
-            resources[i] = resources[i] || 0;
-            resources[i] += itemPerSec * 60;
+            nodeGroupSourceThroughput.push(provide);
           });
         } else {
           throughput = {
@@ -208,7 +466,7 @@ export const analyzeGraph = function() {
 
             providedSet.add(i);
 
-            const itemPerSec = provide.itemPerSec;
+            const itemPerSec = provide.beltLimiteditemPerSec;
 
             resources[i] = resources[i] || 0;
             resources[i] += itemPerSec * 60;
@@ -269,10 +527,10 @@ export const analyzeGraph = function() {
               node.itemsPerMinute[item] =node.itemThroughPut[item];
             });
           });
+
+
+          nodeGroupSourceThroughput.push({throughput, efficiency, source: origin});
         }
-
-        nodeGroupSourceThroughput.push({throughput, efficiency, source: origin});
-
 
         (derivedGraphOutgoing[origin] || []).forEach(elem => {
           const source = nodeGroupSource.map(node => node.id)[0];
@@ -290,13 +548,62 @@ export const analyzeGraph = function() {
             throw new Error('No link found, or too many links found!!!');
           }
 
+          const limitedSpeed = foundLink.instance.speed;
+
+          providedThroughput[elem] = providedThroughput[elem] || [];
+
+          let totalItemPerSec = 0;
+
+          nodeGroupSourceThroughput.forEach(item => {
+
+            const q = item.throughput.quantity;
+            const t = item.throughput.time;
+            const e = item.efficiency;
+            const o = item.throughput.overclock;
+            const s = item.throughput.speed;
+
+            let itemPerSec = q / t * e * o * s|| 0;
+
+            totalItemPerSec += itemPerSec;
+          });
 
 
 
+          let modifier = 1;
 
+          if  (limitedSpeed < totalItemPerSec) {
+            modifier = limitedSpeed / totalItemPerSec;
+          }
 
+          nodeGroupSourceThroughput.forEach(itemRaw => {
+            const throughput = JSON.parse(JSON.stringify(itemRaw));
+            const q = throughput.throughput.quantity;
+            const t = throughput.throughput.time;
+            const e = throughput.efficiency;
+            const o = throughput.throughput.overclock;
+            const s = throughput.throughput.speed;
+            const i = throughput.throughput.item;
+
+            let itemPerSec =  q/t * e * o * s|| 0;
+
+            const previousLimit = throughput.previousLimit || Infinity
+
+            const itemsLimitedByPreviousBelt = Math.min(previousLimit, itemPerSec);
+            const itemsLimitedByBeltCombined =  itemsLimitedByPreviousBelt * modifier;
+
+            const limitedItemPerSec = limitedSpeed / 60;
+
+            foundLink.itemThroughPut = foundLink.itemThroughPut || {};
+            foundLink.itemThroughPut[i] = foundLink.itemThroughPut[i] || {max: 0, actual: 0};
+            foundLink.itemThroughPut[i].max += limitedItemPerSec * 60;
+
+            throughput.beltLimiteditemPerSec = itemsLimitedByBeltCombined;
+
+            foundLink.itemThroughPut[i].actual += itemPerSec * 60;
+
+            providedThroughput[elem].push(item);
+          });
         });
-
       } else {
         // multiple node groups!
       }
@@ -602,7 +909,7 @@ export const analyzeGraph = function() {
 
     };
 
-    propagateNodeToEdges(thisNodeInflated, outgoingInflated, node, outgoing);
+    propagateNodeToEdgesRevised(thisNodeInflated, outgoingInflated, node, outgoing);
 
     Object.keys(derivedGraphIncoming).forEach(key => {
       const accessor = derivedGraphIncoming[key];
@@ -612,31 +919,13 @@ export const analyzeGraph = function() {
     myTinyQueue.reheapify();
   }
 
-
-
-  this.graphData.nodes.forEach(node => {
-    console.log(node, node.instance.name);
-  });
-
-  this.graphData.links.forEach(link => {
-    console.log(link);
-  });
-
-
-
   editEfficiencyArc('efficiency', 59, 322);
-
-
-
-
 };
 export const initSimulation = () => {
   const bodyEl = document.getElementById('mainRender');
 
   const width = bodyEl.clientWidth;
   const height = bodyEl.clientHeight;
-
-  console.log(width, height);
   return d3.forceSimulation()
     .force('link', d3.forceLink().id(function (d) {
       return d.id;

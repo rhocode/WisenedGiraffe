@@ -177,7 +177,9 @@ export const updateComponents = function(elementsToUpdate) {
     const allowedInRemaining = d.allowedIn.slice();
     const provided = t.nodeIn[d.id] || [];
     const actualIn = provided.map(node => node.allowedOut).flat(1);
-    new Set(actualIn).forEach(id => {    spliceUtil(allowedInRemaining, id); });
+
+    actualIn.forEach(id => {    spliceUtil(allowedInRemaining, id); });
+
     const element = d3.select(this);
 
     element.selectAll('.' + constants.nodeRequirementsSubIconClass).remove();
@@ -196,6 +198,9 @@ export const updateComponents = function(elementsToUpdate) {
       const fetchRemainingIn = allowedInRemaining.map(item =>
         itemAccessor.filter(findItem => item === findItem.id)[0]
       );
+
+      if (fetchRemainingIn.length > 1)
+        console.log(fetchRemainingIn)
 
       const outputtedItems = new Set();
 
@@ -235,7 +240,7 @@ export const updateComponents = function(elementsToUpdate) {
     const allowedOutRemaining = d.allowedOut.slice();
     const provides = t.nodeOut[d.id] || [];
     const actualOut = provides.map(node => node.allowedIn).flat(1);
-    new Set(actualOut).forEach(id => {   spliceUtil(allowedOutRemaining, id); });
+    actualOut.forEach(id => {   spliceUtil(allowedOutRemaining, id); });
 
     if (allowedOutRemaining.length > 0) {
       element.append('text').attr('class', 'fas fa-arrow-left')
@@ -356,7 +361,6 @@ export const insertComponents = function(parentElement) {
     const nodeThis = d3.select(this);
     nodeThis.selectAll('.' + constants.nodeProducesPerMinText).remove();
 
-
     nodeThis.append('text')
       .attr('fill', 'white')
       .attr('class', 'overclockFont')
@@ -368,10 +372,8 @@ export const insertComponents = function(parentElement) {
       .attr('x', -5).attr('y', -37)
       .attr('font-size', 30)
       .text(function(d) {
-        console.log(d);
-
         let combinedSum = 0;
-        Object.keys(d.itemsPerMinute).forEach(item => {
+        Object.keys(d.itemsPerMinute || {}).forEach(item => {
           combinedSum += d.itemsPerMinute[item];
         });
 
@@ -388,7 +390,7 @@ export const insertComponents = function(parentElement) {
       .attr('font-size', 30)
       .text(function(d) {
         let combinedSum = 0;
-        Object.keys(d.itemsPerMinute).forEach(item => {
+        Object.keys(d.itemsPerMinute || {}).forEach(item => {
           combinedSum += d.itemsPerMinute[item];
         });
 
@@ -406,7 +408,14 @@ export const insertComponents = function(parentElement) {
     Object.keys(d.itemThroughPut || {}).forEach((key, index) => {
       const item = d.itemThroughPut[key];
 
-      if (item.actual === item.max || !d.itemIconLookup) return;
+      if (!d.itemIconLookup) return;
+
+      let definedColor = 'LightCoral';
+
+      if (item.actual === item.max) {
+        definedColor = 'white';
+      }
+
       const icon = d.itemIconLookup[key];
 
       nodeThis.append('svg:image')
@@ -414,7 +423,7 @@ export const insertComponents = function(parentElement) {
         .attr('xlink:href', function (d) {
           return icon
         })
-        .attr('x', -49).attr('y', 59 + (index * 20))
+        .attr('x', -49 + 35).attr('y', 59 + (index * 20))
         .attr('height', 20)
         .attr('width', 20);
 
@@ -426,22 +435,21 @@ export const insertComponents = function(parentElement) {
         .style('dominant-baseline', 'central')
         .attr('stroke', 'black')
         .attr('stroke-width', 4)
-        .attr('x', -25).attr('y', 68 + (index * 20))
+        .attr('x', -25 + 35).attr('y', 68 + (index * 20))
         .attr('font-size', 20)
         .text(function(d) {
           return Math.round(item.actual * 100) / 100 + '/' + Math.round(item.max * 100) / 100;
         });
 
 
-      nodeThis.append('text').attr('fill', 'LightCoral')
+      nodeThis.append('text').attr('fill', definedColor)
         .attr('class', 'overclockFont')
         .classed(constants.nodeLimitingThroughputText, true)
         .style('text-anchor', 'start')
         .style('dominant-baseline', 'central')
-        .attr('x', -25).attr('y', 68 + (index * 20))
+        .attr('x', -25 + 35).attr('y', 68 + (index * 20))
         .attr('font-size', 20)
         .text(function(d) {
-          // console.log(d.itemsPerMinute);
           return Math.round(item.actual * 100) / 100 + '/' + Math.round(item.max * 100) / 100;
         });
 
