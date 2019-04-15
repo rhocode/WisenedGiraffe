@@ -382,7 +382,7 @@ class App extends Component {
             <Typography variant="body1">TODO</Typography>
           </React.Fragment>
         }/>
-        {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ? <SelectorPanel label='Version' graphSvg={this.graphSvg} selected={this.state.selectedNode || this.state.selectedPath} /> : null}
+        {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ? <SelectorPanel label='Tier' graphSvg={this.graphSvg} selected={this.state.selectedNode || this.state.selectedPath} /> : null}
         <Drawer
           className={classes.drawer}
           variant="permanent"
@@ -411,6 +411,7 @@ class App extends Component {
             <SidebarPopup Icon={WarningIcon} label='Known Issues' title='Known Issues'>
               <ul>
                 <li>Resource nodes do not have purities displayed on the graph</li>
+                <li>Cyclic graphs are disabled.</li>
               </ul>
             </SidebarPopup>
           </List>

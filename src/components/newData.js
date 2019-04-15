@@ -459,8 +459,7 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
         icon: baseUrl + 'Smelter.png',
         speed: 200,
-        hidden: true
-        ,
+        hidden: true,
         input_slots: 1,
         output_slots: 1
       },
