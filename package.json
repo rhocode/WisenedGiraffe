@@ -26,7 +26,13 @@
   "license": "MIT",
   "babel": {
     "presets": [
-      "@babel/preset-env",
+      [
+        "@babel/preset-env",
+        {
+          "useBuiltIns": "usage",
+          "corejs": 3
+        }
+      ],
       "@babel/preset-react"
     ],
     "plugins": [
@@ -83,6 +89,7 @@
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
     "clean-webpack-plugin": "^2.0.1",
+    "core-js": "^3.0.1",
     "css-loader": "^2.1.1",
     "eslint": "^5.15.3",
     "eslint-loader": "^2.1.2",
