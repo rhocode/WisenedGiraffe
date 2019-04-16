@@ -28,7 +28,7 @@ import SidebarPanel from './SidebarPanel';
 import ClearButton from './ClearButton';
 import ShareButton from './ShareButton';
 import LoadButton from './LoadButton';
-import SelectorPanel from "./SelectorPanel";
+import SelectorPanel from './SelectorPanel';
 // import * as d3 from 'd3';
 
 /* global d3 */
@@ -355,8 +355,8 @@ class App extends Component {
               title="logo"/>
             <div className={classes.grow}></div>
             {/*<Button color="inherit" >*/}
-              {/*<OfflineBoltIcon/>*/}
-              {/*<div className={classes.label}>Analyze</div>*/}
+            {/*<OfflineBoltIcon/>*/}
+            {/*<div className={classes.label}>Analyze</div>*/}
             {/*</Button>*/}
             <Button color="inherit" onClick={() => t.graphSvg.analyze()}>
               <SettingsInputComponentIcon/>
