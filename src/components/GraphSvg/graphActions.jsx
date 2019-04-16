@@ -113,7 +113,7 @@ export const analyzeGraph = function() {
     delete node.efficiency;
     delete node.itemThroughPut;
     delete node.itemsPerMinute;
-    delete node.hiddenDisplayModifier;
+    delete node.internalError;
     node.itemIconLookup = itemLookup;
   });
 
@@ -325,6 +325,22 @@ export const analyzeGraph = function() {
           const sources = nodeGroupSource.map(node => node.id);
           const targets = superNodeGraphLookupInflated[outgoingNode].map(node => node.id);
 
+
+
+
+          const totalItemThroughput = nodeGroupSourceThroughput.map(throughput => {
+            const q = throughput.throughput.quantity;
+            const t = throughput.throughput.time;
+            const e = throughput.efficiency;
+            const o = throughput.throughput.overclock;
+            const s = throughput.throughput.speed;
+            const i = throughput.throughput.item;
+
+            //check propagated limited
+            const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
+            return Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
+          }).reduce((a, b = 0) => a + b, 0);
+
           sources.forEach(source => {
             targets.forEach(target => {
 
@@ -358,9 +374,12 @@ export const analyzeGraph = function() {
                 //check propagated limited
                 const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
 
-                const limitedItemPerSecByBelt = limitedSpeed / 60;
 
                 let itemPerSecBeforeBeltLimiting = Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
+
+                // need to do some weird math to constrain the items/psec to a PORTION of the belt limited
+                const limitedItemPerSecByBelt = limitedSpeed / 60 * (itemPerSecBeforeBeltLimiting/totalItemThroughput);
+
 
                 throughput.maxItemsPerSecLimiter = Math.min(limitedItemPerSecByBelt, maxItemsPerSecLimiter);
 
@@ -388,6 +407,8 @@ export const analyzeGraph = function() {
         const providedThroughputFromOtherSources = providedThroughput[origin];
 
         const resources = {};
+        const resourcePrevious = {};
+        const resourceInitial = {};
         const providedSet = new Set();
 
         nodeGroupSource.forEach((node, index) => {
@@ -403,116 +424,174 @@ export const analyzeGraph = function() {
               //TODO: UH OH!!!!
               // provide.maxItemsPerSecLimiter = provide.calculatedItemPerSecond / ((this.nodeOut[node.id] || []).length || 1);
 
-
               const i = provide.throughput.item;
               providedSet.add(i);
               const itemPerSec = provide.calculatedItemPerSecond;
               resources[node.id] = resources[node.id] || {};
               resources[node.id][i] = resources[node.id][i] || 0;
               resources[node.id][i] += itemPerSec * 60;
+
+              resourcePrevious[node.id] = resourcePrevious[node.id] || {};
+              resourcePrevious[node.id][i] = resourcePrevious[node.id][i] || 0;
+              resourcePrevious[node.id][i] += itemPerSec * 60;
+
+              resourceInitial[node.id] = resourceInitial[node.id] || {};
+              resourceInitial[node.id][i] = resourceInitial[node.id][i] || 0;
+              resourceInitial[node.id][i] += itemPerSec * 60;
             });
           }
         });
-
         let i = 0;
-        while(i < 3) {
-          const visitedNodes = new Set();
-          nodeGroupSource.forEach(nodeInitial => {
-            const stack = [];
-            if (!visitedNodes.has(nodeInitial.id)) {
-              visitedNodes.add(nodeInitial.id);
-              stack.push(nodeInitial);
-            }
+        while(i < 999) {
 
-            while(stack.length) {
-              const node = stack.pop();
-
-
-
-              const myResources = resources[node.id] || [];
-
-              console.log('Visiting', node.id, myResources);
-
-
-
-              // const provided = localProvide[node.id] || [];
-              if (node.machine.name === 'Logistic' && node.instance.name === 'Splitter') {
-                // TODO: I need to output to my edges. unfortunately NOT ALL my edges will be in the cycle.
-              } else if (node.machine.name === 'Logistic' && node.instance.name === 'Merger') {
-                this.nodeOut[node.id].forEach(outNode => {
-                  const links = this.graphData.links.filter(link => link.source.id === node.id && link.target.id === outNode.id);
-                  if (links && links.length !== 1) {
-                    throw new Error('Too many links found!!!');
-                  }
-                  const link = links[0];
-                  const limitedSpeed = link.instance.speed;
-                  Object.keys(myResources).map(key  => myResources[key]).reduce((a, b = 0) => a + b, 0);
-                });
-                // I need to output to my edges. Fortunately, all my edges will be in the cycle.
-              } else if (node.machine.name === 'Container' ) {
-                // I need to output to my edges. Fortunately, all my edges will be in the cycle.
+          const visitNodes = (resources) => {
+            const visitedNodes = new Set();
+            nodeGroupSource.forEach((nodeInitial) => {
+              const stack = [];
+              if (!visitedNodes.has(nodeInitial.id)) {
+                visitedNodes.add(nodeInitial.id);
+                stack.push(nodeInitial);
               }
-              // const resources = {};
-              // const providedSet = new Set();
-              // provided.forEach(provide => {
-              //   const i = provide.throughput.item;
-              //   providedSet.add(i);
-              //   const itemPerSec = provide.calculatedItemPerSecond;
-              //   resources[i] = resources[i] || 0;
-              //   resources[i] += itemPerSec * 60;
-              //   // nodeGroupSourceThroughput.push(provide);
-              // });
 
-              // nodeGroupSource.forEach(node => {
-              //   node.efficiency = 1;
-              //   node.itemsPerMinute = {};
-              //   node.itemThroughPut = {};
-              //   providedSet.forEach(providedItem => {
-              //     const resourceCount = resources[providedItem];
-              //     node.itemsPerMinute[providedItem] = resourceCount;
-              //     node.itemThroughPut[providedItem] = {max: resourceCount, actual: resourceCount};
-              //   });
-              // });
+              while(stack.length) {
+                const node = stack.pop();
 
+                const myResources = resources[node.id] || [];
 
-              //   const resources = {};
-              //   const providedSet = new Set();
-              //   provided.forEach(provide => {
-              //     const i = provide.throughput.item;
-              //     providedSet.add(i);
-              //     const itemPerSec = provide.calculatedItemPerSecond;
-              //     resources[i] = resources[i] || 0;
-              //     resources[i] += itemPerSec * 60;
-              //     nodeGroupSourceThroughput.push(provide);
-              //   });
-              //
-              //   nodeGroupSource.forEach(node => {
-              //     node.efficiency = 1;
-              //     node.itemsPerMinute = {};
-              //     providedSet.forEach(providedItem => {
-              //       const resourceCount = resources[providedItem];
-              //       node.itemsPerMinute[providedItem] = resourceCount;
-              //       node.itemThroughPut = {[providedItem] : {max: resourceCount, actual: resourceCount}};
-              //     });
-              //   });
-              // }
+                console.log('Visiting', node.instance.name, myResources);
 
+                // const provided = localProvide[node.id] || [];
+                if (node.machine.name === 'Logistic' && node.instance.name === 'Splitter') {
+                  // TODO: I need to output to my edges. unfortunately NOT ALL my edges will be in the cycle.
 
+                  const nWaySplit = (this.nodeOut[node.id] || []).length || 1;
 
-              (this.nodeOut[node.id] || []).forEach(outNode => {
-                if (!visitedNodes.has(outNode.id)) {
-                  visitedNodes.add(outNode.id);
-                  stack.push(outNode);
+                  const totalItemThroughput = Object.keys(myResources).map(key  => myResources[key]).reduce((a, b = 0) => a + b, 0) / nWaySplit;
+
+                  this.nodeOut[node.id].forEach(outNode => {
+
+                    if (!loopedNodes.has(outNode.id)) {
+                      return;
+                    }
+
+                    const links = this.graphData.links.filter(link => link.source.id === node.id && link.target.id === outNode.id);
+                    if (links && links.length !== 1) {
+                      throw new Error('Too many links found!!!');
+                    }
+                    const link = links[0];
+                    const limitedSpeed = link.instance.speed;
+
+                    resources[outNode.id] = resources[outNode.id] || {};
+                    console.log(node.instance.name, totalItemThroughput, limitedSpeed)
+                    if (totalItemThroughput > limitedSpeed) {
+                      // UNSTABLE RESULTS!!!
+                      outNode.internalError = outNode.internalError || new Set();
+                      outNode.internalError.add("LIMITED_OUTPUT");
+                      console.error("UNSTABLE NODE");
+                    }
+
+                    Object.keys(myResources).forEach(key => {
+                      const resourceCountPerMinute = myResources[key] / nWaySplit;
+                      resources[outNode.id][key] = resources[outNode.id][key] || 0;
+
+                      const limitedItemPerSecByBelt = limitedSpeed  * (resourceCountPerMinute / totalItemThroughput);
+
+                      console.log("The limited node", resourceCountPerMinute, "/",limitedItemPerSecByBelt);
+
+                      resources[outNode.id][key] += Math.min(resourceCountPerMinute, limitedItemPerSecByBelt) ;
+                    })
+                  });
+                } else if (node.machine.name === 'Logistic' && node.instance.name === 'Merger') {
+                  this.nodeOut[node.id].forEach(outNode => {
+                    const links = this.graphData.links.filter(link => link.source.id === node.id && link.target.id === outNode.id);
+                    if (links && links.length !== 1) {
+                      throw new Error('Too many links found!!!');
+                    }
+                    const link = links[0];
+                    const limitedSpeed = link.instance.speed;
+                    const totalItemThroughput = Object.keys(myResources).map(key  => myResources[key]).reduce((a, b = 0) => a + b, 0);
+                    resources[outNode.id] = resources[outNode.id] || {};
+
+                    Object.keys(myResources).forEach(key => {
+                      const resourceCountPerMinute = myResources[key];
+                      resources[outNode.id][key] = resources[outNode.id][key] || 0;
+
+                      const limitedItemPerSecByBelt = limitedSpeed  * (resourceCountPerMinute/totalItemThroughput);
+
+                      console.log("The limited node", resourceCountPerMinute, limitedItemPerSecByBelt);
+
+                      resources[outNode.id][key] += Math.min(resourceCountPerMinute, limitedItemPerSecByBelt) ;
+                    })
+                  });
+                  // I need to output to my edges. Fortunately, all my edges will be in the cycle.
+                } else if (node.machine.name === 'Container' ) {
+                  // I need to output to my edges. Fortunately, all my edges will be in the cycle.
+
+                  this.nodeOut[node.id].forEach(outNode => {
+                    const links = this.graphData.links.filter(link => link.source.id === node.id && link.target.id === outNode.id);
+                    if (links && links.length !== 1) {
+                      throw new Error('Too many links found!!!');
+                    }
+                    const link = links[0];
+                    const limitedSpeed = link.instance.speed;
+                    const totalItemThroughput = Object.keys(myResources).map(key  => myResources[key]).reduce((a, b = 0) => a + b, 0);
+                    resources[outNode.id] = resources[outNode.id] || {};
+
+                    Object.keys(myResources).forEach(key => {
+                      const resourceCountPerMinute = myResources[key];
+                      resources[outNode.id][key] = resources[outNode.id][key] || 0;
+                      const limitedItemPerSecByBelt = limitedSpeed  * (resourceCountPerMinute/totalItemThroughput);
+                      resources[outNode.id][key] += Math.min(resourceCountPerMinute, limitedItemPerSecByBelt) ;
+                    })
+                  });
                 }
-              });
+
+                (this.nodeOut[node.id] || []).forEach(outNode => {
+                  if (!visitedNodes.has(outNode.id) && loopedNodes.has(outNode.id)) {
+                    visitedNodes.add(outNode.id);
+                    stack.push(outNode);
+                  }
+                });
+              }
+            });
+
+            let preventDelete = 0;
+            const rounder = 1000;
+            nodeGroupSource.forEach((nodeInitial, index) => {
+
+              if (index === 0) {
+                Object.keys(resourcePrevious[nodeInitial.id] || {}).forEach(key => {
+                  const item = resources[nodeInitial.id][key];
+                  const prevItem = resourcePrevious[nodeInitial.id][key];
+                  const delta = item - prevItem;
 
 
+                  resources[nodeInitial.id][key] = resourceInitial[nodeInitial.id][key] + delta;
+                  resourcePrevious[nodeInitial.id][key] = resources[nodeInitial.id][key];
 
 
-            }
-          });
+                  if (Math.round(prevItem * rounder) === Math.round(resources[nodeInitial.id][key] * rounder)) {
+                    i += 9999999;
+                    preventDelete = true;
+                  }
+                });
+                if (!preventDelete) return;
+              }
+              if (preventDelete) {
+                Object.keys(resources[nodeInitial.id] || {}).forEach(key => {
+                  resources[nodeInitial.id][key] = Math.round(resources[nodeInitial.id][key] * (rounder / 100) ) / (rounder / 100);
+                });
+                return;
+              }
+              delete resources[nodeInitial.id];
+            });
+          };
+
+          visitNodes(resources);
           i += 1;
         }
+
+        console.log(resources);
 
         nodeGroupSource.forEach(node => {
           //push to edge
