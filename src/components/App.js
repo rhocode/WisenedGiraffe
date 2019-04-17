@@ -373,10 +373,11 @@ class App extends Component {
             <Typography variant="h5">Graph Basics</Typography>
             <ul>
               <li><Typography variant="body1">Use the left menu to add nodes to the graph.</Typography></li>
-              <li><Typography variant="body1">Click once on a node to select it.</Typography></li>
-              <li><Typography variant="body1">Click twice on a node and press DELETE to delete it.</Typography></li>
+              <li><Typography variant="body1">Click once on a node/path to select it.</Typography></li>
+              <li><Typography variant="body1">Press DELETE on a selected node/path to delete it.</Typography></li>
               <li><Typography variant="body1">Hold down shift - click and drag from a node to direct it to another
                 node.</Typography></li>
+              <li><Typography variant="body1">Use mouse wheel to control overclock (black text in the white circle)</Typography></li>
             </ul>
             <Typography variant="h5">Saving/Loading</Typography>
             <Typography variant="body1">TODO</Typography>

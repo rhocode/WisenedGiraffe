@@ -640,7 +640,7 @@ const data = [
         name: 'Iron Plate',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Ingot'),
-          quantity: 12
+          quantity: 2
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Iron Plate'),

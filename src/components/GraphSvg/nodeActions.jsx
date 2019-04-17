@@ -166,7 +166,7 @@ export const updateOverclock = function(textElement) {
 
 export const updateNodeTier = function(textElement) {
   textElement.text(function (d) {
-    return d.instance.machine_version.representation;
+    return d.instance.machine_version.representation + (d.id ? '(' + d.id + ')' : '' );
   });
 };
 

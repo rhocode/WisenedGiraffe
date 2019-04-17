@@ -112,6 +112,17 @@ export const analyzeGraph = function() {
     delete node.itemThroughPut;
     delete node.itemsPerMinute;
     delete node.internalError;
+
+    if (node.data && node.data.recipe && !node.data.node && this.props.parentAccessor.state && this.props.parentAccessor.state.recipe && this.props.parentAccessor.state.recipe.recipe) {
+      if (window.location.search.indexOf('thankYouStay=veryYes') > -1) {
+        const workaroundHack = this.props.parentAccessor.state.recipe.recipe.filter(rec => rec.id === node.data.recipe.id);
+        if (workaroundHack.length > 0) {
+          node.data.recipe = workaroundHack[0];
+        }
+        console.log('Replaced recipe', workaroundHack[0]);
+      }
+    }
+
     node.itemIconLookup = itemLookup;
   });
 
@@ -353,6 +364,7 @@ export const analyzeGraph = function() {
               // Now totalItemPerSec contains the actual throughput of items
               const limitedSpeed = foundLink.instance.speed;
 
+
               nodeGroupSourceThroughput.forEach(itemRaw => {
 
                 const throughput = JSON.parse(JSON.stringify(itemRaw));
@@ -374,13 +386,19 @@ export const analyzeGraph = function() {
                 const limitedItemPerSecByBelt = limitedSpeed / 60 * (itemPerSecBeforeBeltLimiting/totalItemThroughput);
 
 
+                let beltMaxForThisEntry = limitedSpeed;
+
+                if (totalItemThroughput * 60 > limitedSpeed) {
+                  beltMaxForThisEntry = limitedItemPerSecByBelt * 60;
+                }
+
                 throughput.maxItemsPerSecLimiter = Math.min(limitedItemPerSecByBelt, maxItemsPerSecLimiter);
 
                 throughput.calculatedItemPerSecond = Math.min(itemPerSecBeforeBeltLimiting, throughput.maxItemsPerSecLimiter);
 
                 foundLink.itemThroughPut = foundLink.itemThroughPut || {};
                 foundLink.itemThroughPut[i] = foundLink.itemThroughPut[i] || {max: 0, actual: 0};
-                foundLink.itemThroughPut[i].max = limitedItemPerSecByBelt * 60;
+                foundLink.itemThroughPut[i].max =  beltMaxForThisEntry;
                 foundLink.itemThroughPut[i].actual += itemPerSecBeforeBeltLimiting * 60;
 
                 providedThroughput[target].push(throughput);
@@ -393,6 +411,7 @@ export const analyzeGraph = function() {
       } else {
         // propagate to nodes in this nodeGroup only.
         // then
+        // alert('Cycles are not supportted yet :(');
 
 
 
@@ -434,10 +453,14 @@ export const analyzeGraph = function() {
         const visit = (nodeInitial, provide, loopedNodes) => {
           let i = 0;
 
-          const item = provide.throughput.item;
           let initialItemPerSec = provide.calculatedItemPerSecond;
-          const resources = {[nodeInitial.id] : initialItemPerSec};
-          while(i < 1) {
+          let resources = {[nodeInitial.id] : initialItemPerSec * 60};
+          const initialNode = nodeInitial.id;
+          let  previousOutput = {[nodeInitial.id] : initialItemPerSec * 60};
+          let  outputIterator = {[nodeInitial.id] : initialItemPerSec * 60};
+          let iteratorTemp = initialItemPerSec * 60;
+
+          while(i < 999) {
             const visitedNodes = new Set();
             const stack = [nodeInitial];
             visitedNodes.add(nodeInitial.id);
@@ -445,12 +468,11 @@ export const analyzeGraph = function() {
             while(stack.length) {
               const node = stack.pop();
 
-
-              const theseResources = resources[node.id];
+              let theseResources = resources[node.id];
 
 
               if (node.machine.name === 'Logistic' && node.instance.name === 'Splitter') {
-
+                theseResources = theseResources / 2;
               } else if (node.machine.name === 'Logistic' && node.instance.name === 'Merger') {
 
               } else if (node.machine.name === 'Container' ) {
@@ -470,11 +492,9 @@ export const analyzeGraph = function() {
                 const link = links[0];
                 const limitedSpeed = link.instance.speed;
 
-                console.log('Link:', node.id, outNode.id, limitedSpeed);
-
                 resources[outNode.id] = resources[outNode.id] || 0;
 
-                resources[outNode.id] += (theseResources * 60);
+                resources[outNode.id] += (theseResources);
 
 
                 // const totalItemThroughput = Object.keys(myResources).map(key  => myResources[key]).reduce((a, b = 0) => a + b, 0);
@@ -496,16 +516,48 @@ export const analyzeGraph = function() {
               });
 
             }
-            i++;
+
+            const delta = resources[initialNode] - previousOutput[initialNode];
+
+            if (i === 0) {
+              Object.keys(resources).forEach(key => {
+                outputIterator[key] = resources[key];
+              });
+
+              outputIterator[nodeInitial.id] = initialItemPerSec * 60;
+            }
+
+            if (i < 0) {
+              // break condition!
+              return resources;
+            } else if (!nodeGroupTarget.length || delta > previousOutput || Math.round(delta * 100) === 0) {
+              resources = {[initialNode]: Math.round((iteratorTemp + delta) * 100) / 100};
+              i = -Infinity;
+            } else {
+
+              iteratorTemp += delta;
+
+              Object.keys(resources).forEach(key => {
+                previousOutput[key] = resources[key] - previousOutput[key];
+              });
+
+              Object.keys(resources).forEach(key => {
+                outputIterator[key] = outputIterator[key] + previousOutput[key];
+              });
+              console.error(outputIterator);
+              resources = {[initialNode]: delta};
+              i++;
+            }
           }
-          console.log(resources);
         };
 
         nodeGroupSource.forEach((node) => {
           const providedThroughputFromOthers = JSON.parse(JSON.stringify(providedThroughput[node.id] || []));
 
           providedThroughputFromOthers.forEach(provide => {
-            visit(node, provide, loopedNodes);
+            const resultantResource = visit(node, provide, loopedNodes);
+            const item = provide.throughput.item;
+            console.log(resultantResource, provide);
           });
 
         });
