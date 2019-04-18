@@ -19,8 +19,8 @@ export const add_node = (d, t) => {
   const width = bodyEl.clientWidth;
   const height = bodyEl.clientHeight;
 
-  viewCenter[0] = (-1)*zoomData.translateX + (0.5) * ( width/zoomData.scaleX );
-  viewCenter[1] = (-1)*zoomData.translateY + (0.5) * ( height/zoomData.scaleY );
+  viewCenter[0] = (0.5) * ( width/zoomData.scaleX ) - (zoomData.translateX / zoomData.scaleX);
+  viewCenter[1] =  (0.5) * ( height/zoomData.scaleY ) - (zoomData.translateY / zoomData.scaleY);
 
   d.id = d.id || t.id++;
   d.x = d.x || 0;
@@ -28,6 +28,7 @@ export const add_node = (d, t) => {
 
   d.fx = viewCenter[0];
   d.fy = viewCenter[1];
+  console.error(viewCenter);
 
   d.overclock = d.overclock || 100;
   console.log(JSON.stringify(d));
