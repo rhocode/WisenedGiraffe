@@ -605,7 +605,8 @@ export const analyzeGraph = function() {
                   //SET provide.
                   // throughput.maxItemsPerSecLimiter = Math.min(limitedItemPerSecByBelt, maxItemsPerSecLimiter);
                   //
-                  // throughput.calculatedItemPerSecond = Math.min(itemPerSecBeforeBeltLimiting, throughput.maxItemsPerSecLimiter);
+                  // throughput.calculatedItemPerSecond = Math.min(itemPerSecBeforeBeltLimiting, throughput.maxItemsPerSecLimiter); ->> THIS IS SUPER IMPORTANT
+                  // SINCE IT DETERMINES DOWNSTREAMS!!
                   // MAXIMIZE the edge output so it is exacly totalItems big!!!!
                   //check edge limits
                   //then set the  providedThroughput[target]
