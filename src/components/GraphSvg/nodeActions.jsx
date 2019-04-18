@@ -412,6 +412,8 @@ export const insertComponents = function(parentElement) {
 
       if (item.actual === item.max) {
         definedColor = 'white';
+      } else if (item.actual < item.max) {
+        definedColor = 'gold';
       }
 
       const icon = d.itemIconLookup[key];
