@@ -370,6 +370,7 @@ export const insertComponents = function(parentElement) {
       .attr('x', -5).attr('y', -37)
       .attr('font-size', 30)
       .text(function(d) {
+        console.log(d.instance.name, d.itemsPerMinute);
         let combinedSum = 0;
         Object.keys(d.itemsPerMinute || {}).forEach(item => {
           combinedSum += d.itemsPerMinute[item];
