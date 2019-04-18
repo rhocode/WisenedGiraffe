@@ -612,7 +612,6 @@ export const analyzeGraph = function() {
                     provide.calculatedItemPerSecond = Math.min(provide.calculatedItemPerSecond, linkSpeed / 60);
                     provide.maxItemsPerSecLimiter = provide.calculatedItemPerSecond;
 
-
                     const throughput = provide;
                     const q = throughput.throughput.quantity;
                     const t = throughput.throughput.time;
@@ -630,48 +629,13 @@ export const analyzeGraph = function() {
                     providedThroughput[target].push(throughput);
                   });
                 });
-
-
-
-
-                provided.forEach(provide => {
-                  const item = provide.throughput.item;
-                  provideByItem[item] = provideByItem[item] || [];
-                  provideByItem[item].push(provide);
-
-                  // combine provides by id?
-
-
-                  //SET provide.
-                  // throughput.maxItemsPerSecLimiter = Math.min(limitedItemPerSecByBelt, maxItemsPerSecLimiter);
-                  //
-                  // throughput.calculatedItemPerSecond = Math.min(itemPerSecBeforeBeltLimiting, throughput.maxItemsPerSecLimiter); ->> THIS IS SUPER IMPORTANT
-                  // SINCE IT DETERMINES DOWNSTREAMS!!
-                  // MAXIMIZE the edge output so it is exacly totalItems big!!!!
-                  //check edge limits
-                  //then set the  providedThroughput[target]
-                  //
-                });
-                // console.error(node.instance.name);
               });
 
             });
           });
 
         });
-
-
-        //========================
-
-
-        // push everything to edges as usual.
       }
-
-
-
-
-
-
     };
 
     propagateNodeToEdgesRevised(thisNodeInflated, outgoingInflated, node, outgoing);
@@ -700,8 +664,8 @@ export const initSimulation = () => {
     .force('collision', d3.forceCollide().radius(function (d) {
       return 120;
     }))
-    .force('xAxis', d3.forceX().strength(0.1).x(function(d){return width/2;}))
-    .force('yAxis', d3.forceY().strength(0.5).y(function(d){return height/2;}));
+    .force('xAxis', d3.forceX().strength(0.1).x(function(d){return d.initialX || (width/2);}))
+    .force('yAxis', d3.forceY().strength(0.5).y(function(d){return d.initialY || (height/2);}));
 };
 
 export const updateGraph = function (simulation, graphNodesGroup, graphLinksGroup) {

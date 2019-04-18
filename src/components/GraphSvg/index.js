@@ -31,6 +31,7 @@ class GraphSvg extends Component {
 
   addNode(nodeData) {
     add_node(nodeData, this);
+
     console.log(JSON.stringify(nodeData));
   }
 

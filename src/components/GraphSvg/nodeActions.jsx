@@ -4,10 +4,31 @@ import * as d3 from 'd3';
 import {deselect_path_and_nodes} from './graphActions';
 import {spliceUtil} from './util';
 
+import { parseSvg } from 'd3-interpolate/src/transform/parse';
+
 export const add_node = (d, t) => {
+
+  const zoomData = parseSvg(d3.select('#svgGroup').attr('transform'));
+  console.error(zoomData)
+
+  var viewCenter = [];
+
+
+  const bodyEl = document.getElementById('mainRender');
+
+  const width = bodyEl.clientWidth;
+  const height = bodyEl.clientHeight;
+
+  viewCenter[0] = (-1)*zoomData.translateX + (0.5) * ( width/zoomData.scaleX );
+  viewCenter[1] = (-1)*zoomData.translateY + (0.5) * ( height/zoomData.scaleY );
+
   d.id = d.id || t.id++;
   d.x = d.x || 0;
   d.y = d.y || 0;
+
+  d.fx = viewCenter[0];
+  d.fy = viewCenter[1];
+
   d.overclock = d.overclock || 100;
   console.log(JSON.stringify(d));
   t.graphData.nodes.push(d);
@@ -200,7 +221,7 @@ export const updateComponents = function(elementsToUpdate) {
       );
 
       if (fetchRemainingIn.length > 1)
-        console.log(fetchRemainingIn)
+        console.log(fetchRemainingIn);
 
       const outputtedItems = new Set();
 
@@ -421,7 +442,7 @@ export const insertComponents = function(parentElement) {
       nodeThis.append('svg:image')
         .classed(constants.nodeLimitingThroughputText, true)
         .attr('xlink:href', function (d) {
-          return icon
+          return icon;
         })
         .attr('x', -49 + 35).attr('y', 59 + (index * 20))
         .attr('height', 20)
