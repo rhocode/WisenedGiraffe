@@ -192,6 +192,9 @@ export const analyzeGraph = function() {
 
             //TODO: change the 3 to the actual number of links out
             provide.maxItemsPerSecLimiter = provide.calculatedItemPerSecond / ((this.nodeOut[nodeGroupSource[0].id] || []).length || 1);
+
+            provide.reconstructionMultiplier = ((this.nodeOut[nodeGroupSource[0].id] || []).length || 1);
+
             const i = provide.throughput.item;
             providedSet.add(i);
             const itemPerSec = provide.calculatedItemPerSecond;
@@ -297,11 +300,7 @@ export const analyzeGraph = function() {
             }
 
             const resourceThroughputNeeded = maxThroughput * (quantity / throughput.quantity);
-
-            // console.log("Debug: Producing ", node.data.recipe.quantity, "of", node.data.recipe.item.name, "from", quantity, "of", item)
-            // console.log("Looking like we will need ", throughput.time, throughput.quantity);
             const calculatedThroughput = maxThroughput * (Math.min(resourceThroughputNeeded, providedQuantity) / resourceThroughputNeeded);
-
             const maxThroughputPerItem = resourceThroughputNeeded;
 
             node.itemThroughPut = node.itemThroughPut || {};
@@ -312,7 +311,6 @@ export const analyzeGraph = function() {
             const efficiency = calculatedThroughput / maxThroughput;
 
             efficiencies.push(Math.min(1, efficiency));
-
           });
 
           if (missing.size > 0) {
@@ -329,25 +327,142 @@ export const analyzeGraph = function() {
           });
         }
 
+        let totalItemThroughput = 0;
+        let totalLinkThroughput = 0;
+        if ((derivedGraphOutgoing[origin] || new Set()).size > 1) {
+          (derivedGraphOutgoing[origin] || []).forEach(outgoingNode => {
+            const sources = nodeGroupSource.map(node => node.id);
+            const targets = superNodeGraphLookupInflated[outgoingNode].map(node => node.id);
+
+            sources.forEach(source => {
+              targets.forEach(target => {
+                const link = this.graphData.links.filter(link => link.source.id === source && link.target.id === target);
+                let foundLink = null;
+                if (link && link.length === 1) {
+                  foundLink = link[0];
+                } else if (link && link.length > 1) {
+                  throw new Error('Too many links found!!!');
+                } else {
+                  return;
+                }
+
+                const localItemThroughput = nodeGroupSourceThroughput.map(throughput => {
+
+                  const q = throughput.throughput.quantity;
+                  const t = throughput.throughput.time;
+                  const e = throughput.efficiency;
+                  const o = throughput.throughput.overclock;
+                  const s = throughput.throughput.speed;
+                  const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
+                  return Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
+                }).reduce((a, b = 0) => a + b, 0);
+                totalItemThroughput += localItemThroughput;
+                totalLinkThroughput += foundLink.instance.speed;
+              })
+            });
+
+            console.error(totalItemThroughput);
+          });
+
+          if (totalItemThroughput > totalLinkThroughput)
+
+          (derivedGraphOutgoing[origin] || []).forEach(outgoingNode => {
+            const sources = nodeGroupSource.map(node => node.id);
+            const targets = superNodeGraphLookupInflated[outgoingNode].map(node => node.id);
+
+            sources.forEach(source => {
+              targets.forEach(target => {
+                const link = this.graphData.links.filter(link => link.source.id === source && link.target.id === target);
+                let foundLink = null;
+                if (link && link.length === 1) {
+                  foundLink = link[0];
+                } else if (link && link.length > 1) {
+                  throw new Error('Too many links found!!!');
+                } else {
+                  return;
+                }
+
+                const localItemThroughput = nodeGroupSourceThroughput.map(throughput => {
+
+                  const q = throughput.throughput.quantity;
+                  const t = throughput.throughput.time;
+                  const e = throughput.efficiency;
+                  const o = throughput.throughput.overclock;
+                  const s = throughput.throughput.speed;
+                  const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
+                  return Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
+                }).reduce((a, b = 0) => a + b, 0);
+                totalItemThroughput += localItemThroughput;
+                totalLinkThroughput += foundLink.instance.speed;
+              })
+            });
+          });
+
+
+        }
+
+
         (derivedGraphOutgoing[origin] || []).forEach(outgoingNode => {
           const sources = nodeGroupSource.map(node => node.id);
           const targets = superNodeGraphLookupInflated[outgoingNode].map(node => node.id);
 
-          const totalItemThroughput = nodeGroupSourceThroughput.map(throughput => {
-            const q = throughput.throughput.quantity;
-            const t = throughput.throughput.time;
-            const e = throughput.efficiency;
-            const o = throughput.throughput.overclock;
-            const s = throughput.throughput.speed;
-
-            //check propagated limited
-            const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
-            return Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
-          }).reduce((a, b = 0) => a + b, 0);
+            const totalItemThroughput = nodeGroupSourceThroughput.map(throughput => {
+              const q = throughput.throughput.quantity;
+              const t = throughput.throughput.time;
+              const e = throughput.efficiency;
+              const o = throughput.throughput.overclock;
+              const s = throughput.throughput.speed;
+              const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
+              return Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
+            }).reduce((a, b = 0) => a + b, 0);
 
           sources.forEach(source => {
-            targets.forEach(target => {
+            // console.log("AAAAA, SOURCE", targets)
+            // const speedList = {};
+            // let outputFillType = 0;
+            //
+            // if (targets.length > 1) {
+            //   // special handling when it's a splitter!
+            //   targets.sort((t1, t2) => {
+            //     const link1 = this.graphData.links.filter(link => link.source.id === source && link.target.id === t1)[0];
+            //     const link2 = this.graphData.links.filter(link => link.source.id === source && link.target.id === t2)[0];
+            //     //leap of faith... don't die please!!
+            //     return link1.instance.speed - link2.instance.speed;;
+            //   });
+            //
+            //   const outputLinkSum = targets.map(t => {
+            //     const tmp = this.graphData.links.filter(link => link.source.id === source && link.target.id === t)[0]
+            //     speedList[tmp.instance.speed] = speedList[tmp.instance.speed] || 0;
+            //     speedList[tmp.instance.speed]++;
+            //     return tmp.instance.speed;
+            //   }).reduce((a, b = 0) => a + b, 0);
+            //
+            //   const outputNodeSum = nodeGroupSourceThroughput.map(throughput => {
+            //     const q = throughput.throughput.quantity;
+            //     const t = throughput.throughput.time;
+            //     const e = throughput.efficiency;
+            //     const o = throughput.throughput.overclock;
+            //     const s = throughput.throughput.speed;
+            //     const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
+            //     return Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
+            //   }).reduce((a, b = 0) => a + b, 0);
+            //
+            //   outputFillType = 1;
+            //   if (outputLinkSum > outputNodeSum) {
+            //     // fill the shit sequentially :(
+            //     outputFillType = 2;
+            //   }
+            //
+            //   let remaining = outputNodeSum;
+            //
+            //   console.error(remaining);
+            //
+            //   targets.forEach(target => {
+            //
+            //   })
+            // }
 
+            targets.forEach(target => {
               const link = this.graphData.links.filter(link => link.source.id === source && link.target.id === target);
 
               let foundLink = null;
@@ -359,11 +474,12 @@ export const analyzeGraph = function() {
                 return;
               }
 
+              console.log(source, target, nodeGroupSourceThroughput);
+
               providedThroughput[target] = providedThroughput[target] || [];
 
               // Now totalItemPerSec contains the actual throughput of items
               const limitedSpeed = foundLink.instance.speed;
-
 
               nodeGroupSourceThroughput.forEach(itemRaw => {
 
@@ -379,18 +495,11 @@ export const analyzeGraph = function() {
                 //check propagated limited
                 const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
 
-
                 let itemPerSecBeforeBeltLimiting = Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
-
                 // need to do some weird math to constrain the items/psec to a PORTION of the belt limited
                 const limitedItemPerSecByBelt = limitedSpeed / 60 * (itemPerSecBeforeBeltLimiting/totalItemThroughput);
 
-
-                let beltMaxForThisEntry = limitedSpeed;
-
-                if (totalItemThroughput * 60 > limitedSpeed) {
-                  beltMaxForThisEntry = limitedItemPerSecByBelt * 60;
-                }
+                let beltMaxForThisEntry = limitedItemPerSecByBelt * 60;
 
                 throughput.maxItemsPerSecLimiter = Math.min(limitedItemPerSecByBelt, maxItemsPerSecLimiter);
 
@@ -398,7 +507,7 @@ export const analyzeGraph = function() {
 
                 foundLink.itemThroughPut = foundLink.itemThroughPut || {};
                 foundLink.itemThroughPut[i] = foundLink.itemThroughPut[i] || {max: 0, actual: 0};
-                foundLink.itemThroughPut[i].max =  beltMaxForThisEntry;
+                foundLink.itemThroughPut[i].max +=  beltMaxForThisEntry;
                 foundLink.itemThroughPut[i].actual += itemPerSecBeforeBeltLimiting * 60;
 
                 providedThroughput[target].push(throughput);
@@ -559,6 +668,9 @@ export const analyzeGraph = function() {
           const targets = superNodeGraphLookupInflated[outgoingNode].map(node => node.id);
 
           sources.forEach(source => {
+
+
+
             targets.forEach(target => {
 
               const link = this.graphData.links.filter(link => link.source.id === source && link.target.id === target);
