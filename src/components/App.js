@@ -356,7 +356,7 @@ class App extends Component {
             <div className={classes.grow}></div>
             <Button color="inherit"  disabled>
                 <OfflineBoltIcon/>
-            <div className={classes.label}>Analyze</div>
+            <div className={classes.label}>Optimize</div>
             </Button>
             <Button color="inherit" onClick={() => t.graphSvg.analyze()}>
               <SettingsInputComponentIcon/>
