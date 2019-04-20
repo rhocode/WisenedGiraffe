@@ -14,6 +14,8 @@ export const drag_start = function (d, simulation, graphSvg) {
   }
 };
 
+
+
 //make sure you can't drag the circle outside the box
 export const drag_drag = (d, graphSvg) => {
   if (graphSvg.state && graphSvg.state.shiftHeld) {
@@ -25,6 +27,10 @@ export const drag_drag = (d, graphSvg) => {
     d.fy = d3.event.y;
     graphSvg.setState({wasMoved: true});
   }
+};
+
+const round_up = function(x,factor) {
+  return Math.round(x/factor) * factor;
 };
 
 export const drag_end = (d, graphSvg, simulation) => {
@@ -39,6 +45,13 @@ export const drag_end = (d, graphSvg, simulation) => {
     if (graphSvg.state && graphSvg.state.wasMoved) {
       d.x = d.fx;
       d.y = d.fy;
+
+      if (graphSvg.state.snapToGrid) {
+        if (d.fx) {
+          d.fx = round_up(d.fx, 100);
+          d.fy = round_up(d.fy, 100);
+        }
+      }
     } else if (graphSvg.state && !graphSvg.state.wasFixed) {
       d.fx = null;
       d.fy = null;

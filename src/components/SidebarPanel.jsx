@@ -16,6 +16,8 @@ import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import Chip from '@material-ui/core/Chip';
 import Tooltip from '@material-ui/core/Tooltip';
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import {useExperimentalFeature} from "./GraphSvg/util";
 
 const styles = theme => ({
   root : {
@@ -145,7 +147,21 @@ class SidebarPanel extends React.Component {
             {/*})}*/}
           {/*</Select>*/}
         {/*</FormControl>*/}
-
+        {
+          useExperimentalFeature('stg') ?
+              <FormControlLabel
+                  control={
+                    <Checkbox
+                        checked={parentState.graphSvg && parentState.graphSvg.state.snapToGrid}
+                        onChange={() => {
+                          parentState.graphSvg.setState({snapToGrid: !parentState.graphSvg.state.snapToGrid})
+                        }}
+                        value="snapToGrid"
+                    />
+                  }
+                  label="Snap To Grid"
+              /> : null
+        }
         <Button className={classes.button} fullWidth onClick={() => {
           parentState.graphSvg.jiggle();
         }}>
