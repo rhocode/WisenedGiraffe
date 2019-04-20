@@ -7,42 +7,42 @@ import Button from '@material-ui/core/Button';
 import {withStyles} from '@material-ui/core';
 
 const styles = theme => ({
-  root: {},
-  modal: {
-    position: 'absolute',
-    width: theme.spacing.unit * 100,
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing.unit * 4,
-    outline: 'none',
-    margin: 'auto'
-  },
+    root: {},
+    modal: {
+        position: 'absolute',
+        width: theme.spacing.unit * 100,
+        backgroundColor: theme.palette.background.paper,
+        boxShadow: theme.shadows[5],
+        padding: theme.spacing.unit * 4,
+        outline: 'none',
+        margin: 'auto'
+    },
 });
 
 class PopupDialog extends React.Component {
 
-  constructor(props) {
-    super(props);
-  }
+    constructor(props) {
+        super(props);
+    }
 
-  render() {
-    const {classes, title, contents, open, handleModalClose, children} = this.props;
-    return (
-      <Dialog
-        open={Boolean(open)}
-        onClose={handleModalClose}
-        id='modal'
-      >
-        <DialogTitle>{title}</DialogTitle>
-        <DialogContent>
-          {children}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleModalClose} color='secondary'>Close</Button>
-        </DialogActions>
-      </Dialog>
-    );
-  }
+    render() {
+        const {classes, title, contents, open, handleModalClose, children} = this.props;
+        return (
+            <Dialog
+                open={Boolean(open)}
+                onClose={handleModalClose}
+                id='modal'
+            >
+                <DialogTitle>{title}</DialogTitle>
+                <DialogContent>
+                    {children}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleModalClose} color='secondary'>Close</Button>
+                </DialogActions>
+            </Dialog>
+        );
+    }
 }
 
 export default withStyles(styles)(PopupDialog);
