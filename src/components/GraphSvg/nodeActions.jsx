@@ -120,11 +120,11 @@ const overClockCalculation = (d, percentage_metric, offset, endOffsetRaw) => {
 
 
 export const addEfficiencyArc = (parent, percentage_metric, offset, endOffset) => {
-  parent.append('path')
+  parent.append('path').filter(function(d) { return !['Container', 'Logistic'].includes(d.machine.name) })
     .attr('class', constants.overclockedArcClass)
     .attr('fill', 'none')
-    .attr('stroke-width', 8)
-    .attr('stroke', 'darkslategray');
+    .attr('stroke-width', 8);
+
   editEfficiencyArc(percentage_metric, offset, endOffset);
 };
 
@@ -132,6 +132,21 @@ export const editEfficiencyArc = (percentage_metric, offset, endOffset) => {
   d3.selectAll('.' + constants.overclockedArcClass)
     .attr('d', function (d) {
       return overClockCalculation(d, percentage_metric, offset, endOffset);
+    })
+    .attr('stroke', function(d) {
+        const p = d[percentage_metric] || 0;
+        const r1 = 255;
+        const g1 = 0;
+        const b1 = 0;
+
+        const r2 = 50;
+        const g2 = 205;
+        const b2 = 50;
+        const r = Math.round((1.0-p) * r1 + p * r2 + 0.5);
+        const g = Math.round((1.0-p) * g1 + p * g2 + 0.5);
+        const b = Math.round((1.0-p) * b1 + p * b2 + 0.5);
+
+        return 'rgb(' + r + ',' + g + ',' + b + ')';
     });
 };
 
@@ -188,7 +203,8 @@ export const updateOverclock = function(textElement) {
 
 export const updateNodeTier = function(textElement) {
   textElement.text(function (d) {
-    return d.instance.machine_version.representation + (d.id ? '(' + d.id + ')' : '' );
+    return d.instance.machine_version.representation;
+        // + (d.id ? '(' + d.id + ')' : '' );
   });
 };
 
@@ -522,7 +538,9 @@ export const insertNodeTier = (gEl) => {
 
 export const insertNodeOverclock = (gEl) => {
   // const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', '-' + (nwords - 1) * 7.5);
-  const el = gEl.append('g').attr('text-anchor', 'middle').attr('dy', 0);
+  const el = gEl
+      .filter(function(d) { return !['Container', 'Logistic'].includes(d.machine.name) })
+      .append('g').attr('text-anchor', 'middle').attr('dy', 0);
   el.append('circle').attr('r', 17).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
 
   const tspan = el.append('text').attr('fill', 'black')

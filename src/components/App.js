@@ -11,7 +11,7 @@ import Divider from '@material-ui/core/Divider';
 import InfoIcon from '@material-ui/icons/Info';
 
 import WarningIcon from '@material-ui/icons/Warning';
-
+import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
 
 import Button from '@material-ui/core/Button';
@@ -354,10 +354,10 @@ class App extends Component {
               src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
               title="logo"/>
             <div className={classes.grow}></div>
-            {/*<Button color="inherit" >*/}
-            {/*<OfflineBoltIcon/>*/}
-            {/*<div className={classes.label}>Analyze</div>*/}
-            {/*</Button>*/}
+            <Button color="inherit"  disabled>
+                <OfflineBoltIcon/>
+            <div className={classes.label}>Analyze</div>
+            </Button>
             <Button color="inherit" onClick={() => t.graphSvg.analyze()}>
               <SettingsInputComponentIcon/>
               <div className={classes.label}>Analyze</div>
@@ -380,7 +380,11 @@ class App extends Component {
               <li><Typography variant="body1">Use mouse wheel to control overclock (black text in the white circle)</Typography></li>
             </ul>
             <Typography variant="h5">Saving/Loading</Typography>
-            <Typography variant="body1">TODO</Typography>
+            <Typography variant="body1">You can share codes using the Share top left button, and load using the Load top left button</Typography>
+            <Typography variant="h5">Legend</Typography>
+            <Typography variant="body1"><span style={{'color': 'gold'}}>Orange</span> numbers means machine wastes time doing nothing</Typography>
+            <Typography variant="body1"><span style={{'color': 'LightCoral'}}>Red</span> numbers means machine isn't processing fast enough</Typography>
+            <Typography variant="body1"><span style={{'color': 'Blue'}}>Blue</span> numbers means the capacity has been overridden to be Infinite in order to speed up calculation</Typography>
           </React.Fragment>
         }/>
         {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ? <SelectorPanel label='Tier' graphSvg={this.graphSvg} selected={this.state.selectedNode || this.state.selectedPath} /> : null}

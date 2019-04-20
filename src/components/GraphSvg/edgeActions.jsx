@@ -365,6 +365,10 @@ export const insertEdgeLabel = function (elem) {
 
       let definedColor = 'LightCoral';
 
+      if (d.forceOverwritable) {
+        definedColor = 'LightBlue';
+      }
+
       if (item.actual <= item.max) {
         definedColor = 'white';
       }
