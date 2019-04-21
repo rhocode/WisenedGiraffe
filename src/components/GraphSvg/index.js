@@ -32,6 +32,10 @@ class GraphSvg extends Component {
         };
     }
 
+    static inflateGraphData(data) {
+        return parse(pako.inflate(Base64.atob(data), {to: 'string'}));
+    }
+
     addNode(nodeData) {
         add_node(nodeData, this);
 
@@ -226,10 +230,6 @@ class GraphSvg extends Component {
     uploadDataWithResponse() {
         const data = {data: this.compressGraphData()};
         return saveHash(data);
-    }
-
-    static inflateGraphData(data) {
-        return parse(pako.inflate(Base64.atob(data), {to: 'string'}));
     }
 
     analyze = () => {

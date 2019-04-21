@@ -1,4 +1,4 @@
-import {parse, stringify} from 'flatted/esm';
+import {parse} from 'flatted/esm';
 import pako from 'pako';
 import Base64 from 'Base64';
 
@@ -17,9 +17,9 @@ export const saveHash = (data) => {
                 "Content-Type": "application/json; charset=utf-8",
             },
             body: JSON.stringify(data), // body data type must match "Content-Type" header
-        }).then(response => response.json()).then(function(response) {
+        }).then(response => response.json()).then(function (response) {
             if (response.uri) {
-                const resp = response.uri.replace('https:\/\/api.myjson.com/bins//','');
+                const resp = response.uri.replace('https:\/\/api.myjson.com/bins//', '');
                 console.log(response.uri);
                 console.log(resp);
                 console.log(encodeURIComponent(Base64.btoa(resp)));
@@ -27,10 +27,10 @@ export const saveHash = (data) => {
             }
             throw new Error("Invalid save");
         })
-        .catch(function(error) {
-            console.log('Fetch error:', error.message);
-            reject(error);
-        });
+            .catch(function (error) {
+                console.log('Fetch error:', error.message);
+                reject(error);
+            });
     })
 };
 
@@ -49,13 +49,13 @@ export const loadHash = () => {
 
             return fetch('https://api.myjson.com/bins//' + Base64.atob(decodeURIComponent(location)), {
                 method: "GET"
-            }).then(response => response.json()).then(function(responseRaw) {
+            }).then(response => response.json()).then(function (responseRaw) {
                 resolve(inflate(responseRaw.data));
             })
-            .catch(function(error) {
-                console.log('Fetch error:', error.message);
-                resolve(inflate(data));
-            });
+                .catch(function (error) {
+                    console.log('Fetch error:', error.message);
+                    resolve(inflate(data));
+                });
         } else {
             resolve(inflate(data));
         }
@@ -68,7 +68,7 @@ export const rebuildQueryParams = () => {
         vars[key] = value;
     });
     if (Object.keys(vars).length) {
-        return '?' + Object.keys(vars).map(k => k+ '=' + vars[k]).join('&');
+        return '?' + Object.keys(vars).map(k => k + '=' + vars[k]).join('&');
     }
 
     return '';

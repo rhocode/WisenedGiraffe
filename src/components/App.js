@@ -412,7 +412,7 @@ class App extends Component {
                     </React.Fragment>
                 }/>
                 {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ?
-                    <SelectorPanel label='Tier' graphSvg={this.graphSvg}
+                    <SelectorPanel label='Options' graphSvg={this.graphSvg}
                                    selected={this.state.selectedNode || this.state.selectedPath}/> : null}
                 <Drawer
                     className={classes.drawer}

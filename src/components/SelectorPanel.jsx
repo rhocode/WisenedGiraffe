@@ -104,12 +104,12 @@ class SelectorPanel extends React.Component {
         return (
             <Paper className={classes.paper}>
                 <Typography variant='h5'>{label}</Typography>
-                <IconButton color="primary" className={classes.button} onClick={this.upgrade}>
-                    <ArrowUpwardIcon/>
-                </IconButton>
-                {this.props.selected.instance.name}
                 <IconButton color="secondary" className={classes.button} onClick={this.downgrade}>
                     <ArrowDownwardIcon/>
+                </IconButton>
+                {this.props.selected.instance.name}
+                <IconButton color="primary" className={classes.button} onClick={this.upgrade}>
+                    <ArrowUpwardIcon/>
                 </IconButton>
             </Paper>
         );
