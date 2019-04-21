@@ -61,7 +61,7 @@ class LoadButton extends React.Component {
                             <Button color="inherit" className={classes.inlineDialogButton} onClick={
                                 () => new Promise((resolve, reject) => {
                                     try {
-                                        const data = this.props.t.graphSvg.inflateGraphData(this.state.inputValue);
+                                        const data = GraphSvg.inflateGraphData(this.state.inputValue);
 
                                         this.props.t.graphSvg.loadGraphData(data);
                                         resolve(true);

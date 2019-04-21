@@ -6,6 +6,7 @@ import {withStyles} from '@material-ui/core';
 import ShareIcon from '@material-ui/icons/Share';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import TextField from '@material-ui/core/TextField';
+import {rebuildQueryParams} from "./GraphSvg/util";
 
 const styles = theme => ({
     label: {
@@ -31,19 +32,29 @@ const styles = theme => ({
 class ShareButton extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {modalOpen: false};
+        this.state = {modalOpen: false, value: true};
     }
 
     handleModalClose = () => this.setState({modalOpen: false});
     handleModalOpen = () => this.setState({modalOpen: true});
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (!prevState.modalOpen && this.state.modalOpen) {
+            this.setState({value: 'Loading...'}, () => {
+                this.props.t.graphSvg.uploadDataWithResponse().then(resp => {
+                    const port = window.location.port ? ':' + window.location.port : ''
+                    const url = window.location.protocol +  window.location.hostname + port + window.location.pathname
+                        + '#' +  resp + rebuildQueryParams();
+                    this.setState({value: url});
+                })
+            })
+        }
+    }
 
     render() {
-        const {classes, label, title, children, onClick} = this.props;
-        let value = '';
-        if (this.props.t && this.props.t.graphSvg) {
-            value = this.props.t.graphSvg.compressGraphData();
-        }
+        const {classes, onClick} = this.props;
+        let value = this.state.value;
+
         return (
             <React.Fragment>
                 <Button color='inherit' onClick={onClick || this.handleModalOpen}>
@@ -68,13 +79,6 @@ class ShareButton extends React.Component {
                                         }, 3000);
                                     });
                                 })}
-
-                                //     setTimeout(() => {
-                                //
-                                //     }, 200);
-                                //
-                                //   }
-                                // }
                             >
                                 <FileCopyIcon/>
                                 <div className={classes.label}>Copy</div>
