@@ -6,7 +6,7 @@ import {withStyles} from '@material-ui/core';
 import ShareIcon from '@material-ui/icons/Share';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import TextField from '@material-ui/core/TextField';
-import {rebuildQueryParams} from "./GraphSvg/util";
+import {rebuildQueryParams, useExperimentalFeature} from "./GraphSvg/util";
 
 const styles = theme => ({
     label: {
@@ -84,9 +84,9 @@ class ShareButton extends React.Component {
                                 <div className={classes.label}>Copy</div>
                             </Button>
                         </div>
-                        <Button color="inherit" className={classes.dialogButton} fullWidth>
+                        {useExperimentalFeature('sti' ? <Button color="inherit" className={classes.dialogButton} fullWidth>
                             <div className={classes.label}>Generate Image</div>
-                        </Button>
+                        </Button> : null)}
                         <div className={classes.statusMessage}>
                             {this.state.statusMessage}
                         </div>

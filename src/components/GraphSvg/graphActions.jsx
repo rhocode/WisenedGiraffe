@@ -1072,6 +1072,39 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     // }));
     callbacks.forEach(callback => callback());
     simulation.alphaTarget(0.3).restart();
+
+    console.error("it's triggered")
+
+
+
+
+//     //get svg element.
+//     var svg = document.getElementById("mainRender");
+//
+// //get svg source.
+//     var serializer = new XMLSerializer();
+//     var source = serializer.serializeToString(svg);
+//
+// //add name spaces.
+//     if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+//         source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+//     }
+//     if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
+//         source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+//     }
+//
+// //add xml declaration
+//     source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+//
+// //convert svg source to URI data scheme.
+//     var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+//
+// //set url value to a element's href attribute.
+//
+//     var download = document.createElement('a');
+//     download.href = url;
+//     download.download = 'reddot.png';
+//     download.click();
 };
 
 export const deselect_path_and_nodes = function (t) {
