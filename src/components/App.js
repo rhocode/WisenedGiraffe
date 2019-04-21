@@ -30,7 +30,7 @@ import ClearButton from './ClearButton';
 import ShareButton from './ShareButton';
 import LoadButton from './LoadButton';
 import SelectorPanel from './SelectorPanel';
-import {loadHash, saveHash} from "./GraphSvg/util";
+import {loadHash, saveHash, useExperimentalFeature} from "./GraphSvg/util";
 // import * as d3 from 'd3';
 
 /* global d3 */
@@ -369,17 +369,17 @@ class App extends Component {
                         <img alt="wow so satis factory" className={classes.logo}
                              src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
                              title="logo"/>
-                        <div className={classes.grow}></div>
-                        <Button color="inherit" disabled>
+                        <div className={classes.grow} />
+                        {useExperimentalFeature('opt') ? <Button color="inherit">
                             <OfflineBoltIcon/>
                             <div className={classes.label}>Optimize</div>
-                        </Button>
+                        </Button> : null }
                         <Button color="inherit" onClick={() => t.graphSvg.analyze()}>
                             <SettingsInputComponentIcon/>
                             <div className={classes.label}>Analyze</div>
                         </Button>
                         <ShareButton t={t}/>
-                        <LoadButton t={t}/>
+                        {/*<LoadButton t={t}/>*/}
                         <ClearButton t={t}/>
                     </Toolbar>
                 </AppBar>
