@@ -456,7 +456,7 @@ export const analyzeGraph = function () {
 
                         foundLink.itemThroughPut = foundLink.itemThroughPut || {};
                         foundLink.itemThroughPut[i] = foundLink.itemThroughPut[i] || {max: 0, actual: 0};
-                        foundLink.itemThroughPut[i].max += (itemPerSecBeforeBeltLimiting / totalItemThroughput) * beltMaxForThisEntry;
+                        foundLink.itemThroughPut[i].max += (itemPerSecBeforeBeltLimiting / (totalItemThroughput || 1)) * beltMaxForThisEntry;
                         foundLink.itemThroughPut[i].actual += itemPerSecBeforeBeltLimiting * 60 * fraction;
 
                         providedThroughput[target].push(throughput);
@@ -583,7 +583,7 @@ export const analyzeGraph = function () {
                             const q = itemPerNode[node.id][item];
                             foundLink.itemThroughPut = foundLink.itemThroughPut || {};
                             foundLink.itemThroughPut[item] = foundLink.itemThroughPut[item] || {max: 0, actual: 0};
-                            foundLink.itemThroughPut[item].max = (q / totalItems * linkSpeed);
+                            foundLink.itemThroughPut[item].max = (q / (totalItems || 1) * linkSpeed);
                             foundLink.itemThroughPut[item].actual += (q / ((this.nodeOut[node.id] || []).length || 1));
                             foundLink.forceOverwritable = true;
                         });
