@@ -41,7 +41,7 @@ class InnerNestedSidebarButton extends React.Component {
         this.setState({anchorEl: event.currentTarget, selectedButton: event.currentTarget.id});
     };
 
-    handleClose = () => {
+    handleClose = (event) => {
         this.setState({
             anchorEl: null,
             lastTarget: this.state.anchorEl,
