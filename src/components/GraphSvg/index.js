@@ -248,12 +248,12 @@ class GraphSvg extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        // if (this.state.selectedPath !== prevState.selectedPath || this.state.selectedNode !== prevState.selectedNode) {
-        //     this.props.parentAccessor.setState({
-        //         selectedPath: this.state.selectedPath,
-        //         selectedNode: this.state.selectedNode
-        //     });
-        // }
+        if (this.state.selectedPath !== prevState.selectedPath || this.state.selectedNode !== prevState.selectedNode) {
+            this.props.parentAccessor.setState({
+                selectedPath: this.state.selectedPath,
+                selectedNode: this.state.selectedNode
+            });
+        }
     }
 
 

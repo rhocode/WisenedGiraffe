@@ -85,7 +85,7 @@ class SelectorPanel extends React.Component {
 
     debouncedUpdate = this.debounce(() => {
         this.update();
-    }, 20);
+    }, 200);
 
     upgrade = () => {
         const instance = this.props.selected.instance;
