@@ -456,11 +456,11 @@ class App extends Component {
                         </SidebarPopup>
                     </List>
                 </Drawer>
-                <main className={classes.content}>
+                <div id="svgParent" className={classes.content}>
                     {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
                         t.graphSvg = graphSvg;
                     }}/> : <div/>}
-                </main>
+                </div>
             </MuiThemeProvider>
         </div>;
     }

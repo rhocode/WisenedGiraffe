@@ -148,6 +148,9 @@ div.full-div {
   flex: 1;
 }
 
+#main {
+  display: block;  /* new */
+}
 #mainRender {
   flex: 1;
 }

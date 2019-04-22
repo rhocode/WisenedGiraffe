@@ -14,8 +14,8 @@ export const add_node = (d, t) => {
     var viewCenter = [];
 
 
-    const bodyEl = document.getElementById('mainRender');
-
+    const bodyEl = document.getElementById('svgParent');
+    console.log(bodyEl, "AAAAAA");
     const width = bodyEl.clientWidth;
     const height = bodyEl.clientHeight;
 

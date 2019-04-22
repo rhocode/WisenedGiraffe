@@ -859,8 +859,7 @@ export const analyzeGraph = function () {
     editEfficiencyArc('efficiency', 59, 322);
 };
 export const initSimulation = () => {
-    const bodyEl = document.getElementById('mainRender');
-
+    const bodyEl = document.getElementById('svgParent');
     const width = bodyEl.clientWidth;
     const height = bodyEl.clientHeight;
     return d3.forceSimulation()
@@ -1005,7 +1004,6 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
             return 'path-parent' + d.source.id + '-' + d.target.id;
         })
         .classed(constants.lineParentObjectClass, true);
-
 
     // apply styling to each selected line
     linkFullObject.append('path')
