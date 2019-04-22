@@ -414,6 +414,7 @@ class App extends Component {
                         machine isn't processing fast enough</Typography>
                     <Typography variant="body1"><span style={{'color': 'Blue'}}>Blue</span> numbers means the belt capacity was overridden (fix it ASAP!)</Typography>
                     <br/>
+                    {/*<Typography variant="body1">Special thanks to the following testers: GeekyMeerkat, Stay, HartWeed, safken, marcspc, Laugexd</Typography>*/}
                     <Typography variant="body1">You can revisit these instructions anytime by clicking on the bottom left.</Typography>
 
                 </FabPopup>
@@ -451,8 +452,8 @@ class App extends Component {
                         </SidebarPopup>
                         <SidebarPopup Icon={WarningIcon} label='Known Issues' title='Known Issues'>
                             <ul>
-                                <li>Resource nodes do not have purities displayed on the graph</li>
-                                <li>Cyclic graphs are disabled.</li>
+                                <li>Resource nodes do not have purities displayed on the graph.</li>
+                                <li>No option yet to hide belt and factory numbers.</li>
                             </ul>
                         </SidebarPopup>
                     </List>
