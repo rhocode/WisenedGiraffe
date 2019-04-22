@@ -460,7 +460,7 @@ class App extends Component {
                              src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satisgraphtory.png"
                              title="logo"/>
                         <div className={classes.grow} />
-                        {useExperimentalFeature('opt') ? <Button color="inherit">
+                        {useExperimentalFeature('opt') ? <Button color="inherit" onClick={() => t.graphSvg.optimize()}>
                             <OfflineBoltIcon/>
                             <div className={classes.label}>Optimize</div>
                         </Button> : null }
@@ -505,7 +505,8 @@ class App extends Component {
                     <Typography variant="body1">Revisit these instructions anytime by clicking on the <b>?</b> in the bottom right.</Typography>
 
                 </FabPopup>
-                {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ?
+                {(this.state.selectedNode && this.state.selectedNode.machine.name === 'Container') ||(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes
+                    && this.state.selectedPath.upgradeTypes.length > 1) ?
                     <SelectorPanel label='Options' graphSvg={this.graphSvg}
                                    overclock={this.state.selectedNode ? this.state.selectedNode.overclock : -1} selected={this.state.selectedNode || this.state.selectedPath}/> : null}
                 <Drawer

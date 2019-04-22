@@ -377,8 +377,10 @@ export const insertEdgeLabel = function (elem) {
             const icon = d.itemIconLookup[key];
 
             edgeThis.classed('link-has-problems', false);
+            edgeThis.classed('link-has-no-problems', true);
             if (linkClass) {
                 edgeThis.classed('link-has-problems', true);
+                edgeThis.classed('link-has-no-problems', false);
             }
 
             edgeThis.append('svg:image')

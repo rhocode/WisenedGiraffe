@@ -182,6 +182,10 @@ export const addNodeImage = (parent) => {
         .attr('width', 100);
 };
 
+export const updateAllOverclockCalculations = () => {
+    updateOverclock(d3.selectAll('.' + constants.overclockedTextClass));
+};
+
 export const wheelZoomCalculation = function (d, overclockOverride = null, selectedElem = null) {
     if (overclockOverride === null) {
         d3.event.stopImmediatePropagation();
@@ -208,14 +212,17 @@ export const wheelZoomCalculation = function (d, overclockOverride = null, selec
 
 export const updateOverclock = function (textElement) {
     textElement.text(function (d) {
-        return d.overclock;
+        return Math.round(d.overclock);
     });
 };
 
 export const updateNodeTier = function (textElement) {
     textElement.text(function (d) {
-        return d.instance.machine_version.representation;
-        // + (d.id ? '(' + d.id + ')' : '' );
+        let name = d.instance.machine_version.representation;
+        if (process.env.NODE_ENV && process.env.NODE_ENV !== 'production') {
+            name +=  (d.id ? '(' + d.id + ')' : '' );
+        }
+        return name;
     });
 };
 
@@ -471,8 +478,10 @@ export const insertComponents = function (parentElement) {
             const icon = d.itemIconLookup[key];
 
             nodeThis.classed('node-has-problems', false);
+            nodeThis.classed('node-has-no-problems', true);
             if (nodeClass) {
                 nodeThis.classed('node-has-problems', true);
+                nodeThis.classed('node-has-no-problems', false);
             }
 
             nodeThis.append('svg:image')

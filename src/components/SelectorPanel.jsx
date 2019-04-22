@@ -122,6 +122,7 @@ class SelectorPanel extends React.Component {
 
 
     render() {
+        console.log(this.props.selected)
         const {classes, label} = this.props;
         return (
             <Paper className={classes.paper}>
@@ -135,7 +136,7 @@ class SelectorPanel extends React.Component {
                     <ArrowUpwardIcon/>
                 </IconButton>
                 </Typography>
-                {this.props.overclock !== -1 ?
+                {this.props.overclock !== -1 && this.props.selected.machine.name !== 'Container' && this.props.selected.machine.name !== 'Logistic' ?
                     <React.Fragment>
                         <Typography id="label" className={classes.overclock} variant="body1">Overclock: {this.state.sliderValue}%</Typography>
                         <Slider

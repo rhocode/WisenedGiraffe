@@ -9,7 +9,7 @@ import {withStyles} from '@material-ui/core';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import {useExperimentalFeature} from "./GraphSvg/util";
-
+import * as d3 from 'd3'
 const styles = theme => ({
     root: {},
     paper: {
@@ -81,7 +81,10 @@ class SidebarPanel extends React.Component {
         this.state = {
             playerUnlock: this.props.playerUnlock.player_unlock,
             recipe: this.props.playerUnlock.recipe,
-            selectedDrives: []
+            selectedDrives: [],
+            // (props.parentState.graphSvg && props.parentState.graphSvg.state.snapToGrid) ||
+            checked: true,
+            showAllLines: true
         };
     }
 
@@ -102,6 +105,25 @@ class SidebarPanel extends React.Component {
         }
         this.setState({
             selectedDrives: value,
+        });
+    };
+
+    handleCheckboxChange = () => {
+        this.props.parentState.graphSvg.setState({snapToGrid: !this.props.parentState.graphSvg.state.snapToGrid},
+            () => {
+                this.setState({ checked: this.props.parentState.graphSvg &&
+                        this.props.parentState.graphSvg.state.snapToGrid})
+            })
+    };
+
+    showHideLines = () => {
+        this.setState({showAllLines: !this.state.showAllLines}, () => {
+            if (this.state.showAllLines) {
+                d3.selectAll('.link-has-no-problems').classed('hiddenGraphElement', false)
+            } else {
+                d3.selectAll('.link-has-no-problems').classed('hiddenGraphElement', true)
+            }
+            d3.selectAll('.link-has-problems').classed('hiddenGraphElement', false)
         });
     };
 
@@ -153,47 +175,54 @@ class SidebarPanel extends React.Component {
                 {/*})}*/}
                 {/*</Select>*/}
                 {/*</FormControl>*/}
-                {
-                    useExperimentalFeature('stg') ?
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={parentState.graphSvg && parentState.graphSvg.state.snapToGrid}
-                                    onChange={() => {
-                                        parentState.graphSvg.setState({snapToGrid: !parentState.graphSvg.state.snapToGrid})
-                                    }}
-                                    value="snapToGrid"
-                                    className={classes.checkbox}
-                                />
-                            }
-                            label="Snap To Grid"
-                            className={classes.checkboxLabel}
-                        /> : null
-                }
-                <Button className={classes.button} fullWidth onClick={() => {
-                    parentState.graphSvg.jiggle();
-                }}>
-                    <ShuffleIcon/>
-                    <div className={classes.label}>Rejiggle Graph</div>
-                </Button>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={this.state.checked}
+                            onChange={this.handleCheckboxChange}
+                            value="snapToGrid"
+                            className={classes.checkbox}
+                        />
+                    }
+                    label="Snap To Grid"
+                    className={classes.checkboxLabel}
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={this.state.showAllLines}
+                            onChange={this.showHideLines}
+                            value="snapToGrid"
+                            className={classes.checkbox}
+                        />
+                    }
+                    label="Show All Belts"
+                    className={classes.checkboxLabel}
+                />
+                {/*<Button className={classes.button} fullWidth onClick={() => {*/}
+                {/*    parentState.graphSvg.jiggle();*/}
+                {/*}}>*/}
+                {/*    <ShuffleIcon/>*/}
+                {/*    <div className={classes.label}>Rejiggle Graph</div>*/}
+                {/*</Button>*/}
                 <Button className={classes.button} fullWidth onClick={() => {
                     parentState.graphSvg.resetCamera();
                 }}>
                     <ReplayIcon/>
                     <div className={classes.label}>Reset Camera</div>
                 </Button>
-                <Button className={classes.button} fullWidth onClick={() => {
-                    parentState.graphSvg.fixNodes();
-                }}>
-                    <ReplayIcon/>
-                    <div className={classes.label}>Fix Nodes</div>
-                </Button>
-                <Button className={classes.button} fullWidth onClick={() => {
-                    parentState.graphSvg.unfixNodes();
-                }}>
-                    <UndoIcon/>
-                    <div className={classes.label}>Unfix Nodes</div>
-                </Button>
+                {/*<Button className={classes.button} fullWidth onClick={() => {*/}
+                {/*    parentState.graphSvg.fixNodes();*/}
+                {/*}}>*/}
+                {/*    <ReplayIcon/>*/}
+                {/*    <div className={classes.label}>Fix Nodes</div>*/}
+                {/*</Button>*/}
+                {/*<Button className={classes.button} fullWidth onClick={() => {*/}
+                {/*    parentState.graphSvg.unfixNodes();*/}
+                {/*}}>*/}
+                {/*    <UndoIcon/>*/}
+                {/*    <div className={classes.label}>Unfix Nodes</div>*/}
+                {/*</Button>*/}
             </Paper>
         );
     }

@@ -21,7 +21,7 @@ import {strongly_connected_components_standalone} from './algorithms';
 import TinyQueue from '../TinyQueue';
 
 
-export const analyzeGraph = function () {
+export const analyzeGraph = function (optimize=false) {
     const nodeUnion = new Set(Object.keys(this.nodeIn));
     Object.keys(this.nodeOut).forEach(node => nodeUnion.add(node));
     const nodeUnionArray = Array.from(nodeUnion);
@@ -182,7 +182,7 @@ export const analyzeGraph = function () {
                     nodeGroupSource.forEach(node => {
                         node.efficiency = efficiency;
                         node.itemsPerMinute = {[throughput.item]: maxThroughput};
-
+                        node.optimumOverclock = 2.5;
                         // Comment this out if we should remove the display from nodes
                         node.itemThroughPut = {[throughput.item]: {max: maxThroughput, actual: maxThroughput}};
                     });
@@ -291,6 +291,22 @@ export const analyzeGraph = function () {
 
                     const missing = new Set();
                     const efficiencies = [Infinity];
+                    const overclocks = [2.5];
+
+                    const throughputWithoutOverclock = (throughput.quantity / throughput.time) * 60 * node.instance.speed / 100;
+
+                    throughput.inputs.forEach(inp => {
+                        const item = inp.item;
+                        const quantity = inp.quantity;
+                        const providedQuantity = resources[item] || 0;
+                        const bestOverclock = Math.min((providedQuantity / (throughputWithoutOverclock || 1)) * (throughput.quantity / (quantity || 1)), 2.5);
+                        overclocks.push(bestOverclock);
+                    });
+
+                    const optimumOverclock = Math.ceil(Math.min(...overclocks) * 100);
+                    if (optimize) {
+                        throughput.overclock = optimumOverclock / 100;
+                    }
 
                     const maxThroughput = (throughput.quantity / throughput.time) * 60 * node.instance.speed / 100 * throughput.overclock;
 
@@ -303,6 +319,7 @@ export const analyzeGraph = function () {
                         }
 
                         const resourceThroughputNeeded = maxThroughput * (quantity / throughput.quantity);
+
                         const calculatedThroughput = maxThroughput * (Math.min(resourceThroughputNeeded, providedQuantity) / resourceThroughputNeeded);
                         const maxThroughputPerItem = resourceThroughputNeeded;
 
@@ -326,6 +343,8 @@ export const analyzeGraph = function () {
 
                     nodeGroupSource.forEach(node => {
                         node.efficiency = efficiency;
+                        node.overclock = throughput.overclock * 100;
+                        node.optimumOverclock = optimumOverclock;
                         node.itemsPerMinute = {[throughput.item]: maxThroughput * efficiency};
                     });
                 }
@@ -603,162 +622,6 @@ export const analyzeGraph = function () {
                     });
                 });
 
-
-                //=========================
-                // let totalLinkThroughput = {};
-                //
-                // let linkPairs = [];
-                // let sourcesSet = new Set();
-                //
-                // (derivedGraphOutgoing[origin] || []).forEach(outgoingNode => {
-                //   const sources = nodeGroupSource.map(node => node.id);
-                //   const targets = superNodeGraphLookupInflated[outgoingNode].map(node => node.id);
-                //
-                //   sources.forEach(source => {
-                //     targets.forEach(target => {
-                //       const link = this.graphData.links.filter(link => link.source.id === source && link.target.id === target);
-                //       let foundLink = null;
-                //       if (link && link.length === 1) {
-                //         foundLink = link[0];
-                //       } else if (link && link.length > 1) {
-                //         throw new Error('Too many links found!!!');
-                //       } else {
-                //         return;
-                //       }
-                //
-                //       linkPairs.push({source, target, speed: foundLink.instance.speed, link: foundLink});
-                //       sourcesSet.add(source);
-                //       totalLinkThroughput[source] = totalLinkThroughput[source] || 0;
-                //       totalLinkThroughput[source] += foundLink.instance.speed;
-                //     });
-                //   });
-                // });
-                //
-                // linkPairs.sort(
-                //     (t1, t2) => {
-                //       return t1.speed - t2.speed;
-                //     }
-                // );
-                //
-                // console.error("HE WASSSSS", sourcesSet);
-                //
-                // sourcesSet.forEach(sourceMain => {
-                //   let totalItemThroughput = 0;
-                //   const localItemThroughput = nodeGroupSourceThroughput.map(throughput => {
-                //
-                //     const q = throughput.throughput.quantity;
-                //     const t = throughput.throughput.time;
-                //     const e = throughput.efficiency;
-                //     const o = throughput.throughput.overclock;
-                //     const s = throughput.throughput.speed;
-                //     const i = throughput.throughput.item;
-                //
-                //     const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
-                //     const tmp = Math.min(q / t * e * o * s || 0, maxItemsPerSecLimiter);
-                //
-                //     return tmp;
-                //   }).reduce((a, b = 0) => a + b, 0);
-                //
-                //   const totalItems = Object.keys(itemPerNode[sourceMain] || {}).map(item => itemPerNode[sourceMain][item]).reduce((a, b = 0) => a + b, 0);
-                //
-                //   console.log("HE WAS", itemPerNode, totalItems, sourceMain);
-                //
-                //   totalItemThroughput += (totalItems / 60);
-                //
-                //   let processingType = 1;
-                //   if (totalItemThroughput * 60 > totalLinkThroughput[sourceMain]) {
-                //     // split proportioanly the totalItemThroughput
-                //     console.error("WE HAVE TOO MANY ITEMS DAMMIT!!!", totalItemThroughput * 60, totalLinkThroughput[sourceMain])
-                //   } else {
-                //     processingType = 0;
-                //     console.error("fewer items!!!")
-                //     //fill things sequentiually
-                //   }
-                //
-                //
-                //
-                //   let remainingItemProcessing = totalItemThroughput * 60;
-                //   let remainingLinkPairs = linkPairs.filter((link) => link.source === sourceMain).length;
-                //   console.error("Starting calc with", remainingItemProcessing, "items", remainingLinkPairs, "pairs", "on", sourceMain);
-                //   linkPairs.filter((link) => link.source === sourceMain).forEach(pair => {
-                //     const target = pair.target;
-                //     const limitedSpeed = pair.speed;
-                //
-                //     providedThroughput[target] = providedThroughput[target] || [];
-                //     if (processingType === 1) {
-                //       // split everything
-                //       // fraction of this belt of ALL belts:
-                //       const fraction = limitedSpeed / (totalLinkThroughput[sourceMain]);
-                //       pair.fraction = fraction;
-                //       console.error("Processing type 1", limitedSpeed, totalLinkThroughput[sourceMain])
-                //     } else {
-                //       if (remainingItemProcessing / remainingLinkPairs > limitedSpeed) {
-                //         // there will be residuals
-                //         const itemsUsed = limitedSpeed;
-                //         remainingItemProcessing -= itemsUsed;
-                //         const fraction = limitedSpeed / (totalItemThroughput * 60);
-                //         pair.fraction = fraction;
-                //         console.error("Processing type 2.1", limitedSpeed, totalItemThroughput * 60)
-                //       } else {
-                //         // no residuals.
-                //         const itemsUsed = remainingItemProcessing / remainingLinkPairs;
-                //         remainingItemProcessing -= itemsUsed;
-                //         const fraction = itemsUsed / (totalItemThroughput * 60);
-                //         pair.fraction = fraction;
-                //         console.error("Processing type 2.2", itemsUsed, totalItemThroughput * 60)
-                //       }
-                //     }
-                //     console.error("Created one link with fraction", pair.fraction);
-                //     remainingLinkPairs -= 1;
-                //   });
-                //
-                //   linkPairs.filter((link) => link.source === sourceMain).forEach(pair => {
-                //     const source = pair.source;
-                //     const target = pair.target;
-                //     const speed = pair.speed;
-                //     const foundLink = pair.link;
-                //     const fraction = pair.fraction || 1;
-                //     const limitedSpeed = speed;
-                //
-                //     providedThroughput[target] = providedThroughput[target] || [];
-                //
-                //     console.error("OK HERE IS THE DEBUG", nodeGroupSourceThroughput, linkPairs.filter((link) => link.source === sourceMain));
-                //
-                //     nodeGroupSourceThroughput.forEach(itemRaw => {
-                //       const throughput = JSON.parse(JSON.stringify(itemRaw));
-                //       const i = throughput.throughput.item;
-                //       //check propagated limited
-                //       const maxItemsPerSecLimiter = throughput.maxItemsPerSecLimiter === undefined ? Infinity : throughput.maxItemsPerSecLimiter;
-                //
-                //       let itemPerSecBeforeBeltLimiting = itemPerNode[sourceMain][i]  * fraction / 60 / (nodeGroupSourceThroughput.filter(item => item.throughput.item ===i)).length;
-                //       console.error("???", itemPerNode[sourceMain][i], fraction)
-                //       console.log("Here is the limiting thing", itemPerSecBeforeBeltLimiting * 60 * 2)
-                //
-                //       // need to do some weird math to constrain the items/psec to a PORTION of the belt limited
-                //       const limitedItemPerSecByBelt = limitedSpeed / 60;
-                //
-                //       const beltMaxForThisEntry = limitedItemPerSecByBelt * 60;
-                //
-                //       throughput.maxItemsPerSecLimiter = itemPerSecBeforeBeltLimiting;
-                //       console.log("Here are the prereqs", itemPerSecBeforeBeltLimiting)
-                //       console.error("Processing throughput from", source, '->', target, 'quantity: ', 60 * throughput.maxItemsPerSecLimiter, 'fraction:', fraction);
-                //       throughput.calculatedItemPerSecond = throughput.maxItemsPerSecLimiter;
-                //       throughput.efficiency = Infinity;
-                //
-                //       foundLink.itemThroughPut = foundLink.itemThroughPut || {};
-                //       foundLink.itemThroughPut[i] = foundLink.itemThroughPut[i] || {max: 0, actual: 0};
-                //       foundLink.itemThroughPut[i].max +=  (itemPerSecBeforeBeltLimiting / totalItemThroughput) * beltMaxForThisEntry;
-                //       foundLink.itemThroughPut[i].actual += itemPerSecBeforeBeltLimiting * 60 * fraction;
-                //
-                //       providedThroughput[target].push(throughput);
-                //     });
-                //   })
-                // })
-
-
-                //=========================
-
-
                 (derivedGraphOutgoing[origin] || []).forEach(outgoingNode => {
                     const sources = nodeGroupSource.map(node => node.id);
                     const targets = superNodeGraphLookupInflated[outgoingNode].map(node => node.id);
@@ -944,8 +807,9 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
             }).on('dblclick', function (d) {
             d3.event.stopImmediatePropagation();
             remove_select_from_nodes(t);
-            d.fx = null;
-            d.fy = null;
+            //double click
+            // d.fx = null;
+            // d.fy = null;
         }).on('mouseover', function (d) {
             node_mouse_over.call(this, d, t);
         }).on('mouseout', function (d) {
