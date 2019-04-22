@@ -65,7 +65,7 @@ class ShareButton extends React.Component {
                              handleModalClose={this.handleModalClose}>
                     <div className={classes.dialogContainer}>
                         <div>
-                            <TextField inputRef={ref => this.inputRef = ref} label="Share Code" value={value}>
+                            <TextField spellCheck={ false } inputRef={ref => this.inputRef = ref} label="Share Code" value={value}>
                             </TextField>
                             <Button color="inherit" className={classes.inlineDialogButton} onClick={
                                 () => new Promise(resolve => {

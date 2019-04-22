@@ -51,7 +51,7 @@ const styles = theme => ({
         display: 'inline-block',
     },
     maxHeightPaper: {
-        overflowY: 'scroll',
+        overflowY: 'auto',
         maxHeight: 600
     }
 });
