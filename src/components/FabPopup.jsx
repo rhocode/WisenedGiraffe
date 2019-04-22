@@ -19,22 +19,19 @@ class FabPopup extends React.Component {
 
     constructor(props) {
         super(props);
-        const seenMessage = window.localStorage.getItem('seenWelcome');
         const dontShowAgain = window.localStorage.getItem('dontShowAgain');
         let modalOpen = false;
         let dontShow = false;
 
-        if (!seenMessage) {
-            window.localStorage.setItem('seenWelcome', '1');
-            modalOpen = true;
-        }
-
         if (dontShowAgain === '1') {
             window.localStorage.setItem('dontShowAgain', '1');
             dontShow = true;
+        } else {
+            window.localStorage.setItem('dontShowAgain', '0');
+            dontShow = false;
         }
 
-        if (!dontShowAgain) {
+        if (!dontShow) {
             modalOpen = true;
         }
 

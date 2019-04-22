@@ -1073,11 +1073,6 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     callbacks.forEach(callback => callback());
     simulation.alphaTarget(0.3).restart();
 
-    console.error("it's triggered")
-
-
-
-
 //     //get svg element.
 //     var svg = document.getElementById("mainRender");
 //
