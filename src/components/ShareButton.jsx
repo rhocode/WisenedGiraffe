@@ -43,7 +43,7 @@ class ShareButton extends React.Component {
             this.setState({value: 'Loading...'}, () => {
                 this.props.t.graphSvg.uploadDataWithResponse().then(resp => {
                     const port = window.location.port ? ':' + window.location.port : ''
-                    const url = window.location.protocol +  window.location.hostname + port + window.location.pathname
+                    const url = window.location.protocol + '//' +  window.location.hostname + port + window.location.pathname
                         + '#' +  resp + rebuildQueryParams();
                     this.setState({value: url});
                 })
