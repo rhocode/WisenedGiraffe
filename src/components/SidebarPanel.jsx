@@ -25,6 +25,8 @@ const styles = theme => ({
     button: {
         flex: 1,
         marginTop: 10,
+        textAlign: 'left',
+        justifyContent: 'left',
     },
     label: {
         paddingLeft: 10,
@@ -50,6 +52,14 @@ const styles = theme => ({
         fontSize: 18,
         display: 'inline-block',
     },
+    checkbox: {
+        paddingLeft: 22,
+    },
+    checkboxLabel: {
+        height: 30,
+        paddingTop: 30,
+        paddingBottom: 16, 
+    }
 });
 
 const ITEM_HEIGHT = 48;
@@ -151,9 +161,11 @@ class SidebarPanel extends React.Component {
                                         parentState.graphSvg.setState({snapToGrid: !parentState.graphSvg.state.snapToGrid})
                                     }}
                                     value="snapToGrid"
+                                    className={classes.checkbox}
                                 />
                             }
                             label="Snap To Grid"
+                            className={classes.checkboxLabel}
                         /> : null
                 }
                 <Button className={classes.button} fullWidth onClick={() => {

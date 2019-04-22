@@ -1,7 +1,8 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
-import AddBoxIcon from '@material-ui/icons/AddBox';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import Popper from '@material-ui/core/Popper';
 import {withStyles} from '@material-ui/core';
 import MenuList from '@material-ui/core/MenuList';
@@ -68,7 +69,9 @@ class NestedSidebarButton extends React.Component {
                         onClick={open ? this.handleClose : this.handleMenu}
                         className={classes.button}
                     >
-                        <AddBoxIcon/>
+                        {
+                            open ? <RemoveCircleIcon/> : <AddCircleOutlineIcon/>
+                        }
                         <div className={classes.label}>{label}</div>
                     </Button>
                     <Popper className={classes.popper} open={open} anchorEl={anchorEl} transition
