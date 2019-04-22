@@ -494,7 +494,7 @@ class App extends Component {
                             white circle)</Typography></li>
                     </ul>
                     <Typography variant="h5">Sharing</Typography>
-                    <Typography variant="body1">Generate a share code using the Share button in the top right.</Typography>
+                    <Typography variant="body1">Generate a share code by using the Share button in the top right.</Typography>
                     <br/>
                     <Typography variant="h5">Legend</Typography>
                     <Typography variant="body1"><span style={{'color': 'orange'}}>Orange</span> numbers means the machine wastes time doing nothing.</Typography>
@@ -502,7 +502,7 @@ class App extends Component {
                     <Typography variant="body1"><span style={{'color': 'Blue'}}>Blue</span> numbers means the belt capacity was overridden (and you need to fix it ASAP!)</Typography>
                     <br/>
                     {/*<Typography variant="body1">Special thanks to the following testers: GeekyMeerkat, Stay, HartWeed, safken, marcspc, Laugexd</Typography>*/}
-                    <Typography variant="body1">Revisit these instructions anytime by clicking on the bottom right.</Typography>
+                    <Typography variant="body1">Revisit these instructions anytime by clicking on the <b>?</b> in the bottom right.</Typography>
 
                 </FabPopup>
                 {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ?
