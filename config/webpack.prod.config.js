@@ -18,9 +18,9 @@ const config = {
     //   inlineManifest: true,
     // }),
   ],
-  // output: {
-  //   filename: '[name].[chunkhash].js'
-  // },
+  output: {
+    filename: '[name].[chunkhash].js'
+  },
   optimization: {
     splitChunks: {
       chunks: "initial",
