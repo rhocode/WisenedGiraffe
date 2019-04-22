@@ -1060,17 +1060,26 @@ const data = [
     }
 ];
 
+const firebaseData = {};
+data.forEach(elem => {
+    firebaseData[elem.key] = elem.value;
+});
+
 const createDatabase = () => {
     const createDB = async () => {
-        const p = schemaBuilder.connect().then(async db => {
+        const p = schemaBuilder.connect({
+        }).then(async db => {
             const schema = db.getSchema();
             const promiseList = [];
+
+            const firebaseRaw = {};
 
             for (let i = 0; i < data.length; i++) {
                 const obj = data[i];
                 const key = obj.key;
                 const table = schema.table(key);
                 const rows = [];
+                const rowsRaw = [];
                 const valuePromiseRows = [];
 
                 if (typeof obj.value == 'function') {
@@ -1079,6 +1088,7 @@ const createDatabase = () => {
                         row.hidden = row.hidden || false;
                         row.id = index;
                         rows.push(table.createRow(row));
+                        rowsRaw.push(row);
                     });
                 } else {
                     for (let j = 0; j < obj.value.length; j++) {
@@ -1096,14 +1106,19 @@ const createDatabase = () => {
 
                         await Promise.all(blockingPromises);
                         rows.push(table.createRow(row));
+                        rowsRaw.push(row);
                         valuePromiseRows.push(Promise.resolve());
                     }
                 }
 
+                firebaseRaw[key] = rowsRaw;
                 await Promise.all(valuePromiseRows);
                 await db.insertOrReplace().into(table).values(rows).exec();
                 console.info('Loaded ' + rows.length + ' into ' + key);
             }
+
+            console.log("Here is the finished doc");
+            console.log(JSON.stringify(firebaseRaw));
             await Promise.all(promiseList);
             return db;
         });

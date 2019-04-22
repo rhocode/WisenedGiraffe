@@ -27,7 +27,7 @@ class Loader extends React.Component {
     componentDidUpdate(previousProps, previousState) {
         if (this.props.ready === true && !previousProps.ready) {
             this.props.parentState.setState({isReady: true}, () => {
-                console.info('App set as "Ready"', d3);
+                console.info('App set as "Ready"');
             });
         }
     }

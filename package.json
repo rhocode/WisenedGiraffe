@@ -126,6 +126,7 @@
     "Base64": "^1.0.2",
     "d3": "^5.9.2",
     "d3-interpolate": "latest",
+    "firebase": "^5.10.0",
     "flatted": "^2.0.0",
     "intro.js": "^2.9.3",
     "intro.js-react": "^0.2.0",
