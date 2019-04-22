@@ -31,7 +31,6 @@ export const add_node = (d, t) => {
     console.error(viewCenter);
 
     d.overclock = d.overclock || 100;
-    console.log(JSON.stringify(d));
     t.graphData.nodes.push(d);
     t.updateGraphHelper();
 };
@@ -152,7 +151,6 @@ export const editEfficiencyArc = (percentage_metric, offset, endOffset) => {
             }
 
             const p =  100 * (d[percentage_metric] || 0);
-            console.log(perc2color(p));
             return perc2color(p)
         });
 };

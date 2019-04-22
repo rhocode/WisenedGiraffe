@@ -251,9 +251,7 @@ class App extends Component {
     }
 
     componentDidMount() {
-        ReactGA.initialize('UA-136827615-1', {
-            debug: process.env.NODE_ENV === 'production'
-        });
+        ReactGA.initialize('UA-136827615-1');
         ReactGA.pageview(window.location.pathname + window.location.search);
         window.addEventListener("hashchange", () => {
             document.location.reload();
