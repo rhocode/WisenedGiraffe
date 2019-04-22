@@ -50,6 +50,10 @@ const styles = theme => ({
         fontSize: 18,
         display: 'inline-block',
     },
+    maxHeightPaper: {
+        overflowY: 'auto',
+        maxHeight: 600
+    }
 });
 
 class SidebarButton extends React.Component {
@@ -142,10 +146,10 @@ class SidebarButton extends React.Component {
                         {({TransitionProps, placement}) => (
                             <Grow
                                 {...TransitionProps}
-                                id="menu-list-grow"
+                                id="menu-list-grow-2"
                                 style={{transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'}}
                             >
-                                <Paper>
+                                <Paper className={classes.maxHeightPaper}>
                                     <ClickAwayListenerV2 onClickAway={this.clickAwayClose}
                                                          clobberedElement={'#mainRender'}>
                                         <MenuList>

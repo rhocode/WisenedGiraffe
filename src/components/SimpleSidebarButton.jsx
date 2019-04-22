@@ -77,7 +77,7 @@ class SimpleSidebarButton extends React.Component {
                     {({TransitionProps, placement}) => (
                         <Grow
                             {...TransitionProps}
-                            id="menu-list-grow"
+                            id="menu-list-grow-1"
                             style={{transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom'}}
                         >
                             <Paper>
