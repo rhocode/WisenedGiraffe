@@ -236,22 +236,19 @@ export const updateComponents = function (elementsToUpdate) {
         element.selectAll('.' + constants.nodeRequirementsSubIconClass).remove();
 
         if (allowedInRemaining.length > 0) {
-            element.append('text').attr('class', 'fas fa-arrow-left')
+            element.append('text').attr('class', 'fas fa-arrow-right')
                 .classed(constants.nodeRequirementsSubIconClass, true)
                 .attr('x', function (d) {
-                    return 56;
+                    return -56 - 25;
                 })
                 .attr('y', function (d) {
-                    return -28;
+                    return 3;
                 })
                 .attr('height', 25)
                 .attr('width', 25);
             const fetchRemainingIn = allowedInRemaining.map(item =>
                 itemAccessor.filter(findItem => item === findItem.id)[0]
             );
-
-            if (fetchRemainingIn.length > 1)
-                console.log(fetchRemainingIn);
 
             const outputtedItems = new Set();
 
@@ -279,10 +276,10 @@ export const updateComponents = function (elementsToUpdate) {
                         return remaining.icon;
                     })
                     .attr('x', function (d) {
-                        return 58 + 28 + (28 * index++);
+                        return -58 - 28 - 28 - (28 * index++);
                     })
                     .attr('y', function (d) {
-                        return -28;
+                        return 3;
                     })
                     .attr('height', 25)
                     .attr('width', 25);
@@ -296,13 +293,13 @@ export const updateComponents = function (elementsToUpdate) {
         });
 
         if (allowedOutRemaining.length > 0) {
-            element.append('text').attr('class', 'fas fa-arrow-left')
+            element.append('text').attr('class', 'fas fa-arrow-right')
                 .classed(constants.nodeRequirementsSubIconClass, true)
                 .attr('x', function (d) {
-                    return -58 - 25;
+                    return 58;
                 })
                 .attr('y', function (d) {
-                    return 3;
+                    return -28;
                 })
                 .attr('height', 25)
                 .attr('width', 25);
@@ -336,10 +333,10 @@ export const updateComponents = function (elementsToUpdate) {
                         return remaining.icon;
                     })
                     .attr('x', function (d) {
-                        return -56 - 25 - 28 - (28 * index++);
+                        return 85 + (28 * index++);
                     })
                     .attr('y', function (d) {
-                        return 3;
+                        return -28;
                     })
                     .attr('height', 25)
                     .attr('width', 25);
