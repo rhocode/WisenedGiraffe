@@ -136,19 +136,24 @@ export const editEfficiencyArc = (percentage_metric, offset, endOffset) => {
             return overClockCalculation(d, percentage_metric, offset, endOffset);
         })
         .attr('stroke', function (d) {
-            const p = d[percentage_metric] || 0;
-            const r1 = 255;
-            const g1 = 0;
-            const b1 = 0;
 
-            const r2 = 50;
-            const g2 = 205;
-            const b2 = 50;
-            const r = Math.round((1.0 - p) * r1 + p * r2 + 0.5);
-            const g = Math.round((1.0 - p) * g1 + p * g2 + 0.5);
-            const b = Math.round((1.0 - p) * b1 + p * b2 + 0.5);
+            function perc2color(perc) {
+                var r, g, b = 0;
+                if(perc < 50) {
+                    r = 255;
+                    g = Math.round(5.1 * perc);
+                }
+                else {
+                    g = 255;
+                    r = Math.round(510 - 5.10 * perc);
+                }
+                var h = r * 0x10000 + g * 0x100 + b * 0x1;
+                return '#' + ('000000' + h.toString(16)).slice(-6);
+            }
 
-            return 'rgb(' + r + ',' + g + ',' + b + ')';
+            const p =  100 * (d[percentage_metric] || 0);
+            console.log(perc2color(p));
+            return perc2color(p)
         });
 };
 
@@ -179,22 +184,28 @@ export const addNodeImage = (parent) => {
         .attr('width', 100);
 };
 
-export const wheelZoomCalculation = function (d) {
-    d3.event.stopImmediatePropagation();
+export const wheelZoomCalculation = function (d, overclockOverride = null, selectedElem = null) {
+    if (overclockOverride === null) {
+        d3.event.stopImmediatePropagation();
+        let roughEstimate = -1;
 
-    let roughEstimate = -1;
+        if (d3.event.deltaY < 0) {
+            roughEstimate = 1;
+        }
 
-    if (d3.event.deltaY < 0) {
-        roughEstimate = 1;
+        d.overclock = (d.overclock + (roughEstimate));
+        if (d.overclock < 0) {
+            d.overclock = 251 + d.overclock;
+        } else if (d.overclock > 250) {
+            d.overclock = d.overclock - 251;
+        }
+        updateOverclock(d3.select(this).select('.' + constants.overclockedTextClass));
+    } else {
+        d.overclock = overclockOverride;
+        updateOverclock(selectedElem);
     }
 
-    d.overclock = (d.overclock + (roughEstimate));
-    if (d.overclock < 0) {
-        d.overclock = 251 + d.overclock;
-    } else if (d.overclock > 250) {
-        d.overclock = d.overclock - 251;
-    }
-    updateOverclock(d3.select(this).select('.' + constants.overclockedTextClass));
+
 };
 
 export const updateOverclock = function (textElement) {
@@ -453,14 +464,21 @@ export const insertComponents = function (parentElement) {
             if (!d.itemIconLookup) return;
 
             let definedColor = 'LightCoral';
+            let nodeClass = 'node-has-problems';
 
             if (item.actual === item.max) {
                 definedColor = 'white';
+                nodeClass = null;
             } else if (item.actual < item.max) {
                 definedColor = 'gold';
             }
 
             const icon = d.itemIconLookup[key];
+
+            nodeThis.classed('node-has-problems', false);
+            if (nodeClass) {
+                nodeThis.classed('node-has-problems', true);
+            }
 
             nodeThis.append('svg:image')
                 .classed(constants.nodeLimitingThroughputText, true)
@@ -548,13 +566,17 @@ export const insertNodeOverclock = (gEl) => {
             return !['Container', 'Logistic'].includes(d.machine.name)
         })
         .append('g').attr('text-anchor', 'middle').attr('dy', 0);
+
     el.append('circle').attr('r', 17).attr('fill', '#FFFFFF').attr('cx', 32).attr('cy', -38).attr('stroke', 'black').attr('stroke-width', 1);
 
     const tspan = el.append('text').attr('fill', 'black')
         .attr('class', 'overclockFont')
         .classed(constants.overclockedTextClass, true)
         .attr('x', 32).attr('dy', -32)
-        .attr('font-size', 20);
+        .attr('font-size', 20)
+        .attr('id', function (d) {
+            return 'node-overclock-accessor-' + d.id;
+        })
 
     updateOverclock(tspan);
 };

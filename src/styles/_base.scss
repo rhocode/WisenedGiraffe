@@ -42,8 +42,8 @@ body {
 }
 
 .graphMachineNode {
-  fill: #FFE0B2;
-  stroke: #FFCC80;
+  fill: #ffc246;
+  stroke: #ff3d00;
   stroke-width: 1px;
 }
 
@@ -52,11 +52,11 @@ body {
 }
 
 .graphNodeHoverClass .graphMachineNode {
-  fill: #FF9800;
+  fill: #ff9100;
 }
 
 .selected-node .graphMachineNode {
-  fill: #E65100;
+  fill: #c56200;
 }
 
 .graphNodeGrabbedClass {
@@ -163,7 +163,7 @@ div.full-div {
 svg#mainRender {
   height: 100%;
   width: 100%;
-  background-color: #dddddd;
+  background-color: #E0E0E0;
 }
 
 .lead {

@@ -12,5 +12,6 @@ deploy:
   keep_history: true
   repo: tehalexf/Satisgraphtory
   local_dir: public
+  fqdn: satisgraphtory.com
   on:
     branch: master

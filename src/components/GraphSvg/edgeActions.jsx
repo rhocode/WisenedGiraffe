@@ -363,6 +363,7 @@ export const insertEdgeLabel = function (elem) {
             d.tempIndex[key] = index++;
 
             let definedColor = 'LightCoral';
+            let linkClass = 'link-has-problems';
 
             if (d.forceOverwritable) {
                 definedColor = 'LightBlue';
@@ -370,9 +371,15 @@ export const insertEdgeLabel = function (elem) {
 
             if (item.actual <= item.max) {
                 definedColor = 'white';
+                linkClass = null;
             }
 
             const icon = d.itemIconLookup[key];
+
+            edgeThis.classed('link-has-problems', false);
+            if (linkClass) {
+                edgeThis.classed('link-has-problems', true);
+            }
 
             edgeThis.append('svg:image')
                 .classed(constants.lineLimitedThroughputClass, true)

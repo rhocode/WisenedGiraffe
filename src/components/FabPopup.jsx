@@ -4,6 +4,8 @@ import HelpIcon from '@material-ui/icons/Help';
 
 import PopupDialog from './PopupDialog';
 import {withStyles} from '@material-ui/core';
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 const styles = theme => ({
     fab: {
@@ -17,21 +19,60 @@ class FabPopup extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {modalOpen: false};
+        const seenMessage = window.localStorage.getItem('seenWelcome');
+        const dontShowAgain = window.localStorage.getItem('dontShowAgain');
+        let modalOpen = false;
+        let dontShow = false;
+
+        if (!seenMessage) {
+            window.localStorage.setItem('seenWelcome', '1');
+            modalOpen = true;
+        }
+
+        if (dontShowAgain === '1') {
+            window.localStorage.setItem('dontShowAgain', '1');
+            dontShow = true;
+        }
+
+        if (!dontShowAgain) {
+            modalOpen = true;
+        }
+
+        this.state = {modalOpen, dontShow};
     }
 
-    render() {
-        const {classes, title, contents} = this.props;
+    handleDontShow = event => {
+        this.setState({ dontShow: event.target.checked });
+        if (event.target.checked) {
+            window.localStorage.setItem('dontShowAgain', '1');
+        } else {
+            window.localStorage.setItem('dontShowAgain', '0');
+        }
+    };
 
+    render() {
+        const {classes, title} = this.props;
+        const children = this.props.children;
         return (
             <React.Fragment>
-                <Fab aria-label='help' color='primary' className={classes.fab}
+                <Fab id='helpFab' aria-label='help' color='secondary' className={classes.fab}
                      onClick={() => this.setState({modalOpen: true})}>
                     <HelpIcon/>
                 </Fab>
-                <PopupDialog title={title} open={this.state.modalOpen}
+                <PopupDialog title={''} open={this.state.modalOpen}
                              handleModalClose={() => this.setState({modalOpen: false})}>
-                    {contents}
+                    {children}
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={this.state.dontShow}
+                                onChange={this.handleDontShow}
+                                value="checkedA"
+                            />
+                        }
+                        label="Don't show this message again"
+                    />
+
                 </PopupDialog>
             </React.Fragment>
         );

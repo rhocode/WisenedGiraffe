@@ -31,9 +31,9 @@ import ShareButton from './ShareButton';
 import LoadButton from './LoadButton';
 import SelectorPanel from './SelectorPanel';
 import {loadHash, saveHash, useExperimentalFeature} from "./GraphSvg/util";
-// import * as d3 from 'd3';
+import 'intro.js/introjs.css';
+import { Steps, Hints } from 'intro.js-react';
 
-/* global d3 */
 
 const drawerWidth = 310;
 
@@ -106,16 +106,16 @@ const styles = theme => ({
     },
 });
 
-const theme = createMuiTheme({
-    typography: {
+const palette = {
+    primary: { main: '#FF9100' },
+    secondary: { main: '#FF3D00', contrastText: '#FAFAFA' }
+};
+
+const themeName = 'Pizazz Vermilion Gayal';
+
+const theme = createMuiTheme({ typography: {
         useNextVariants: true,
-    },
-    palette: {
-        primary: {
-            main: '#424242'
-        },
-    }
-});
+    }, palette, themeName: themeName});
 
 class App extends Component {
     constructor(props) {
@@ -362,12 +362,13 @@ class App extends Component {
         const t = this;
 
         return <div className={classes.root}>
+
             <CssBaseline/>
             <MuiThemeProvider theme={theme}>
                 <AppBar position="fixed" className={classes.appBar}>
                     <Toolbar>
                         <img alt="wow so satis factory" className={classes.logo}
-                             src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory.png"
+                             src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satisgraphtory.png"
                              title="logo"/>
                         <div className={classes.grow} />
                         {useExperimentalFeature('opt') ? <Button color="inherit">
@@ -384,36 +385,41 @@ class App extends Component {
                     </Toolbar>
                 </AppBar>
 
-                <FabPopup title='Help' contents={
-                    <React.Fragment>
-                        <Typography variant="h5">Graph Basics</Typography>
-                        <ul>
-                            <li><Typography variant="body1">Use the left menu to add nodes to the graph.</Typography>
-                            </li>
-                            <li><Typography variant="body1">Click once on a node/path to select it.</Typography></li>
-                            <li><Typography variant="body1">Press DELETE on a selected node/path to delete
-                                it.</Typography></li>
-                            <li><Typography variant="body1">Hold down shift - click and drag from a node to direct it to
-                                another
-                                node.</Typography></li>
-                            <li><Typography variant="body1">Use mouse wheel to control overclock (black text in the
-                                white circle)</Typography></li>
-                        </ul>
-                        <Typography variant="h5">Saving/Loading</Typography>
-                        <Typography variant="body1">You can share codes using the Share top left button, and load using
-                            the Load top left button</Typography>
-                        <Typography variant="h5">Legend</Typography>
-                        <Typography variant="body1"><span style={{'color': 'gold'}}>Orange</span> numbers means machine
-                            wastes time doing nothing</Typography>
-                        <Typography variant="body1"><span style={{'color': 'LightCoral'}}>Red</span> numbers means
-                            machine isn't processing fast enough</Typography>
-                        <Typography variant="body1"><span style={{'color': 'Blue'}}>Blue</span> numbers means the
-                            capacity has been overridden to be Infinite in order to speed up calculation</Typography>
-                    </React.Fragment>
-                }/>
+                <FabPopup>
+                    <Typography variant="h4">Welcome to SatisGraphtory!</Typography>
+                    <Typography variant="body1">Thanks for checking out our tool! If you have any questions or suggestions whatsoever, feel free to join our discord <a href={"https://discord.gg/ZRpcgqY"}>here!</a> I'm always looking to add more
+                    functionality!</Typography>
+                    <br />
+                    <Typography variant="h5">This tool will always be free.</Typography>
+                    <Typography variant="body1">If you would like to contribute, contact us on the discord, we'd love your help!</Typography>
+                    <br />
+                    <Typography variant="h5">Graph Basics</Typography>
+                    <ul>
+                        <li><Typography variant="body1">Use the <b>left menu</b> to <b>add</b> machines to the diagram</Typography>
+                        </li>
+                        <li><Typography variant="body1"><b>Click</b> on a node/path to <b>select</b> it</Typography></li>
+                        <li><Typography variant="body1">Press <b>BACKSPACE</b> on a selected node/path to delete
+                            it</Typography></li>
+                        <li><Typography variant="body1">Hold down <b>shift</b> and <b>drag</b> from node to node to create belts</Typography></li>
+                        <li><Typography variant="body1">Use <b>mouse wheel</b> to control overclock (black text in the
+                            white circle)</Typography></li>
+                    </ul>
+                    <Typography variant="h5">Sharing</Typography>
+                    <Typography variant="body1">You can share codes using the Share top left button.</Typography>
+                    <br/>
+                    <Typography variant="h5">Legend</Typography>
+                    <Typography variant="body1"><span style={{'color': 'orange'}}>Orange</span> numbers means machine
+                        wastes time doing nothing</Typography>
+                    <Typography variant="body1"><span style={{'color': 'LightCoral'}}>Red</span> numbers means
+                        machine isn't processing fast enough</Typography>
+                    <Typography variant="body1"><span style={{'color': 'Blue'}}>Blue</span> numbers means the belt capacity was overridden (fix it ASAP!)</Typography>
+                    <br/>
+                    <Typography variant="body1">You can revisit these instructions anytime by clicking on the bottom left.</Typography>
+
+                </FabPopup>
                 {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ?
                     <SelectorPanel label='Options' graphSvg={this.graphSvg}
-                                   selected={this.state.selectedNode || this.state.selectedPath}/> : null}
+                                   overclock={this.state.selectedNode ? this.state.selectedNode.overclock : -1} selected={this.state.selectedNode || this.state.selectedPath}/> : null}
                 <Drawer
                     className={classes.drawer}
                     variant="permanent"

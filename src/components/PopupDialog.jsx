@@ -8,15 +8,6 @@ import {withStyles} from '@material-ui/core';
 
 const styles = theme => ({
     root: {},
-    modal: {
-        position: 'absolute',
-        width: theme.spacing.unit * 100,
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: theme.shadows[5],
-        padding: theme.spacing.unit * 4,
-        outline: 'none',
-        margin: 'auto'
-    },
 });
 
 class PopupDialog extends React.Component {
@@ -29,6 +20,7 @@ class PopupDialog extends React.Component {
         const {classes, title, contents, open, handleModalClose, children} = this.props;
         return (
             <Dialog
+                className={classes.modal}
                 open={Boolean(open)}
                 onClose={handleModalClose}
                 id='modal'
@@ -45,4 +37,5 @@ class PopupDialog extends React.Component {
     }
 }
 
-export default withStyles(styles)(PopupDialog);
+export default
+withStyles(styles)(PopupDialog);
