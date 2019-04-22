@@ -59,6 +59,8 @@ const styles = theme => ({
         height: 30,
         paddingTop: 30,
         paddingBottom: 16, 
+        fontFamily: 'Roboto sans-serif',
+        fontWeight: 'bold',
     }
 });
 

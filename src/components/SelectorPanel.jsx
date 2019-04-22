@@ -33,6 +33,9 @@ const styles = theme => ({
     slider: {
         padding: '10px',
     },
+    overclock: {
+        paddingLeft: 10,
+    },
 });
 
 class SelectorPanel extends React.Component {
@@ -123,6 +126,7 @@ class SelectorPanel extends React.Component {
         return (
             <Paper className={classes.paper}>
                 <Typography variant='h5'>{label}</Typography>
+                <Typography variant="body1">
                 <IconButton color="secondary" className={classes.button} onClick={this.downgrade}>
                     <ArrowDownwardIcon/>
                 </IconButton>
@@ -130,9 +134,10 @@ class SelectorPanel extends React.Component {
                 <IconButton color="primary" className={classes.button} onClick={this.upgrade}>
                     <ArrowUpwardIcon/>
                 </IconButton>
+                </Typography>
                 {this.props.overclock !== -1 ?
                     <React.Fragment>
-                        <Typography id="label">Overclock: {this.state.sliderValue}%</Typography>
+                        <Typography id="label" className={classes.overclock} variant="body1">Overclock: {this.state.sliderValue}%</Typography>
                         <Slider
                             classes={{ root: classes.slider }}
                             value={this.state.sliderValue}

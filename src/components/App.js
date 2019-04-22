@@ -445,8 +445,8 @@ class App extends Component {
                         </SidebarPopup>
                         <SidebarPopup Icon={WarningIcon} label='Known Issues' title='Known Issues'>
                             <ul>
-                                <li>Resource nodes do not have purities displayed on the graph.</li>
-                                <li>No option yet to hide belt and factory numbers.</li>
+                                <li><Typography variant="body1">Resource nodes do not have purities displayed on the graph.</Typography></li>
+                                <li><Typography variant="body1">No option yet to hide belt and factory numbers.</Typography></li>
                             </ul>
                         </SidebarPopup>
                     </List>
