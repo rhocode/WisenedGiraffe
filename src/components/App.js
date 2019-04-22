@@ -476,35 +476,33 @@ class App extends Component {
 
                 <FabPopup>
                     <Typography variant="h4">Welcome to SatisGraphtory!</Typography>
-                    <Typography variant="body1">Thanks for checking out our tool! If you have any questions or suggestions whatsoever, feel free to join our discord <a href={"https://discord.gg/ZRpcgqY"}>here!</a> I'm always looking to add more
+                    <Typography variant="body1">Thanks for checking out our tool! If you have any questions, suggestions, or feedback, feel free to join our <a href={"https://discord.gg/ZRpcgqY"}>Discord server</a>! We're always looking to add more
                     functionality!</Typography>
                     <br />
                     <Typography variant="h5">This tool will always be free.</Typography>
-                    <Typography variant="body1">If you would like to contribute, contact us on the discord, we'd love your help!</Typography>
+                    <Typography variant="body1">If you would like to contribute, contact us on Discord! We'd love your help!</Typography>
                     <br />
                     <Typography variant="h5">Graph Basics</Typography>
                     <ul>
                         <li><Typography variant="body1">Use the <b>left menu</b> to <b>add</b> machines to the diagram</Typography>
                         </li>
-                        <li><Typography variant="body1"><b>Click</b> on a node/path to <b>select</b> it</Typography></li>
+                        <li><Typography variant="body1"><b>CLICK</b> on a node/path to <b>select</b> it</Typography></li>
                         <li><Typography variant="body1">Press <b>BACKSPACE</b> on a selected node/path to delete
                             it</Typography></li>
-                        <li><Typography variant="body1">Hold down <b>shift</b> and <b>drag</b> from node to node to create belts</Typography></li>
-                        <li><Typography variant="body1">Use <b>mouse wheel</b> to control overclock (black text in the
+                        <li><Typography variant="body1">Hold down <b>SHIFT</b> and <b>drag</b> from node to node to create belts</Typography></li>
+                        <li><Typography variant="body1">Use <b>MOUSE SCROLL</b> to control overclock (black text in the
                             white circle)</Typography></li>
                     </ul>
                     <Typography variant="h5">Sharing</Typography>
-                    <Typography variant="body1">You can share codes using the Share top left button.</Typography>
+                    <Typography variant="body1">Generate a share code using the Share button in the top right.</Typography>
                     <br/>
                     <Typography variant="h5">Legend</Typography>
-                    <Typography variant="body1"><span style={{'color': 'orange'}}>Orange</span> numbers means machine
-                        wastes time doing nothing</Typography>
-                    <Typography variant="body1"><span style={{'color': 'LightCoral'}}>Red</span> numbers means
-                        machine isn't processing fast enough</Typography>
-                    <Typography variant="body1"><span style={{'color': 'Blue'}}>Blue</span> numbers means the belt capacity was overridden (fix it ASAP!)</Typography>
+                    <Typography variant="body1"><span style={{'color': 'orange'}}>Orange</span> numbers means the machine wastes time doing nothing.</Typography>
+                    <Typography variant="body1"><span style={{'color': 'LightCoral'}}>Red</span> numbers means the machine isn't processing fast enough.</Typography>
+                    <Typography variant="body1"><span style={{'color': 'Blue'}}>Blue</span> numbers means the belt capacity was overridden (and you need to fix it ASAP!)</Typography>
                     <br/>
                     {/*<Typography variant="body1">Special thanks to the following testers: GeekyMeerkat, Stay, HartWeed, safken, marcspc, Laugexd</Typography>*/}
-                    <Typography variant="body1">You can revisit these instructions anytime by clicking on the bottom left.</Typography>
+                    <Typography variant="body1">Revisit these instructions anytime by clicking on the bottom right.</Typography>
 
                 </FabPopup>
                 {(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes && this.state.selectedPath.upgradeTypes.length > 1) ?
