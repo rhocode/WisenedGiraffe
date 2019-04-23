@@ -390,11 +390,11 @@ const data = [
             },
             {
                 name: 'Quantum Crystal',
-                icon: baseUrl + 'Quantum_Crystal.png'
+                icon: baseUrl + 'Generic.png'
             },
             {
                 name: 'Superposition Oscillator',
-                icon: baseUrl + 'Superposition_Oscillator.png'
+                icon: baseUrl + 'Generic.png'
             },
             {
                 name: 'Quantum Computer',
