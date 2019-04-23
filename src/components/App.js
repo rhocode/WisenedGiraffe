@@ -572,11 +572,12 @@ class App extends Component {
 
           <FabPopup>
             <Typography variant="h4">Welcome to SatisGraphtory!</Typography>
-            <Typography variant="body1">Thanks for checking out our tool! If you have any questions, suggestions, or feedback, feel free to join our <a href={'https://discord.gg/ZRpcgqY'} target="_blank">Discord server</a>! We're always looking to add more
-                    functionality!</Typography>
+            <Typography variant="body1">This is a factory planner/optimizer/analyzer tool for factories old and new, meant to accompany the game Satisfactory by Coffee Stain Studios. </Typography>
+            <br />
+            <Typography variant="body1">Thanks for checking out our tool! If you have any questions, suggestions, feedback, or want to contribute feel free to join our <a href={'https://discord.gg/ZRpcgqY'} target="_blank">Discord server</a>! We're always looking to add more
+              functionality!</Typography>
             <br />
             <Typography variant="h5">This tool will always be free.</Typography>
-            <Typography variant="body1">If you would like to contribute, contact us on Discord! We'd love your help!</Typography>
             <br />
             <Typography variant="h5">Graph Basics</Typography>
             <ul>
