@@ -485,7 +485,7 @@ class App extends Component {
 
                 <FabPopup>
                     <Typography variant="h4">Welcome to SatisGraphtory!</Typography>
-                    <Typography variant="body1">Thanks for checking out our tool! If you have any questions, suggestions, or feedback, feel free to join our <a href={"https://discord.gg/ZRpcgqY"}>Discord server</a>! We're always looking to add more
+                    <Typography variant="body1">Thanks for checking out our tool! If you have any questions, suggestions, or feedback, feel free to join our <a href={"https://discord.gg/ZRpcgqY"} target="_blank">Discord server</a>! We're always looking to add more
                     functionality!</Typography>
                     <br />
                     <Typography variant="h5">This tool will always be free.</Typography>
