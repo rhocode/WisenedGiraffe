@@ -1,4 +1,5 @@
 import lf from 'lovefield';
+import { getTraversableComposition } from 'fp-ts/lib/Traversable2v';
 
 /** @namespace lf.Type */
 const schemaBuilder = lf.schema.create('test', 6);
@@ -763,7 +764,7 @@ const data = [
             {name: 'Quickwire (Alt.)'},
 
             {name: 'Rubber Cable'},
-            {name: 'Circuit Board'},
+            {name: 'Circuit Board (Alt.)'},
             {name: 'Caterium Circuit Board'},
             {name: 'Caterium Computer'},
 
@@ -1238,6 +1239,79 @@ const data = [
                 item_id: getTableEntryIdByName('item', 'Biofuel'),
                 time: 4,
                 quantity: 2,
+            },
+            {
+                name: 'A.I. Limiter',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Circuit Board'),
+                    quantity: 1,
+                },{
+                    item_id: getTableEntryIdByName('item', 'Quickwire'),
+                    quantity: 18,
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+                item_id: getTableEntryIdByName('item', 'A.I. Limiter'),
+                time: 12,
+                quantity: 1,
+            },
+            {
+                name: 'Circuit Board',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Wire'),
+                    quantity: 12,
+                },{
+                    item_id: getTableEntryIdByName('item', 'Plastic'),
+                    quantity: 6,
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+                item_id: getTableEntryIdByName('item', 'Circuit Board'),
+                time: 12,
+                quantity: 1,
+            },
+            {
+                name: 'Circuit Board (Alt.)',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Rubber'),
+                    quantity: 16,
+                },{
+                    item_id: getTableEntryIdByName('item', 'Wire'),
+                    quantity: 24,
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+                item_id: getTableEntryIdByName('item', 'Circuit Board'),
+                time: 24,
+                quantity: 3,
+                player_unlock_id: getTableEntryIdByName('player_unlock', 'Circuit Board (Alt.)'),
+            },
+            {
+                name: 'Caterium Circuit Board',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Plastic'),
+                    quantity: 12,
+                },{
+                    item_id: getTableEntryIdByName('item', 'Quickwire'),
+                    quantity: 32,
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+                item_id: getTableEntryIdByName('item', 'Circuit Board'),
+                time: 24,
+                quantity: 3,
+                player_unlock_id: getTableEntryIdByName('player_unlock', 'Caterium Circuit Board'),
+            },
+            {
+                name: 'Rubber Cable',
+                inputs: parseRecipeIngredients([{
+                   item_id: getTableEntryIdByName('item', 'Wire'),
+                   quantity: 3,
+                },{
+                    item_id: getTableEntryIdByName('item', 'Rubber'),
+                    quantity: 2,
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+                item_id: getTableEntryIdByName('item', 'Cable'),
+                time: 8,
+                quantity: 5,
+                player_unlock_id: getTableEntryIdByName('player_unlock', 'Rubber Cable'),
             }
         ]
     }

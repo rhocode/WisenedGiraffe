@@ -539,9 +539,9 @@ class App extends Component {
 
                     <List>
                         <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers'>
-                            <Typography variant="body1">Created by <a href="https://github.com/tehalexf">Alex</a> and <a
-                                href="https://github.com/thinkaliker">Adam</a> (<a
-                                href="https://twitter.com/thinkaliker">@thinkaliker</a>).</Typography>
+                            <Typography variant="body1">Created by <a href="https://github.com/tehalexf" target="_blank">Alex</a> and <a
+                                href="https://github.com/thinkaliker" target="_blank">Adam</a> (<a
+                                href="https://twitter.com/thinkaliker" target="_blank">@thinkaliker</a>).</Typography>
                             <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain
                                 Studios AB, or THQ Nordic AB.</Typography>
                             <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from
@@ -549,8 +549,8 @@ class App extends Component {
                         </SidebarPopup>
                         <SidebarPopup Icon={WarningIcon} label='Known Issues' title='Known Issues'>
                             <ul>
-                                <li>Resource nodes do not have purities displayed on the graph.</li>
-                                <li>No option yet to hide belt and factory numbers.</li>
+                                <li><Typography>Resource nodes do not have purities displayed on the graph.</Typography></li>
+                                <li><Typography>No option yet to hide belt and factory numbers.</Typography></li>
                             </ul>
                         </SidebarPopup>
                     </List>
