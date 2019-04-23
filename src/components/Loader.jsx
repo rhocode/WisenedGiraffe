@@ -12,7 +12,8 @@ const loading = [
     'Adding Mana...',
     'Spilling Coffee...',
     'Becoming A Goat...',
-    'Charging Batteries...'
+    'Charging Batteries...',
+    'Reticulating Splines'
 ];
 
 export const styles = theme => ({
