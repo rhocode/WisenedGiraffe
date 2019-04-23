@@ -130,10 +130,17 @@ export const analyzeGraph = function (optimize=false) {
     if (node.data && node.data.recipe && !node.data.node && this.props.parentAccessor.state && this.props.parentAccessor.state.recipe && this.props.parentAccessor.state.recipe.recipe) {
       if (useExperimentalFeature('forceRecalculate')) {
         const workaroundHack = this.props.parentAccessor.state.recipe.recipe.filter(rec => rec.id === node.data.recipe.id);
+        const nodeWorkaround = this.props.parentAccessor.state.machine_node.machine_node.filter(rec => rec.id === node.instance.id);
+
         if (workaroundHack.length > 0) {
           node.data.recipe = workaroundHack[0];
+          console.log('Replaced recipe', workaroundHack[0]);
         }
-        console.log('Replaced recipe', workaroundHack[0]);
+        if (nodeWorkaround.length > 0) {
+          node.instance = nodeWorkaround[0];
+          console.log('Replaced node', nodeWorkaround[0]);
+        }
+
       }
     }
 
