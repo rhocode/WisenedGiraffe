@@ -15,7 +15,6 @@ export const add_node = (d, t) => {
 
 
     const bodyEl = document.getElementById('svgParent');
-    console.log(bodyEl, "AAAAAA");
     const width = bodyEl.clientWidth;
     const height = bodyEl.clientHeight;
 
@@ -461,8 +460,7 @@ export const insertComponents = function (parentElement) {
         nodeThis.selectAll('.' + constants.nodeLimitingThroughputText).remove();
 
         Object.keys(d.itemThroughPut || {}).forEach((key, index) => {
-            const item = d.itemThroughPut[key];
-
+            const item = d.itemThroughPut[key] || {actual: 0, max: 0};
             if (!d.itemIconLookup) return;
 
             let definedColor = 'LightCoral';

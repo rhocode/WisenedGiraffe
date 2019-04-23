@@ -19,6 +19,7 @@ import {drag_drag, drag_end, drag_start} from './mouseEvents';
 import {calculateLabelPositions, insertEdgeLabel, pathMouseClick, recalculateStorageContainers} from './edgeActions';
 import {strongly_connected_components_standalone} from './algorithms';
 import TinyQueue from '../TinyQueue';
+import {useExperimentalFeature} from "./util";
 
 
 export const analyzeGraph = function (optimize=false) {
@@ -33,12 +34,17 @@ export const analyzeGraph = function (optimize=false) {
         nodeLookup[nodeUnionArray[index].id] = nodeUnionArray[index];
         nodeUnionArray[index].childProvides = [];
         nodeUnionArray[index].hasSources = new Set();
-        nodeUnionArray[index].containedItems = [];
+        if (!nodeUnionArray[index].infiniteSource) {
+            nodeUnionArray[index].containedItems = [];
+        }
 
         if (nodeUnionArray[index].machine.name !== 'Container' && nodeUnionArray[index].machine.name !== 'Logistic') {
         } else {
             nodeUnionArray[index].allowedIn = [];
-            nodeUnionArray[index].allowedOut = [];
+            if (!nodeUnionArray[index].infiniteSource) {
+                nodeUnionArray[index].allowedOut = [];
+            }
+
         }
     });
 
@@ -50,10 +56,15 @@ export const analyzeGraph = function (optimize=false) {
 
     const componentsList = strongly_connected_components_standalone(nodeOutWithSets);
     const superNodeGraphLookup = {};
+    this.singleToGroupNodeLookup = {};
     const superNodeGraphLookupInflated = {};
     const lookupArray = {};
     componentsList.forEach((list, index) => {
         superNodeGraphLookup[index] = list;
+        (list  || []).forEach(item => {
+            this.singleToGroupNodeLookup[item] = index
+        });
+
         superNodeGraphLookupInflated[index] = list.map(id => nodeLookup[id]);
         list.forEach(item => {
             lookupArray[item] = index;
@@ -115,7 +126,7 @@ export const analyzeGraph = function (optimize=false) {
         delete node.internalError;
 
         if (node.data && node.data.recipe && !node.data.node && this.props.parentAccessor.state && this.props.parentAccessor.state.recipe && this.props.parentAccessor.state.recipe.recipe) {
-            if (window.location.search.indexOf('thankYouStay=veryYes') > -1) {
+            if (useExperimentalFeature('forceRecalculate')) {
                 const workaroundHack = this.props.parentAccessor.state.recipe.recipe.filter(rec => rec.id === node.data.recipe.id);
                 if (workaroundHack.length > 0) {
                     node.data.recipe = workaroundHack[0];
@@ -241,26 +252,62 @@ export const analyzeGraph = function (optimize=false) {
                         });
                     });
                 } else if (node.machine.name === 'Container') {
-                    const resources = {};
-                    const providedSet = new Set();
-                    provided.forEach(provide => {
-                        const i = provide.throughput.item;
-                        providedSet.add(i);
-                        const itemPerSec = provide.calculatedItemPerSecond;
-                        resources[i] = resources[i] || 0;
-                        resources[i] += itemPerSec * 60;
-                        nodeGroupSourceThroughput.push(provide);
-                    });
+                    if (node.infiniteSource) {
+                        let maxThroughput = 0;
+                        let localThroughput = 0;
+                        (node.allowedOut || []).forEach(itemid => {
+                            throughput = {
+                                speed: 1,
+                                overclock: 1,
+                                quantity: node.quantityPerInfinite || 0,
+                                item: itemid,
+                                time: node.timePerInfinite || 1,
+                                power: 0,
+                                inputs: []
+                            };
+                            efficiency = 1;
 
-                    nodeGroupSource.forEach(node => {
-                        node.efficiency = 1;
-                        node.itemsPerMinute = {};
-                        providedSet.forEach(providedItem => {
-                            const resourceCount = resources[providedItem];
-                            node.itemsPerMinute[providedItem] = resourceCount;
-                            node.itemThroughPut = {[providedItem]: {max: resourceCount, actual: resourceCount}};
+                            localThroughput = (throughput.quantity / throughput.time) * 60;
+                            maxThroughput += localThroughput;
+                            nodeGroupSourceThroughput.push({throughput, efficiency, source: origin});
                         });
-                    });
+
+                        const itemsPerMinute = {};
+                        const itemThroughPut = {};
+                        nodeGroupSourceThroughput.forEach(item => {
+                            itemThroughPut[item.throughput.item] = {max: localThroughput, actual: localThroughput};
+                            itemsPerMinute[item.throughput.item] = localThroughput;
+                        });
+
+                        nodeGroupSource.forEach(node => {
+                            node.efficiency = efficiency;
+                            node.itemsPerMinute = itemsPerMinute;
+                            node.optimumOverclock = 1.0;
+                            // Comment this out if we should remove the display from nodes
+                            node.itemThroughPut = itemThroughPut;
+                        });
+                    } else {
+                        const resources = {};
+                        const providedSet = new Set();
+                        provided.forEach(provide => {
+                            const i = provide.throughput.item;
+                            providedSet.add(i);
+                            const itemPerSec = provide.calculatedItemPerSecond;
+                            resources[i] = resources[i] || 0;
+                            resources[i] += itemPerSec * 60;
+                            nodeGroupSourceThroughput.push(provide);
+                        });
+
+                        nodeGroupSource.forEach(node => {
+                            node.efficiency = 1;
+                            node.itemsPerMinute = {};
+                            providedSet.forEach(providedItem => {
+                                const resourceCount = resources[providedItem];
+                                node.itemsPerMinute[providedItem] = resourceCount;
+                                node.itemThroughPut = {[providedItem]: {max: resourceCount, actual: resourceCount}};
+                            });
+                        });
+                    }
                 } else {
                     throughput = {
                         speed: nodeSpeed,
@@ -772,11 +819,14 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
     const drag = d3.drag()
         .clickDistance(10)
         .on('start', (d) => {
+            console.debug("[Debug] Dragstart");
             drag_start.call(this, d, simulation, t);
         }).on('drag', (d) => {
+            console.debug("[Debug] Dragging");
             drag_drag.call(this, d, t);
         }).on('end', function (d) {
-            d3.event.sourceEvent.stopImmediatePropagation();
+            console.debug("[Debug] Drag end");
+            // d3.event.sourceEvent.stopImmediatePropagation(); // REMOVEDNOW
             drag_end.call(this, d, t, simulation);
         });
 
@@ -798,13 +848,17 @@ export const updateGraph = function (simulation, graphNodesGroup, graphLinksGrou
             // .on('mouseover', d => console.log(`d.id: ${d.id}`))
             // .on('click', d => t.handleNodeClicked(d))
             .on('wheel.zoom', function (d) {
+                console.debug("Wheel zoom");
                 wheelZoomCalculation.call(this, d);
             })
             .on('click', function (d) {
+                console.debug("Clicked");
                 d3.event.stopImmediatePropagation();
+                //REMOVEDNOW
                 node_clicked.call(this, d, t);
                 // self.onNodeClicked.emit(d.id);
             }).on('dblclick', function (d) {
+                console.debug("Double clicked");
             d3.event.stopImmediatePropagation();
             remove_select_from_nodes(t);
             //double click

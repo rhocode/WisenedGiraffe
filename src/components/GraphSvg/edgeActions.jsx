@@ -19,12 +19,17 @@ export const recalculateStorageContainers = function () {
         nodeLookup[nodeUnionArray[index].id] = nodeUnionArray[index];
         nodeUnionArray[index].childProvides = [];
         nodeUnionArray[index].hasSources = new Set();
-        nodeUnionArray[index].containedItems = [];
+        if (!nodeUnionArray[index].infiniteSource) {
+            nodeUnionArray[index].containedItems = [];
+        }
 
         if (nodeUnionArray[index].machine.name !== 'Container' && nodeUnionArray[index].machine.name !== 'Logistic') {
         } else {
             nodeUnionArray[index].allowedIn = [];
-            nodeUnionArray[index].allowedOut = [];
+            if (!nodeUnionArray[index].infiniteSource) {
+                nodeUnionArray[index].allowedOut = [];
+            }
+
         }
     });
 
@@ -108,16 +113,21 @@ export const recalculateStorageContainers = function () {
                 if (node.machine.name !== 'Container' && node.machine.name !== 'Logistic') {
                     combinedProvides.push({item: node.data.recipe, source: origin});
                 } else {
-                    node.childProvides = globalProvideMap[origin] || [];
-                    node.childProvides.forEach(provide => {
-                        if (!combinedProvidesSource.has(provide.source)) {
-                            combinedProvides.push(provide);
-                            combinedProvidesSource.add(provide.source);
-                        }
-                    });
-                    node.allowedIn = node.childProvides.map(elem => elem.item.item.id);
-                    node.allowedOut = node.childProvides.map(elem => elem.item.item.id);
-                    node.containedItems = node.childProvides.map(elem => elem.item.item);
+                    if (node.infiniteSource) {
+                        node.childProvides = [];
+                    } else {
+                        node.childProvides = globalProvideMap[origin] || [];
+                        node.childProvides.forEach(provide => {
+                            if (!combinedProvidesSource.has(provide.source)) {
+                                combinedProvides.push(provide);
+                                combinedProvidesSource.add(provide.source);
+                            }
+                        });
+                        node.allowedIn = node.childProvides.map(elem => elem.item.item.id);
+                        node.allowedOut = node.childProvides.map(elem => elem.item.item.id);
+                        node.containedItemsMap = node.childProvides.map(elem => { return {item: elem.item.item, source: elem.source}});
+                        node.containedItems = node.childProvides.map(elem => elem.item.item);
+                    }
                 }
             });
 
@@ -156,6 +166,9 @@ export const recalculateStorageContainers = function () {
 
             const allowed = new Set();
             nodeGroupTarget.forEach(nodeGroup => nodeGroup.forEach(node => {
+                if (node.infiniteSource) {
+                    return;
+                }
                 node.allowedIn.forEach(item => allowed.add(item))
             }));
 
@@ -164,7 +177,9 @@ export const recalculateStorageContainers = function () {
                     // NoOp
                 } else {
                     if (node.allowedIn.length === 0 && node.allowedOut.length === 0) {
-                        node.allowedIn = Array.from(allowed);
+                        if (!node.infiniteSource) {
+                            node.allowedIn = Array.from(allowed);
+                        }
                         node.allowedOut = Array.from(allowed);
                     }
                 }
@@ -175,6 +190,10 @@ export const recalculateStorageContainers = function () {
 };
 
 export const addPath = function (passedThis, source, target) {
+
+    if (source.id === target.id) {
+        return;
+    }
 
     const sourceChecker = (source.allowedIn || []).length > 0 || (source.allowedOut || []).length > 0;
     const targetChecker = (target.allowedIn || []).length > 0 || (target.allowedOut || []).length > 0;
@@ -197,9 +216,10 @@ export const addPath = function (passedThis, source, target) {
     const newEdge = {source: source, target: target, instance, upgradeTypes: upgrades};
 
     if (((specialSource && !sourceChecker) || (specialTarget && !targetChecker)) || (mergerTarget || mergerSource)) {
-        console.log("Special Handling");
         // special handling if the source is a container
-
+        if (target.infiniteSource) {
+            return;
+        }
         // check if there are open slots
         const outgoing = source.id;
         const incoming = target.id;
@@ -227,6 +247,10 @@ export const addPath = function (passedThis, source, target) {
     } else {
         //checked
 
+        if (target.infiniteSource) {
+            return;
+        }
+
         // Check if there are items you can shove in
         const sharedItems = target.allowedIn.filter(value => source.allowedOut.includes(value));
 
@@ -243,6 +267,8 @@ export const addPath = function (passedThis, source, target) {
             passedThis.updateGraphHelper();
             return;
         }
+
+
 
         const filterResult = passedThis.graphData.links.filter(function (d) {
             if (d.source.id === newEdge.target.id && d.target.id === newEdge.source.id) {
@@ -282,9 +308,32 @@ export const removePath = function (d, t) {
     }
     const outgoing = d.source.id;
     const incoming = d.target.id;
+
+
+    if (d.target.machine.name === 'Container' || d.target.machine.name === 'Logistic') {
+        d.target.childProvides = d.target.childProvides.filter(item => item.source !== '' + outgoing);
+
+        if (d.target.containedItemsMap) {
+            d.target.containedItemsMap = d.target.containedItemsMap.filter(item => item.source !== '' + outgoing);
+            d.target.containedItems =  d.target.containedItemsMap.map(item => item.item);
+        }
+
+        d.target.allowedIn =  d.target.childProvides.map(elem => elem.item.item.id);
+        d.target.allowedOut =  d.target.childProvides.map(elem => elem.item.item.id);
+    }
+
     spliceUtil(t.nodeOut[outgoing], d.target);
     spliceUtil(t.nodeIn[incoming], d.source);
-    spliceUtil(t.graphData.links, d);
+    spliceUtil(t.graphData.links, d)
+
+    if ((d.source.machine.name === 'Container' || d.source.machine.name === 'Logistic') && (t.nodeIn[d.source.id] || []) .length === 0) {
+        d.source.childProvides = [];
+        d.source.containedItems =  [];
+        d.source.containedItemsMap = [];
+        d.source.allowedIn =  [];
+        d.source.allowedOut =  [];
+    }
+
 };
 
 

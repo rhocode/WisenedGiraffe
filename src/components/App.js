@@ -507,7 +507,7 @@ class App extends Component {
                 </FabPopup>
                 {(this.state.selectedNode && this.state.selectedNode.machine.name === 'Container') ||(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes
                     && this.state.selectedPath.upgradeTypes.length > 1) ?
-                    <SelectorPanel label='Options' graphSvg={this.graphSvg}
+                    <SelectorPanel items={this.state.item.item} label='Options' graphSvg={this.graphSvg}
                                    overclock={this.state.selectedNode ? this.state.selectedNode.overclock : -1} selected={this.state.selectedNode || this.state.selectedPath}/> : null}
                 <Drawer
                     className={classes.drawer}

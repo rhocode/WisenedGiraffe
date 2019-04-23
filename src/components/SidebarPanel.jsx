@@ -89,7 +89,6 @@ class SidebarPanel extends React.Component {
     }
 
     handleChangeMultiple = event => {
-        console.log(event.currentTarget);
         const options = event.currentTarget.parentElement.children;
         const value = [];
         for (let i = 0, l = options.length; i < l; i += 1) {

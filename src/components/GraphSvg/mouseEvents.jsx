@@ -42,15 +42,14 @@ export const drag_end = (d, graphSvg, simulation) => {
         graphSvg.dragLine.classed('hidden', true).attr('d', 'M0,0L0,0');
     } else {
         if (graphSvg.state && graphSvg.state.wasMoved) {
-            d.x = d.fx;
-            d.y = d.fy;
-
             if (graphSvg.state.snapToGrid) {
                 if (d.fx) {
                     d.fx = round_up(d.fx, 100);
                     d.fy = round_up(d.fy, 100);
                 }
             }
+            d.x = d.fx;
+            d.y = d.fy;
         } else if (graphSvg.state && !graphSvg.state.wasFixed) {
             d.fx = null;
             d.fy = null;
