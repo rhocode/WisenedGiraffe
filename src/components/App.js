@@ -12,6 +12,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import * as ReactGA from 'react-ga';
 
 import WarningIcon from '@material-ui/icons/Warning';
+import MenuIcon from '@material-ui/icons/Menu';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
 
@@ -29,22 +30,34 @@ import ClearButton from './ClearButton';
 import ShareButton from './ShareButton';
 import SelectorPanel from './SelectorPanel';
 import {loadHash, useExperimentalFeature} from "./GraphSvg/util";
-
+import classNames from 'classnames';
 import firebase from 'firebase/app'
 import 'firebase/database'
 import 'firebase/auth'
 import createDatabase from "./newData";
+import IconButton from "@material-ui/core/IconButton";
+import Hidden from "@material-ui/core/Hidden";
 
-const drawerWidth = 310;
+const drawerWidth = 260;
 
 const styles = theme => ({
+    centeredLogo: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
     root: {
         display: 'flex',
         flexGrow: 1,
         flexBasis: 'auto',
     },
+    menuButton: {
+        marginLeft: 0,
+        marginRight: 12,
+    },
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
+        minHeight: 64
     },
     drawer: {
         width: drawerWidth,
@@ -67,7 +80,10 @@ const styles = theme => ({
     },
     toolbar: theme.mixins.toolbar,
     logo: {
-        width: drawerWidth,
+        width: drawerWidth - 10,
+    },
+    logoSmall: {
+        width: 25,
     },
     grow: {
         flexGrow: 1,
@@ -121,9 +137,14 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            loaded: false
+            loaded: false,
+            mobileOpen: false
         };
     }
+
+    handleDrawerToggle = () => {
+        this.setState(state => ({ mobileOpen: !state.mobileOpen }));
+    };
 
     getRefkeyTableFireBase(table) {
         const db = this.state.fbdb;
@@ -457,6 +478,41 @@ class App extends Component {
         );
     }
 
+    drawerContents = () => {
+        const classes = this.props.classes;
+      return <React.Fragment>
+          <List>
+              <Typography variant="h5" className={classes.drawerTitle}>Nodes</Typography>
+              {this.generateNodeList()}
+              {this.generateSpringList()}
+              {this.generateContainerList()}
+          </List>
+          <Divider/>
+
+          <SidebarPanel parentState={this} playerUnlock={this.state.player_unlock}/>
+
+          <Divider/>
+
+          <List>
+              <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers'>
+                  <Typography variant="body1">Created by <a href="https://github.com/tehalexf" target="_blank">Alex</a> and <a
+                      href="https://github.com/thinkaliker" target="_blank">Adam</a> (<a
+                      href="https://twitter.com/thinkaliker" target="_blank">@thinkaliker</a>).</Typography>
+                  <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain
+                      Studios AB, or THQ Nordic AB.</Typography>
+                  <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from
+                      Coffee Stain Studios AB's Satisfactory.</Typography>
+              </SidebarPopup>
+              <SidebarPopup Icon={WarningIcon} label='Known Issues' title='Known Issues'>
+                  <ul>
+                      <li><Typography>Resource nodes do not have purities displayed on the graph.</Typography></li>
+                      <li><Typography>No option yet to hide belt and factory numbers.</Typography></li>
+                  </ul>
+              </SidebarPopup>
+          </List>
+      </React.Fragment>
+    };
+
     render() {
         const {classes} = this.props;
         if (!this.state.isReady) {
@@ -470,17 +526,39 @@ class App extends Component {
             <MuiThemeProvider theme={theme}>
                 <AppBar position="fixed" className={classes.appBar}>
                     <Toolbar>
-                        <img alt="wow so satis factory" className={classes.logo}
-                             src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satisgraphtory.png"
-                             title="logo"/>
+                        <Hidden mdUp implementation="css">
+                            <div className={classes.centeredLogo}>
+                            <IconButton
+                                color="inherit"
+                                aria-label="Open drawer"
+                                onClick={this.handleDrawerToggle}
+                                // className={classes.menuButton}
+                            >
+                                <MenuIcon />
+                            </IconButton>
+                            <img alt="wow so satis factory" className={classes.logoSmall}
+                                 src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/dot.png"
+                                 title="logo"/>
+                            </div>
+                        </Hidden>
+                        <Hidden smDown implementation="css">
+                            <img alt="wow so satis factory" className={classes.logo}
+                                 src="https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satisgraphtory.png"
+                                 title="logo"/>
+                        </Hidden>
+
                         <div className={classes.grow} />
                         {useExperimentalFeature('opt') ? <Button color="inherit" onClick={() => t.graphSvg.optimize()}>
                             <OfflineBoltIcon/>
+                            <Hidden smDown implementation="css">
                             <div className={classes.label}>Optimize</div>
+                            </Hidden>
                         </Button> : null }
                         <Button color="inherit" onClick={() => t.graphSvg.analyze()}>
                             <SettingsInputComponentIcon/>
+                            <Hidden smDown implementation="css">
                             <div className={classes.label}>Analyze</div>
+                            </Hidden>
                         </Button>
                         <ShareButton t={t}/>
                         {/*<LoadButton t={t}/>*/}
@@ -523,43 +601,34 @@ class App extends Component {
                     && this.state.selectedPath.upgradeTypes.length > 1) ?
                     <SelectorPanel items={this.state.item.item} label='Options' graphSvg={this.graphSvg}
                                    overclock={this.state.selectedNode ? this.state.selectedNode.overclock : -1} selected={this.state.selectedNode || this.state.selectedPath}/> : null}
-                <Drawer
-                    className={classes.drawer}
-                    variant="permanent"
-                    classes={{
-                        paper: classes.drawerPaper,
-                    }}
-                >
-                    <List>
-                        <Typography variant="h5" className={classes.drawerTitle}>Nodes</Typography>
-                        {this.generateNodeList()}
-                        {this.generateSpringList()}
-                        {this.generateContainerList()}
-                    </List>
-                    <Divider/>
+                <Hidden mdUp implementation="css">
+                    <Drawer
+                        container={this.props.container}
+                        variant="temporary"
+                        anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+                        open={this.state.mobileOpen}
+                        onClose={this.handleDrawerToggle}
+                        classes={{
+                            paper: classes.drawerPaper,
+                        }}
+                    >
+                        {this.drawerContents()}
+                    </Drawer>
+                </Hidden>
+                <Hidden smDown implementation="css">
+                    <Drawer
+                        className={classes.drawer}
+                        variant="permanent"
+                        classes={{
+                            paper: classes.drawerPaper,
+                        }}
+                    >
+                        {this.drawerContents()}
+                    </Drawer>
+                </Hidden>
 
-                    <SidebarPanel parentState={this} playerUnlock={this.state.player_unlock}/>
 
-                    <Divider/>
 
-                    <List>
-                        <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers'>
-                            <Typography variant="body1">Created by <a href="https://github.com/tehalexf" target="_blank">Alex</a> and <a
-                                href="https://github.com/thinkaliker" target="_blank">Adam</a> (<a
-                                href="https://twitter.com/thinkaliker" target="_blank">@thinkaliker</a>).</Typography>
-                            <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain
-                                Studios AB, or THQ Nordic AB.</Typography>
-                            <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from
-                                Coffee Stain Studios AB's Satisfactory.</Typography>
-                        </SidebarPopup>
-                        <SidebarPopup Icon={WarningIcon} label='Known Issues' title='Known Issues'>
-                            <ul>
-                                <li><Typography>Resource nodes do not have purities displayed on the graph.</Typography></li>
-                                <li><Typography>No option yet to hide belt and factory numbers.</Typography></li>
-                            </ul>
-                        </SidebarPopup>
-                    </List>
-                </Drawer>
                 <div id="svgParent" className={classes.content}>
                     {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
                         t.graphSvg = graphSvg;

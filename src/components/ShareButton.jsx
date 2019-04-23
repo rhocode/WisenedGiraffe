@@ -7,6 +7,7 @@ import ShareIcon from '@material-ui/icons/Share';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import TextField from '@material-ui/core/TextField';
 import {rebuildQueryParams, useExperimentalFeature} from "./GraphSvg/util";
+import Hidden from "@material-ui/core/Hidden";
 
 const styles = theme => ({
     label: {
@@ -59,7 +60,9 @@ class ShareButton extends React.Component {
             <React.Fragment>
                 <Button color='inherit' onClick={onClick || this.handleModalOpen}>
                     <ShareIcon/>
+                    <Hidden smDown implementation="css">
                     <div className={classes.label}>Share</div>
+                    </Hidden>
                 </Button>
                 <PopupDialog title={'Share Code'} open={this.state.modalOpen}
                              handleModalClose={this.handleModalClose}>

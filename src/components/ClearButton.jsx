@@ -5,6 +5,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 
 import PopupDialog from './PopupDialog';
 import {withStyles} from '@material-ui/core';
+import Hidden from "@material-ui/core/Hidden";
 
 const styles = theme => ({
     label: {
@@ -31,8 +32,11 @@ class ClearButton extends React.Component {
         return (
             <React.Fragment>
                 <Button color='inherit' onClick={onClick || this.handleModalOpen}>
+
                     <DeleteIcon/>
+                    <Hidden smDown implementation="css">
                     <div className={classes.label}>Clear</div>
+                    </Hidden>
                 </Button>
                 <PopupDialog title={'Clear Graph?'} open={this.state.modalOpen}
                              handleModalClose={this.handleModalClose}>

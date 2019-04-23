@@ -16,9 +16,9 @@ import Chip from "@material-ui/core/Chip";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import TextField from "@material-ui/core/TextField";
+import Hidden from "@material-ui/core/Hidden";
 
-const drawerWidth = 310;
-
+const drawerWidth = 260;
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -31,6 +31,14 @@ const styles = theme => ({
     paper: {
         position: 'absolute',
         left: drawerWidth + 20,
+        bottom: 20,
+        margin: 16,
+        padding: 12,
+        minWidth: drawerWidth - 100,
+    },
+    paperMobile: {
+        position: 'absolute',
+        left: 20,
         bottom: 20,
         margin: 16,
         padding: 12,
@@ -245,19 +253,18 @@ class SelectorPanel extends React.Component {
         this.debouncedUpdateGraph();
     };
 
-    render() {
+    renderContent = () => {
         const {classes, label} = this.props;
         return (
-            <Paper className={classes.paper}>
-                <Typography variant='h5'>{label}</Typography>
+                <React.Fragment><Typography variant='h5'>{label}</Typography>
                 <Typography variant="body1">
-                <IconButton color="secondary" className={classes.button} onClick={this.downgrade}>
-                    <ArrowDownwardIcon/>
-                </IconButton>
-                {this.props.selected.instance.name}
-                <IconButton color="primary" className={classes.button} onClick={this.upgrade}>
-                    <ArrowUpwardIcon/>
-                </IconButton>
+                    <IconButton color="secondary" className={classes.button} onClick={this.downgrade}>
+                        <ArrowDownwardIcon/>
+                    </IconButton>
+                    {this.props.selected.instance.name}
+                    <IconButton color="primary" className={classes.button} onClick={this.upgrade}>
+                        <ArrowUpwardIcon/>
+                    </IconButton>
                 </Typography>
                 {this.props.overclock !== -1 && this.props.selected.machine.name !== 'Container' && this.props.selected.machine.name !== 'Logistic' ?
                     <React.Fragment>
@@ -295,52 +302,68 @@ class SelectorPanel extends React.Component {
                     <div>
                         <FormControl>
                             <InputLabel htmlFor="select-multiple-chip">Contents</InputLabel>
-                                <Select
-                                    multiple
-                                    className={classes.itemInput}
-                                    value={this.state.selectedSource}
-                                    onChange={this.handleChange}
-                                    input={<Input id="select-multiple-chip" />}
-                                    renderValue={selected => (
-                                        <div className={classes.chips}>
-                                            {selected.map(value => (
-                                                <Chip key={value} label={this.itemMap[value].name} className={classes.chip} />
-                                            ))}
-                                        </div>
-                                    )}
-                                    MenuProps={MenuProps}
-                                >
-                                    {this.items.map(item => {
-                                        return <MenuItem key={item.id} value={item.id}><img className={classes.icon} src={item.icon} alt="" height="30" width="30" />{item.name}</MenuItem>
-                                    })
-                                    }
-                                </Select>
+                            <Select
+                                multiple
+                                className={classes.itemInput}
+                                value={this.state.selectedSource}
+                                onChange={this.handleChange}
+                                input={<Input id="select-multiple-chip" />}
+                                renderValue={selected => (
+                                    <div className={classes.chips}>
+                                        {selected.map(value => (
+                                            <Chip key={value} label={this.itemMap[value].name} className={classes.chip} />
+                                        ))}
+                                    </div>
+                                )}
+                                MenuProps={MenuProps}
+                            >
+                                {this.items.map(item => {
+                                    return <MenuItem key={item.id} value={item.id}><img className={classes.icon} src={item.icon} alt="" height="30" width="30" />{item.name}</MenuItem>
+                                })
+                                }
+                            </Select>
                             <div className={classes.formGroup}>
-                            <TextField
-                                id="quantity"
-                                label="Quantity (each)"
-                                className={classes.textField}
-                                value={this.state.quantity}
-                                onChange={this.handleTextChangeQuantity}
-                                margin="normal"
-                                type="number" inputProps={{ min: "0", max: "999999", step: "1" }}
-                            />
+                                <TextField
+                                    id="quantity"
+                                    label="Quantity (each)"
+                                    className={classes.textField}
+                                    value={this.state.quantity}
+                                    onChange={this.handleTextChangeQuantity}
+                                    margin="normal"
+                                    type="number" inputProps={{ min: "0", max: "999999", step: "1" }}
+                                />
                                 <div className={classes.textMiddle}>every</div>
-                            <TextField
-                                id="quantity"
-                                label="Seconds"
-                                className={classes.textField}
-                                value={this.state.time}
-                                onChange={this.handleTextChangeSeconds}
-                                margin="normal"
-                                type="number" inputProps={{ min: "1", max: "60", step: "1" }}
-                            />
+                                <TextField
+                                    id="quantity"
+                                    label="Seconds"
+                                    className={classes.textField}
+                                    value={this.state.time}
+                                    onChange={this.handleTextChangeSeconds}
+                                    margin="normal"
+                                    type="number" inputProps={{ min: "1", max: "60", step: "1" }}
+                                />
                             </div>
                         </FormControl>
                     </div>
                     : null}
-            </Paper>
+                </React.Fragment>
         );
+    };
+
+    render() {
+        const {classes} = this.props;
+        return (<React.Fragment>
+            <Hidden smDown implementation="css">
+                <Paper className={classes.paper}>
+                    {this.renderContent()}
+                </Paper>
+            </Hidden>
+            <Hidden mdUp implementation="css">
+                <Paper className={classes.paperMobile}>
+                    {this.renderContent()}
+                </Paper>
+            </Hidden>
+            </React.Fragment>)
     }
 }
 

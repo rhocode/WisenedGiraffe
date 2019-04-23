@@ -23,12 +23,13 @@ const styles = theme => ({
     paper: {
         margin: theme.spacing.unit * 2,
         display: 'flex',
+        zIndex: 1302,
     },
     label: {
         paddingLeft: 10,
     },
     popper: {
-        zIndex: 1200,
+        zIndex: 1301,
         left: '13px !important',
     },
     itemListIcon: {
@@ -109,6 +110,7 @@ class SidebarButton extends React.Component {
                             }
                         );
                         this.handleClose();
+                        appObject.setState({mobileOpen: false})
                     }}>
                         <img alt="probably some goat image" src={link.item.icon} className={classes.itemListIcon}/>
                         {link.quantity === 1 ? '' : link.quantity + 'x '}
