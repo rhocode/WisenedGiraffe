@@ -350,7 +350,7 @@ export const analyzeGraph = function (optimize=false) {
                         overclocks.push(bestOverclock);
                     });
 
-                    const optimumOverclock = Math.ceil(Math.min(...overclocks) * 100);
+                    const optimumOverclock = Math.round(Math.ceil(Math.min(...overclocks) * 100));
                     if (optimize) {
                         throughput.overclock = optimumOverclock / 100;
                     }

@@ -239,7 +239,10 @@ export const updateComponents = function (elementsToUpdate) {
         element.selectAll('.' + constants.nodeRequirementsSubIconClass).remove();
 
         if (allowedInRemaining.length > 0) {
-            element.append('text').attr('class', 'fas fa-arrow-right')
+            element.append('svg:image')
+                .attr('xlink:href', function (d) {
+                    return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/arrow.png'
+                })
                 .classed(constants.nodeRequirementsSubIconClass, true)
                 .attr('x', function (d) {
                     return -56 - 25;
@@ -296,7 +299,10 @@ export const updateComponents = function (elementsToUpdate) {
         });
 
         if (allowedOutRemaining.length > 0) {
-            element.append('text').attr('class', 'fas fa-arrow-right')
+            element.append('svg:image')
+                .attr('xlink:href', function (d) {
+                    return 'https://raw.githubusercontent.com/rhocode/rhocode.github.io/master/img/satoolsfactory_icons/arrow.png'
+                })
                 .classed(constants.nodeRequirementsSubIconClass, true)
                 .attr('x', function (d) {
                     return 58;
