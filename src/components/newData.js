@@ -158,7 +158,7 @@ const parseRecipeIngredients = recipes => {
 
 const generateSpringList = async db => {
     const ret = [];
-    const types = ['Coal Ore', 'Iron Ore', 'Limestone Ore', 'Copper Ore', 'Caterium Ore', 'Crude Oil', 'Raw Quartz','Sulphur', 'Bauxite',
+    const types = ['Coal Ore', 'Iron Ore', 'Limestone Ore', 'Copper Ore', 'Caterium Ore', 'Crude Oil', 'Raw Quartz', 'Sulfur', 'Bauxite',
         'S.A.M. Ore', 'Silica', 'Uranium'];
     const machine_type_miner = await getTableEntryIdByName('machine_class', 'Miner')(db);
     const machine_type_container = await getTableEntryIdByName('machine_class', 'Container')(db);
@@ -406,6 +406,10 @@ const data = [
             {
                 name: 'Biofuel',
                 icon: baseUrl + 'Biofuel.png'
+            },
+            {
+                name: 'S.A.M. Ingot',
+                icon: baseUrl + 'SAM_Ingot.png'
             }
         ]
     },
