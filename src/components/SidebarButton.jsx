@@ -111,6 +111,7 @@ class SidebarButton extends React.Component {
                         this.handleClose();
                     }}>
                         <img alt="probably some goat image" src={link.item.icon} className={classes.itemListIcon}/>
+                        {link.quantity === 1 ? '' : link.quantity + 'x '}
                         {link.name}
                         <div className={classes.grow}/>
                     </MenuItem>

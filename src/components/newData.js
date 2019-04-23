@@ -2,7 +2,7 @@ import lf from 'lovefield';
 import { getTraversableComposition } from 'fp-ts/lib/Traversable2v';
 
 /** @namespace lf.Type */
-const schemaBuilder = lf.schema.create('test', 6);
+const schemaBuilder = lf.schema.create('test', 7);
 
 schemaBuilder.createTable('node_type')
     .addColumn('id', lf.Type.INTEGER)
@@ -366,7 +366,7 @@ const data = [
             },
             {
                 name: 'Aluminum Ingot',
-                icon: baseUrl + 'Aluminum_Ingot.png'
+                icon: baseUrl + 'Iron_Ingot.png'
             },
             {
                 name: 'Aluminum Sheet',
@@ -410,7 +410,7 @@ const data = [
             },
             {
                 name: 'S.A.M. Ingot',
-                icon: baseUrl + 'SAM_Ingot.png'
+                icon: baseUrl + 'Generic.png'
             }
         ]
     },
@@ -762,7 +762,6 @@ const data = [
             {name: 'Steel Ingot (Alt.)'},
             {name: 'Screw (Alt.)'},
             {name: 'Quickwire (Alt.)'},
-
             {name: 'Rubber Cable'},
             {name: 'Circuit Board (Alt.)'},
             {name: 'Caterium Circuit Board'},
@@ -1301,9 +1300,9 @@ const data = [
             {
                 name: 'Rubber Cable',
                 inputs: parseRecipeIngredients([{
-                   item_id: getTableEntryIdByName('item', 'Wire'),
-                   quantity: 3,
-                },{
+                    item_id: getTableEntryIdByName('item', 'Wire'),
+                    quantity: 3,
+                }, {
                     item_id: getTableEntryIdByName('item', 'Rubber'),
                     quantity: 2,
                 }]),
@@ -1312,6 +1311,114 @@ const data = [
                 time: 8,
                 quantity: 5,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Rubber Cable'),
+            },
+            {
+                name: 'Computer',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Circuit Board'),
+                    quantity: 5
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Cable'),
+                    quantity: 12
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Plastic'),
+                    quantity: 18
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Screw'),
+                    quantity: 60
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
+                item_id: getTableEntryIdByName('item', 'Computer'),
+                time: 32,
+                quantity: 1,
+            },
+            {
+                name: 'Caterium Computer',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Quickwire'),
+                    quantity: 112
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Circuit Board'),
+                    quantity: 10
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Rubber'),
+                    quantity: 48
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
+                item_id: getTableEntryIdByName('item', 'Computer'),
+                time: 64,
+                quantity: 3,
+                player_unlock_id: getTableEntryIdByName('player_unlock', 'Caterium Computer')
+            },
+            {
+                name: 'Supercomputer',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Computer'),
+                    quantity: 2
+                }, {
+                    item_id: getTableEntryIdByName('item', 'A.I. Limiter'),
+                    quantity: 2
+                }, {
+                    item_id: getTableEntryIdByName('item', 'High-Speed Connector'),
+                    quantity: 3
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Plastic'),
+                    quantity: 21
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
+                item_id: getTableEntryIdByName('item', 'Supercomputer'),
+                time: 32,
+                quantity: 1,
+            },
+            {
+                name: 'High-Speed Connector',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Quickwire'),
+                    quantity: 40
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Cable'),
+                    quantity: 10
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Plastic'),
+                    quantity: 6
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
+                item_id: getTableEntryIdByName('item', 'High-Speed Connector'),
+                time: 24,
+                quantity: 1,
+            },
+            {
+                name: 'Fuel',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Crude Oil'),
+                    quantity: 8
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Refinery'),
+                item_id: getTableEntryIdByName('item', 'Fuel'),
+                time: 8,
+                quantity: 5,
+            },
+            {
+                name: 'Plastic',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Crude Oil'),
+                    quantity: 4
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Refinery'),
+                item_id: getTableEntryIdByName('item', 'Plastic'),
+                time: 8,
+                quantity: 3,
+            },
+            {
+                name: 'Rubber',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Crude Oil'),
+                    quantity: 4
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Refinery'),
+                item_id: getTableEntryIdByName('item', 'Rubber'),
+                time: 8,
+                quantity: 4,
             }
         ]
     }

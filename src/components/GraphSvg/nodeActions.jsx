@@ -9,10 +9,8 @@ import {parseSvg} from 'd3-interpolate/src/transform/parse';
 export const add_node = (d, t) => {
 
     const zoomData = parseSvg(d3.select('#svgGroup').attr('transform'));
-    console.error(zoomData);
 
     var viewCenter = [];
-
 
     const bodyEl = document.getElementById('svgParent');
     const width = bodyEl.clientWidth;
@@ -27,7 +25,6 @@ export const add_node = (d, t) => {
 
     d.fx = viewCenter[0];
     d.fy = viewCenter[1];
-    console.error(viewCenter);
 
     d.overclock = d.overclock || 100;
     t.graphData.nodes.push(d);
