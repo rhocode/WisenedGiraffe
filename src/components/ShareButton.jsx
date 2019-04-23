@@ -87,9 +87,9 @@ class ShareButton extends React.Component {
                                 <div className={classes.label}>Copy</div>
                             </Button>
                         </div>
-                        {useExperimentalFeature('sti' ? <Button color="inherit" className={classes.dialogButton} fullWidth>
+                        {useExperimentalFeature('sti') ? <Button color="inherit" className={classes.dialogButton} fullWidth>
                             <div className={classes.label}>Generate Image</div>
-                        </Button> : null)}
+                        </Button> : null}
                         <div className={classes.statusMessage}>
                             {this.state.statusMessage}
                         </div>
