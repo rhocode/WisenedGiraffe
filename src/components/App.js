@@ -396,13 +396,14 @@ class App extends Component {
         const machineClassPlural = {};
         this.state.recipe && this.state.recipe.recipe.forEach(recipe => {
             const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
-            const tmp = JSON.parse(JSON.stringify(recipe));
-            tmp.sort((a, b) => {
-                return a.item.id - b.item.id;
-            });
-            thisList.push(tmp);
+            thisList.push(recipe);
             recipesByMachineClass[recipe.machine_class.name] = thisList;
             machineClassPlural[recipe.machine_class.name] = recipe.machine_class.plural;
+        });
+        Object.keys(recipesByMachineClass).map(item  => {
+            recipesByMachineClass[item].sort((a, b) => {
+                return a.item.id - b.item.id;
+            });
         });
         return Object.keys(recipesByMachineClass).map(key =>
             <SidebarButton appObject={this} label={machineClassPlural[key]} key={key}
