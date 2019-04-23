@@ -396,7 +396,11 @@ class App extends Component {
         const machineClassPlural = {};
         this.state.recipe && this.state.recipe.recipe.forEach(recipe => {
             const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
-            thisList.push(recipe);
+            const tmp = JSON.parse(JSON.stringify(recipe));
+            tmp.sort((a, b) => {
+                return a.item.id - b.item.id;
+            });
+            thisList.push(tmp);
             recipesByMachineClass[recipe.machine_class.name] = thisList;
             machineClassPlural[recipe.machine_class.name] = recipe.machine_class.plural;
         });
