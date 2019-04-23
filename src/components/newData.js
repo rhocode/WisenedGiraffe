@@ -568,7 +568,7 @@ const data = [
                 node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
                 machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
                 machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
-                speed: 100,
+                speed: 200,
                 power: 40 ,
                 icon: baseUrl + 'Oil_Pump.png',
                 input_slots: 0,
