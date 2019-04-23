@@ -98,7 +98,6 @@ schemaBuilder.createTable('recipe')
     .addColumn('item_id', lf.Type.INTEGER) // The output Item Id
     .addColumn('time', lf.Type.INTEGER)
     .addColumn('quantity', lf.Type.INTEGER)
-    .addColumn('power', lf.Type.INTEGER)
     .addColumn('hidden', lf.Type.BOOLEAN)
     .addColumn('player_unlock_id', lf.Type.INTEGER)
     .addColumn('icon', lf.Type.STRING)
@@ -159,7 +158,8 @@ const parseRecipeIngredients = recipes => {
 
 const generateSpringList = async db => {
     const ret = [];
-    const types = ['Coal Ore', 'Iron Ore', 'Limestone Ore', 'Copper Ore', 'Caterium Ore'];
+    const types = ['Coal Ore', 'Iron Ore', 'Limestone Ore', 'Copper Ore', 'Caterium Ore', 'Crude Oil', 'Raw Quartz','Sulphur', 'Bauxite',
+        'S.A.M. Ore', 'Silica', 'Uranium'];
     const machine_type_miner = await getTableEntryIdByName('machine_class', 'Miner')(db);
     const machine_type_container = await getTableEntryIdByName('machine_class', 'Container')(db);
     const spring_type_miner = await getTableEntryIdByName('spring_type', 'Miner')(db);
@@ -298,6 +298,114 @@ const data = [
             {
                 name: 'Motor',
                 icon: baseUrl + 'Motor.png'
+            },
+            {
+                name: 'Crude Oil',
+                icon: baseUrl + 'Crude_Oil.png'
+            },
+            {
+                name: 'Raw Quartz',
+                icon: baseUrl + 'Raw_Quartz.png'
+            },
+            {
+                name: 'Sulfur',
+                icon: baseUrl + 'Sulfur.png'
+            },
+            {
+                name: 'Bauxite',
+                icon: baseUrl + 'Bauxite.png'
+            },
+            {
+                name: 'S.A.M. Ore',
+                icon: baseUrl + 'SAM_Ore.png'
+            },
+            {
+                name: 'Silica',
+                icon: baseUrl + 'Silica.png'
+            },
+            {
+                name: 'Uranium',
+                icon: baseUrl + 'Uranium.png'
+            },
+            {
+                name: 'Plastic',
+                icon: baseUrl + 'Plastic.png'
+            },
+            {
+                name: 'Fuel',
+                icon: baseUrl + 'Fuel.png'
+            },
+            {
+                name: 'Rubber',
+                icon: baseUrl + 'Rubber.png'
+            },
+            {
+                name: 'Circuit Board',
+                icon: baseUrl + 'Circuit_Board.png'
+            },
+            {
+                name: 'Computer',
+                icon: baseUrl + 'Computer.png'
+            },
+            {
+                name: 'A.I. Limiter',
+                icon: baseUrl + 'AI_Limiter.png'
+            },
+            {
+                name: 'Supercomputer',
+                icon: baseUrl + 'Supercomputer.png'
+            },
+            {
+                name: 'High-Speed Connector',
+                icon: baseUrl + 'High_Speed_Connector.png'
+            },
+            {
+                name: 'Nuclear Fuel Rod',
+                icon: baseUrl + 'Nuclear_Fuel_Rod.png'
+            },
+            {
+                name: 'Aluminum Ingot',
+                icon: baseUrl + 'Aluminum_Ingot.png'
+            },
+            {
+                name: 'Aluminum Sheet',
+                icon: baseUrl + 'Aluminum_Sheet.png'
+            },
+            {
+                name: 'Heat Sink',
+                icon: baseUrl + 'Heat_Sink.png'
+            },
+            {
+                name: 'Radio Control Unit',
+                icon: baseUrl + 'Radio_Control_Unit.png'
+            },
+            {
+                name: 'Turbo Motor',
+                icon: baseUrl + 'Turbo_Motor.png'
+            },
+            {
+                name: 'Battery',
+                icon: baseUrl + 'Battery.png'
+            },
+            {
+                name: 'Quantum Crystal',
+                icon: baseUrl + 'Quantum_Crystal.png'
+            },
+            {
+                name: 'Superposition Oscillator',
+                icon: baseUrl + 'Superposition_Oscillator.png'
+            },
+            {
+                name: 'Quantum Computer',
+                icon: baseUrl + 'Quantum_Computer.png'
+            },
+            {
+                name: 'Biomass',
+                icon: baseUrl + 'Biomass.png'
+            },
+            {
+                name: 'Biofuel',
+                icon: baseUrl + 'Biofuel.png'
             }
         ]
     },
@@ -375,8 +483,9 @@ const data = [
             {name: 'Constructor', plural: 'Constructors', icon: baseUrl + 'Constructor.png'},
             {name: 'Miner', plural: 'Miners', icon: baseUrl + 'Miner_MK1.png'},
             {name: 'Assembler', plural: 'Assemblers', icon: baseUrl + 'Assembler.png'},
+            {name: 'Refinery', plural: 'Refineries', icon: baseUrl + 'Oil_Refinery.png'},
             {name: 'Smelter', plural: 'Smelters', icon: baseUrl + 'Smelter.png'},
-            {name: 'Coal Generator', plural: 'Coal Generators', icon: baseUrl + 'Coal_Generator.png'},
+            {name: 'Generator', plural: 'Generators', icon: baseUrl + 'Coal_Generator.png'},
             {name: 'Manufacturer', plural: 'Manufacturer', icon: baseUrl + 'Manufacturer.png'},
             {name: 'Container', plural: 'Containers', icon: baseUrl + 'Storage_Container_MK1.png'},
             {name: 'Logistic', plural: 'Logistics', icon: baseUrl + 'Splitter.png'},
@@ -387,12 +496,22 @@ const data = [
         key: 'machine_node',
         value: [
             {
-                name: 'Container',
+                name: 'Container Mk.1',
                 node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
                 machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
                 machine_class_id: getTableEntryIdByName('machine_class', 'Container'),
                 speed: 999999,
                 icon: baseUrl + 'Storage_Container_MK1.png',
+                input_slots: 1,
+                output_slots: 1
+            },
+            {
+                name: 'Container Mk.2',
+                node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+                machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Container'),
+                speed: 999999,
+                icon: baseUrl + 'Storage_Container_MK2.png',
                 input_slots: 1,
                 output_slots: 1
             },
@@ -423,8 +542,7 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
                 speed: 100,
                 power: 5,
-                icon: baseUrl + 'Miner_MK1.png'
-                ,
+                icon: baseUrl + 'Miner_MK1.png',
                 input_slots: 0,
                 output_slots: 1
             },
@@ -435,9 +553,19 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
                 icon: baseUrl + 'Miner_MK2.png',
                 speed: 200,
-                power: 5,
-                hidden: true
-                ,
+                power: 12,
+                hidden: true,
+                input_slots: 0,
+                output_slots: 1
+            },
+            {
+                name: 'Oil Pump',
+                node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+                machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
+                speed: 100,
+                power: 40 ,
+                icon: baseUrl + 'Oil_Pump.png',
                 input_slots: 0,
                 output_slots: 1
             },
@@ -447,8 +575,8 @@ const data = [
                 machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
                 machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
                 speed: 100,
-                icon: baseUrl + 'Smelter.png'
-                ,
+                power: 4,
+                icon: baseUrl + 'Smelter.png',
                 input_slots: 1,
                 output_slots: 1
             },
@@ -459,6 +587,7 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
                 icon: baseUrl + 'Smelter.png',
                 speed: 200,
+                power: 8,
                 hidden: true,
                 input_slots: 1,
                 output_slots: 1
@@ -470,6 +599,7 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 icon: baseUrl + 'Constructor.png',
                 speed: 100,
+                power: 4,
                 input_slots: 1,
                 output_slots: 1
             },
@@ -480,7 +610,19 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 icon: baseUrl + 'Constructor.png',
                 speed: 200,
+                power: 8,
                 hidden: true,
+                input_slots: 1,
+                output_slots: 1
+            },
+            {
+                name: 'Oil Refinery',
+                node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+                machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Refinery'),
+                icon: baseUrl + 'Oil_Refinery.png',
+                speed: 100,
+                power: 50,
                 input_slots: 1,
                 output_slots: 1
             },
@@ -491,6 +633,7 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 icon: baseUrl + 'Assembler.png',
                 speed: 100,
+                power: 15,
                 input_slots: 2,
                 output_slots: 1
             },
@@ -502,6 +645,7 @@ const data = [
                 icon: baseUrl + 'Assembler.png',
                 speed: 100,
                 hidden: true,
+                power: 30,
                 input_slots: 2,
                 output_slots: 1
             },
@@ -510,8 +654,9 @@ const data = [
                 node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
                 machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
                 machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
-                icon: '',
+                icon: baseUrl + 'Manufacturer.png',
                 speed: 100,
+                power: 55,
                 hidden: true,
                 input_slots: 4,
                 output_slots: 1
@@ -521,8 +666,9 @@ const data = [
                 node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
                 machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
                 machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
-                icon: '',
+                icon: baseUrl + 'Manufacturer.png',
                 speed: 200,
+                power: 110,
                 hidden: true,
                 input_slots: 4,
                 output_slots: 1
@@ -531,9 +677,34 @@ const data = [
                 name: 'Coal Generator',
                 node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
                 machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
-                machine_class_id: getTableEntryIdByName('machine_class', 'Coal Generator'),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Generator'),
                 icon: baseUrl + 'Coal_Generator.png',
                 speed: 100,
+                power: -50,
+                hidden: true,
+                input_slots: 1,
+                output_slots: 0
+            },
+            {
+                name: 'Fuel Generator',
+                node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+                machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Generator'),
+                icon: baseUrl + 'Fuel_Generator.png',
+                speed: 100,
+                power: -150,
+                hidden: true,
+                input_slots: 1,
+                output_slots: 0
+            },
+            {
+                name: 'Biomass Burner',
+                node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+                machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Generator'),
+                icon: baseUrl + 'Biomass_Burner.png',
+                speed: 100,
+                power: -20,
                 hidden: true,
                 input_slots: 1,
                 output_slots: 0
@@ -545,6 +716,7 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
                 icon: baseUrl + 'Foundry_MK1.png',
                 speed: 100,
+                power: 16,
                 hidden: true,
                 input_slots: 2,
                 output_slots: 1
@@ -555,7 +727,7 @@ const data = [
                 machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
                 machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
                 icon: baseUrl + 'Foundry_MK2.png', //TODO get MK2 icon
-                speed: 200,
+                speed: 38,
                 hidden: true,
                 input_slots: 2,
                 output_slots: 1
@@ -584,12 +756,13 @@ const data = [
             {name: 'Stator (Alt.)'},
             {name: 'Steel Ingot (Alt.)'},
             {name: 'Screw (Alt.)'},
-            // {name: 'Rubber Cable'},
-            // {name: 'Circuit Board'},
-            // {name: 'Caterium Computer'},
             {name: 'Quickwire (Alt.)'},
-            // {name: 'Caterium Circuit Board'},
-            // {name: 'Crystal Computer'}
+
+            {name: 'Rubber Cable'},
+            {name: 'Circuit Board'},
+            {name: 'Caterium Circuit Board'},
+            {name: 'Caterium Computer'},
+
             // time = output_quantity * 60 / ppm
         ]
     },
@@ -621,7 +794,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
                 item_id: getTableEntryIdByName('item', 'Copper Ingot'),
                 time: 2,
-                power: 4,
                 quantity: 1
             },
             {
@@ -633,7 +805,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
                 item_id: getTableEntryIdByName('item', 'Caterium Ingot'),
                 time: 4,
-                power: 4,
                 quantity: 1,
             },
             {
@@ -645,7 +816,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Iron Plate'),
                 time: 4,
-                power: 4,
                 quantity: 1
             },
             {
@@ -657,7 +827,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Iron Rod'),
                 time: 4,
-                power: 4,
                 quantity: 1
             },
             {
@@ -669,7 +838,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Wire'),
                 time: 4,
-                power: 4,
                 quantity: 3
             },
             {
@@ -681,7 +849,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Wire'),
                 time: 8,
-                power: 4,
                 quantity: 9,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Iron Wire')
@@ -695,7 +862,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Wire'),
                 time: 8,
-                power: 4,
                 quantity: 9,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Caterium Wire')
@@ -709,7 +875,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Cable'),
                 time: 4,
-                power: 4,
                 quantity: 1
             },
             {
@@ -721,7 +886,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Screw'),
                 time: 4,
-                power: 4,
                 quantity: 6
             },
             {
@@ -733,7 +897,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Screw'),
                 time: 8,
-                power: 4,
                 quantity: 12,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Screw (Alt.)')
@@ -747,7 +910,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Concrete'),
                 time: 4,
-                power: 4,
                 quantity: 1
             },
             {
@@ -762,7 +924,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
                 time: 12,
-                power: 15,
                 quantity: 1,
             },
             {
@@ -777,7 +938,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
                 time: 24,
-                power: 15,
                 quantity: 3,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Reinforced Iron Plate (Alt.)')
@@ -794,7 +954,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
                 time: 24,
-                power: 15,
                 quantity: 3,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Stitched Iron Plate')
@@ -811,7 +970,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Rotor'),
                 time: 10,
-                power: 15,
                 quantity: 1,
             },
             {
@@ -826,7 +984,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Rotor'),
                 time: 20,
-                power: 15,
                 quantity: 3,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Rotor (Alt.)')
@@ -843,7 +1000,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Modular Frame'),
                 time: 15,
-                power: 15,
                 quantity: 1,
             },
             {
@@ -858,7 +1014,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Modular Frame'),
                 time: 30,
-                power: 15,
                 quantity: 3,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Modular Frame (Alt.)')
@@ -875,7 +1030,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Encased Industrial Beam'),
                 time: 15,
-                power: 15,
                 quantity: 1,
             },
             {
@@ -890,7 +1044,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Encased Industrial Beam'),
                 time: 30,
-                power: 15,
                 quantity: 3,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Encased Industrial Beam (Alt.)')
@@ -913,7 +1066,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
                 item_id: getTableEntryIdByName('item', 'Heavy Modular Frame'),
                 time: 30,
-                power: 60,
                 quantity: 1,
             },
             {
@@ -934,7 +1086,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
                 item_id: getTableEntryIdByName('item', 'Heavy Modular Frame'),
                 time: 64, //TODO
-                power: 60,
                 quantity: 3,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Heavy Modular Frame (Alt.)')
@@ -951,7 +1102,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
                 item_id: getTableEntryIdByName('item', 'Iron Ingot'),
                 time: 4,
-                power: 4,
                 quantity: 3,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Iron Ingot (Alt.)')
@@ -968,7 +1118,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
                 item_id: getTableEntryIdByName('item', 'Steel Ingot'),
                 time: 4,
-                power: 12,
                 quantity: 2,
             },
             {
@@ -983,7 +1132,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
                 item_id: getTableEntryIdByName('item', 'Steel Ingot'),
                 time: 8,
-                power: 12,
                 quantity: 6,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Steel Ingot (Alt.)')
@@ -997,7 +1145,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Steel Beam'),
                 time: 6,
-                power: 4,
                 quantity: 1,
             },
             {
@@ -1009,7 +1156,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Steel Pipe'),
                 time: 4,
-                power: 4,
                 quantity: 1,
             },
             {
@@ -1021,7 +1167,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
                 item_id: getTableEntryIdByName('item', 'Quickwire'),
                 time: 4,
-                power: 4,
                 quantity: 4,
             },
             {
@@ -1036,7 +1181,6 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Quickwire'),
                 time: 8,
-                power: 4,
                 quantity: 12,
                 hidden: true,
                 player_unlock_id: getTableEntryIdByName('player_unlock', 'Quickwire (Alt.)')
@@ -1053,9 +1197,44 @@ const data = [
                 machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
                 item_id: getTableEntryIdByName('item', 'Motor'),
                 time: 12,
-                power: 15,
                 quantity: 1,
             },
+            {
+                name: 'Aluminum Ingot',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Bauxite'),
+                    quantity: 7
+                }, {
+                    item_id: getTableEntryIdByName('item', 'Silica'),
+                    quantity: 6
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
+                item_id: getTableEntryIdByName('item', 'Aluminum Ingot'),
+                time: 4,
+                quantity: 2,
+            },
+            {
+                name: 'S.A.M. Ingot',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'S.A.M. Ore'),
+                    quantity: 6
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
+                item_id: getTableEntryIdByName('item', 'S.A.M. Ingot'),
+                time: 12,
+                quantity: 1,
+            },
+            {
+                name: 'Biofuel',
+                inputs: parseRecipeIngredients([{
+                    item_id: getTableEntryIdByName('item', 'Biomass'),
+                    quantity: 4
+                }]),
+                machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+                item_id: getTableEntryIdByName('item', 'Biofuel'),
+                time: 4,
+                quantity: 2,
+            }
         ]
     }
 ];

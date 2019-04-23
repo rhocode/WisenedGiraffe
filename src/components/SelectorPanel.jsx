@@ -80,7 +80,7 @@ class SelectorPanel extends React.Component {
 
     constructor(props) {
         super(props);
-        const items = JSON.parse(JSON.stringify(props.items));
+        const items = JSON.parse(JSON.stringify(props.items.filter(item => !item.hidden)));
 
         this.itemMap = {};
         items.forEach(it => {

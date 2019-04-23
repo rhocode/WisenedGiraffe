@@ -33,6 +33,7 @@ import {loadHash, useExperimentalFeature} from "./GraphSvg/util";
 import firebase from 'firebase/app'
 import 'firebase/database'
 import 'firebase/auth'
+import createDatabase from "./newData";
 
 const drawerWidth = 310;
 
@@ -257,7 +258,7 @@ class App extends Component {
 
         loadHash().then(data => {
             this.setState({coreGraphData: data}, () => {
-
+                //
                 const firebaseInstance = firebase.initializeApp({
                     apiKey: "AIzaSyC6qyWIC6Yvc3NmTXYUzQ-jcFE1p3VsKX4",
                     authDomain: "satisgraphtory.firebaseapp.com",
@@ -292,6 +293,14 @@ class App extends Component {
                         });
 
                         wrappedFunction();
+
+
+
+
+
+
+
+
 
 
                         // const gen = generate('player_unlock', generate('item', generate('recipe',
@@ -344,10 +353,11 @@ class App extends Component {
                 // });
 
 
+                if (process.env.NODE_ENV && process.env.NODE_ENV !== 'production') {
+                    createDatabase();
+                }
 
-                // createDatabase().then((db) => {
-                //     this.setState({db, loaded: true});
-                // }).then(() => {
+                // createDatabase().then(() => {
                 //     return this.generateRecursiveStructure('player_unlock').then(player_unlock => {
                 //         this.setState({player_unlock}, () => {
                 //             return this.generateRecursiveStructure('recipe').then(recipe => {
@@ -359,7 +369,6 @@ class App extends Component {
                 //                                     return this.generateRecursiveStructure('path_type').then(path_type => {
                 //                                         this.setState({path_type}, () => {
                 //                                             return this.generateRecursiveStructure('purity_type').then(purity_type => {
-                //
                 //                                                 this.setState({purity_type, isLoaded: true});
                 //                                             });
                 //                                         });
