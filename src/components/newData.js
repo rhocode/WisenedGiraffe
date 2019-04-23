@@ -732,7 +732,8 @@ const data = [
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
         icon: baseUrl + 'Foundry_MK2.png', //TODO get MK2 icon
-        speed: 38,
+        speed: 200,
+        power: 38,
         hidden: true,
         input_slots: 2,
         output_slots: 1
