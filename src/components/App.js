@@ -122,6 +122,7 @@ const styles = theme => ({
   },
   hiddenFlex: {
     display: 'flex',
+    height: '100%'
   },
 });
 
@@ -618,16 +619,18 @@ class App extends Component {
               {this.drawerContents()}
             </Drawer>
           </Hidden>
-          <Hidden smDown implementation="css" className={classes.hiddenFlex}>
-            <Drawer
-              className={classes.drawer}
-              variant="permanent"
-              classes={{
-                paper: classes.drawerPaper,
-              }}
-            >
-              {this.drawerContents()}
-            </Drawer>
+          <Hidden smDown implementation="css">
+            <div className={classes.hiddenFlex}>
+              <Drawer
+                className={classes.drawer}
+                variant="permanent"
+                classes={{
+                  paper: classes.drawerPaper,
+                }}
+              >
+                {this.drawerContents()}
+              </Drawer>
+            </div>
           </Hidden>
 
 
