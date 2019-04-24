@@ -30,13 +30,12 @@ import ClearButton from './ClearButton';
 import ShareButton from './ShareButton';
 import SelectorPanel from './SelectorPanel';
 import {loadHash, useExperimentalFeature} from './GraphSvg/util';
-import classNames from 'classnames';
-import firebase from 'firebase/app';
-import 'firebase/database';
-import 'firebase/auth';
+
 import createDatabase from './newData';
 import IconButton from '@material-ui/core/IconButton';
 import Hidden from '@material-ui/core/Hidden';
+
+import globalData from './data';
 
 const drawerWidth = 260;
 
@@ -152,17 +151,17 @@ class App extends Component {
 
     getRefkeyTableFireBase(table) {
       const db = this.state.fbdb;
-      const tableRef = db.ref('/' + table);
-      return new Promise(resolve => tableRef.once('value').then(results => resolve(results.val())));
+      const tableRef = db[table]
+      return Promise.resolve(tableRef);
     }
 
     generateRecursiveStructureFireBase(startingTable) {
       const db = this.state.fbdb;
-      const starting = db.ref('/' + startingTable);
+      const starting = db[startingTable]
       this.globalStructure = this.globalStructure || {};
       const globalStructure = this.globalStructure;
 
-      return starting.once('value').then(item => item.val()).then( async results => {
+      return Promise.resolve(starting).then( async results => {
         if (results.length > 0) {
           globalStructure[startingTable] = results;
           const refKeysToProcess = Object.keys(results[0]).filter(str => str.endsWith('_id'));
@@ -283,19 +282,9 @@ class App extends Component {
 
       loadHash().then(data => {
         this.setState({coreGraphData: data}, () => {
-          //
-          const firebaseInstance = firebase.initializeApp({
-            apiKey: 'AIzaSyC6qyWIC6Yvc3NmTXYUzQ-jcFE1p3VsKX4',
-            authDomain: 'satisgraphtory.firebaseapp.com',
-            databaseURL: 'https://satisgraphtory.firebaseio.com',
-            projectId: 'satisgraphtory',
-            storageBucket: 'satisgraphtory.appspot.com',
-            messagingSenderId: '463653345773'
-          });
 
-          const fbdb =  firebaseInstance.database();
 
-          this.setState({fbdb, loaded: true}, () => {
+          this.setState({fbdb: globalData, loaded: true}, () => {
 
             const generate = (name, cb = () => {}) => {
               return () => {

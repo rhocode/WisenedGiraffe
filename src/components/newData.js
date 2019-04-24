@@ -464,7 +464,7 @@ const data = [
       },
       {
         name: 'Item Belt Mk 5',
-        speed: 6600,
+        speed: 660,
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.5'),
         rank: 4
       },
