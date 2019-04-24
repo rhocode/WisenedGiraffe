@@ -13,6 +13,7 @@ export const saveHash = (data) => {
   if (process.env.NODE_ENV && process.env.NODE_ENV !== 'production') {
     console.log(data.data);
   }
+
   return new Promise((resolve, reject) => {
     return fetch('https://api.myjson.com/bins/', {
       method: 'POST',
