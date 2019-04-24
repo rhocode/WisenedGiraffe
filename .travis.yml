@@ -5,6 +5,7 @@ install:
   - npm ci
 script:
   - npm run build:prod
+  - npx semantic-release
 deploy:
   provider: pages
   skip_cleanup: true
@@ -15,6 +16,7 @@ deploy:
   fqdn: satisgraphtory.com
   on:
     branch: master
+
 after_success:
   - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
   - chmod +x send.sh
