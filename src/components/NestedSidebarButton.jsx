@@ -88,6 +88,7 @@ class NestedSidebarButton extends React.Component {
                                         <MenuList>
                                             {Object.keys(listItems).map(key => {
                                                 const returnDivList = [];
+                                                //Keep it as Miner
                                                 if (['Miner'].includes(key)) {
                                                     listItems[key].forEach(resource => {
                                                         returnDivList.push(<InnerNestedSidebarButton

@@ -2,6 +2,7 @@ import React from 'react';
 import {Typography, withStyles} from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
 import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
+import DeleteIcon from '@material-ui/icons/Delete';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import IconButton from '@material-ui/core/IconButton';
 import Slider from '@material-ui/lab/Slider';
@@ -17,6 +18,7 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import TextField from "@material-ui/core/TextField";
 import Hidden from "@material-ui/core/Hidden";
+import Fab from "@material-ui/core/Fab";
 
 const drawerWidth = 260;
 
@@ -69,10 +71,14 @@ const styles = theme => ({
         flexWrap: 'wrap',
         alignItems: 'flex-end'
     },
-
     textMiddle: {
         margin: 10,
         marginBottom: 20.
+    },
+    overclockTextField: {
+        paddingLeft: 10,
+        paddingRight: 10,
+        marginTop: 0
     }
 });
 
@@ -179,6 +185,10 @@ class SelectorPanel extends React.Component {
         });
     };
 
+    handleChangeOverclockText =  event => {
+        this.setState({ sliderValue: event.target.value });
+    };
+
     handleCheckboxChange = () => {
         if (this.infiniteSourceEligible) {
             if (this.props.selected.infiniteSource) {
@@ -253,10 +263,27 @@ class SelectorPanel extends React.Component {
         this.debouncedUpdateGraph();
     };
 
+    shouldShowOverclock = () => {
+        return this.props.overclock !== -1 && this.props.selected.machine.name !== 'Container' && this.props.selected.machine.name !== 'Logistic'
+    };
+
+    hasUpgradeTypes = () => {
+        return this.props.selected.upgradeTypes.length > 1
+    };
+
+    shouldShowAnything = () => {
+        return this.infiniteSourceEligible() || this.hasUpgradeTypes() || this.shouldShowOverclock() || this.hasInfiniteSource();
+    };
+
     renderContent = () => {
         const {classes, label} = this.props;
         return (
-                <React.Fragment><Typography variant='h5'>{label}</Typography>
+                <React.Fragment>
+                    <Typography variant='h5'>{label}</Typography>
+                    {/*<IconButton className={classes.button} aria-label="Delete">*/}
+                    {/*    <DeleteIcon />*/}
+                    {/*</IconButton>*/}
+                    {this.hasUpgradeTypes() ?
                 <Typography variant="body1">
                     <IconButton color="secondary" className={classes.button} onClick={this.downgrade}>
                         <ArrowDownwardIcon/>
@@ -265,10 +292,17 @@ class SelectorPanel extends React.Component {
                     <IconButton color="primary" className={classes.button} onClick={this.upgrade}>
                         <ArrowUpwardIcon/>
                     </IconButton>
-                </Typography>
-                {this.props.overclock !== -1 && this.props.selected.machine.name !== 'Container' && this.props.selected.machine.name !== 'Logistic' ?
+                </Typography> : null}
+                {this.shouldShowOverclock() ?
                     <React.Fragment>
-                        <Typography id="label" className={classes.overclock} variant="body1">Overclock: {this.state.sliderValue}%</Typography>
+                        <TextField
+                            id="standard-name"
+                            label="Overclock (%)"
+                            className={classes.overclockTextField}
+                            value={this.state.sliderValue}
+                            onChange={this.handleChangeOverclockText}
+                            margin="normal"
+                        />
                         <Slider
                             classes={{ root: classes.slider }}
                             value={this.state.sliderValue}
@@ -352,6 +386,9 @@ class SelectorPanel extends React.Component {
 
     render() {
         const {classes} = this.props;
+        if (!this.shouldShowAnything()) {
+            return null;
+        }
         return (<React.Fragment>
             <Hidden smDown implementation="css">
                 <Paper className={classes.paper}>

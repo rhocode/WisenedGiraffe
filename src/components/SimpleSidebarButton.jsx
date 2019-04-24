@@ -86,6 +86,7 @@ class SimpleSidebarButton extends React.Component {
                                     <MenuList>
                                         {Object.keys(listItems).map(key => {
                                             const returnDivList = [];
+                                            //Keep this as miner
                                             if (!['Miner', 'Logistic'].includes(key)) {
                                                 listItems[key].forEach(resource => {
                                                     returnDivList.push(<MenuItem onClick={() => {

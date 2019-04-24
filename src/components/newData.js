@@ -2,7 +2,7 @@ import lf from 'lovefield';
 import { getTraversableComposition } from 'fp-ts/lib/Traversable2v';
 
 /** @namespace lf.Type */
-const schemaBuilder = lf.schema.create('test', 7);
+const schemaBuilder = lf.schema.create('test', 10);
 
 schemaBuilder.createTable('node_type')
   .addColumn('id', lf.Type.INTEGER)
@@ -33,6 +33,7 @@ schemaBuilder.createTable('machine_class')
   .addColumn('icon', lf.Type.STRING)
   .addNullable(['icon'])
   .addColumn('hidden', lf.Type.BOOLEAN)
+  .addColumn('node_type_id', lf.Type.STRING)
   .addColumn('plural', lf.Type.STRING);
 
 schemaBuilder.createTable('machine_node')
@@ -43,7 +44,6 @@ schemaBuilder.createTable('machine_node')
   .addPrimaryKey(['id'])
   .addColumn('name', lf.Type.STRING)
   .addColumn('hidden', lf.Type.BOOLEAN)
-  .addColumn('node_type_id', lf.Type.STRING)
   .addColumn('icon', lf.Type.STRING)
   .addColumn('input_slots', lf.Type.INTEGER)
   .addColumn('output_slots', lf.Type.INTEGER);
@@ -165,13 +165,21 @@ const generateSpringList = async db => {
   const machine_type_container = await getTableEntryIdByName('machine_class', 'Container')(db);
   const spring_type_miner = await getTableEntryIdByName('spring_type', 'Miner')(db);
   const spring_type_container = await getTableEntryIdByName('spring_type', 'Container')(db);
+
+  const machine_node_type_oilpump = await getTableEntryIdByName('machine_class', 'Oil Pump')(db);
+
   const purity_types = await getTableEntries('purity_type', db);
   for (let i = 0; i < types.length; i++) {
     const ore = await getTableEntryIdByName('item', types[i])(db);
 
+    let node_type = machine_type_miner;
+    if (types[i] === 'Crude Oil') {
+      node_type = machine_node_type_oilpump;
+    }
+
     const structure = {
       item_id: ore,
-      machine_class_id: machine_type_miner,
+      machine_class_id: node_type,
       spring_type_id: spring_type_miner,
       purities: purity_types
     };
@@ -485,16 +493,28 @@ const data = [
   {
     key: 'machine_class',
     value: [
-      {name: 'Constructor', plural: 'Constructors', icon: baseUrl + 'Constructor.png'},
-      {name: 'Miner', plural: 'Miners', icon: baseUrl + 'Miner_MK1.png'},
-      {name: 'Assembler', plural: 'Assemblers', icon: baseUrl + 'Assembler.png'},
-      {name: 'Refinery', plural: 'Refineries', icon: baseUrl + 'Oil_Refinery.png'},
-      {name: 'Smelter', plural: 'Smelters', icon: baseUrl + 'Smelter.png'},
-      {name: 'Generator', plural: 'Generators', icon: baseUrl + 'Coal_Generator.png'},
-      {name: 'Manufacturer', plural: 'Manufacturer', icon: baseUrl + 'Manufacturer.png'},
-      {name: 'Container', plural: 'Containers', icon: baseUrl + 'Storage_Container_MK1.png'},
-      {name: 'Logistic', plural: 'Logistics', icon: baseUrl + 'Splitter.png'},
-      {name: 'Foundry', plural: 'Foundries', icon: baseUrl + 'Foundry_MK1.png'}
+      {name: 'Constructor', plural: 'Constructors', icon: baseUrl + 'Constructor.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')},
+      {name: 'Miner', plural: 'Miners', icon: baseUrl + 'Miner_MK1.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Resource Node')},
+      {name: 'Oil Pump', plural: 'Oil Pumps', icon: baseUrl + 'Oil_Pump.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Resource Node')},
+      {name: 'Assembler', plural: 'Assemblers', icon: baseUrl + 'Assembler.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')},
+      {name: 'Refinery', plural: 'Refineries', icon: baseUrl + 'Oil_Refinery.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')},
+      {name: 'Smelter', plural: 'Smelters', icon: baseUrl + 'Smelter.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')},
+      {name: 'Generator', plural: 'Generators', icon: baseUrl + 'Coal_Generator.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')},
+      {name: 'Manufacturer', plural: 'Manufacturer', icon: baseUrl + 'Manufacturer.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')},
+      {name: 'Container', plural: 'Containers', icon: baseUrl + 'Storage_Container_MK1.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')},
+      {name: 'Logistic', plural: 'Logistics', icon: baseUrl + 'Splitter.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')},
+      {name: 'Foundry', plural: 'Foundries', icon: baseUrl + 'Foundry_MK1.png',
+        node_type_id: getTableEntryIdByName('node_type', 'Machine Node')}
     ]
   },
   {
@@ -502,7 +522,7 @@ const data = [
     value: [
       {
         name: 'Container Mk.1',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
+
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Container'),
         speed: 999999,
@@ -512,7 +532,6 @@ const data = [
       },
       {
         name: 'Container Mk.2',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Container'),
         speed: 999999,
@@ -522,7 +541,6 @@ const data = [
       },
       {
         name: 'Splitter',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'S'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
         speed: 999999,
@@ -532,7 +550,6 @@ const data = [
       },
       {
         name: 'Merger',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'M'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Logistic'),
         speed: 999999,
@@ -542,7 +559,6 @@ const data = [
       },
       {
         name: 'Miner Mk.1',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
         speed: 100,
@@ -553,7 +569,6 @@ const data = [
       },
       {
         name: 'Miner Mk.2',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
         icon: baseUrl + 'Miner_MK2.png',
@@ -565,9 +580,8 @@ const data = [
       },
       {
         name: 'Oil Pump',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
-        machine_class_id: getTableEntryIdByName('machine_class', 'Miner'),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Oil Pump'),
         speed: 200,
         power: 40 ,
         icon: baseUrl + 'Oil_Pump.png',
@@ -576,7 +590,6 @@ const data = [
       },
       {
         name: 'Smelter Mk.1',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
         speed: 100,
@@ -587,7 +600,6 @@ const data = [
       },
       {
         name: 'Smelter Mk.2',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
         icon: baseUrl + 'Smelter.png',
@@ -599,7 +611,6 @@ const data = [
       },
       {
         name: 'Constructor Mk.1',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         icon: baseUrl + 'Constructor.png',
@@ -610,7 +621,6 @@ const data = [
       },
       {
         name: 'Constructor Mk.2',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         icon: baseUrl + 'Constructor.png',
@@ -622,7 +632,6 @@ const data = [
       },
       {
         name: 'Oil Refinery',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Refinery'),
         icon: baseUrl + 'Oil_Refinery.png',
@@ -633,7 +642,6 @@ const data = [
       },
       {
         name: 'Assembler Mk.1',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         icon: baseUrl + 'Assembler.png',
@@ -644,7 +652,6 @@ const data = [
       },
       {
         name: 'Assembler Mk.2',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         icon: baseUrl + 'Assembler.png',
@@ -656,7 +663,6 @@ const data = [
       },
       {
         name: 'Manufacturer Mk.1',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
         icon: baseUrl + 'Manufacturer.png',
@@ -668,7 +674,6 @@ const data = [
       },
       {
         name: 'Manufacturer Mk.2',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
         icon: baseUrl + 'Manufacturer.png',
@@ -680,7 +685,6 @@ const data = [
       },
       {
         name: 'Coal Generator',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Generator'),
         icon: baseUrl + 'Coal_Generator.png',
@@ -692,7 +696,6 @@ const data = [
       },
       {
         name: 'Fuel Generator',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Generator'),
         icon: baseUrl + 'Fuel_Generator.png',
@@ -704,7 +707,6 @@ const data = [
       },
       {
         name: 'Biomass Burner',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Generator'),
         icon: baseUrl + 'Biomass_Burner.png',
@@ -716,7 +718,6 @@ const data = [
       },
       {
         name: 'Foundry Mk.1',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.1'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
         icon: baseUrl + 'Foundry_MK1.png',
@@ -728,7 +729,6 @@ const data = [
       },
       {
         name: 'Foundry Mk.2',
-        node_type_id: getTableEntryIdByName('node_type', 'Machine Node'),
         machine_version_id: getTableEntryIdByName('machine_version', 'Mk.2'),
         machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
         icon: baseUrl + 'Foundry_MK2.png', //TODO get MK2 icon

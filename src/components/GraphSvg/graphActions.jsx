@@ -175,7 +175,7 @@ export const analyzeGraph = function (optimize=false) {
         const provided = providedThroughput[node.id] || [];
 
         if (node.data.node) {
-          // this is a purity calculation
+          // this is a purity calculation (aka miner or pump)
           const recipe = node.data.recipe;
           const purity = node.data.purity;
           const fetchedPurity = recipe.purities.filter(item => item.name === purity);

@@ -591,10 +591,12 @@ class App extends Component {
             <Typography variant="body1">Revisit these instructions anytime by clicking on the <b>?</b> in the bottom right.</Typography>
 
           </FabPopup>
-          {(this.state.selectedNode && this.state.selectedNode.machine.name === 'Container') ||(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes
-                    && this.state.selectedPath.upgradeTypes.length > 1) ?
-            <SelectorPanel items={this.state.item.item} label='Options' graphSvg={this.graphSvg}
-              overclock={this.state.selectedNode ? this.state.selectedNode.overclock : -1} selected={this.state.selectedNode || this.state.selectedPath}/> : null}
+          {/*{(this.state.selectedNode && ['Container', 'Oil Pump'].includes(this.state.selectedNode.machine.name)) ||(this.state.selectedNode && this.state.selectedNode.upgradeTypes.length > 1) || (this.state.selectedPath && this.state.selectedPath.upgradeTypes*/}
+          {/*          && this.state.selectedPath.upgradeTypes.length > 1) ?*/}
+          {/*   : null}*/}
+          {this.state.selectedNode || this.state.selectedPath ? <SelectorPanel items={this.state.item.item} label='Options' graphSvg={this.graphSvg}
+                                                                               overclock={this.state.selectedNode ? this.state.selectedNode.overclock : -1} selected={this.state.selectedNode || this.state.selectedPath}/> : null}
+
           <Hidden mdUp implementation="css">
             <Drawer
               container={this.props.container}
