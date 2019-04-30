@@ -6,7 +6,11 @@ import {strongly_connected_components_standalone} from './algorithms';
 import {spliceUtil} from './util';
 import {updateNodeTierExternal} from './nodeActions';
 
-export const recalculateStorageContainers = function () {
+export const recalculateStorageContainers = function() {
+
+}
+
+export const recalculateStorageContainers2 = function () {
 
   const nodeUnion = new Set(Object.keys(this.nodeIn));
   Object.keys(this.nodeOut).forEach(node => nodeUnion.add(node));
@@ -89,7 +93,7 @@ export const recalculateStorageContainers = function () {
   });
 
   const myTinyQueue = new TinyQueue(Array.from(new Set([...Object.keys(derivedGraphOutgoing), ...Object.keys(derivedGraphIncoming)])), (a, b) => {
-    return (derivedGraphIncoming[a] || []).size - (derivedGraphIncoming[b] || []).size;
+    return (derivedGraphIncoming[a] || new Set()).size - (derivedGraphIncoming[b] || new Set()).size;
   });
 
   const globalProvideMap = {};
