@@ -1514,7 +1514,7 @@ const createDatabase = () => {
       }
 
       console.log('Here is the finished doc');
-      // console.log(JSON.stringify(firebaseRaw));
+      console.log(JSON.stringify(firebaseRaw));
       await Promise.all(promiseList);
       return db;
     });

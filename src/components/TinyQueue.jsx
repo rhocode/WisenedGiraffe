@@ -5,6 +5,7 @@ export default class TinyQueue {
         this.data = data;
         this.length = this.data.length;
         this.compare = compare;
+
         this.reheapify();
     }
 
@@ -33,7 +34,6 @@ export default class TinyQueue {
         if (this.length === 0) return undefined;
 
         const top = this.data[0];
-
         const bottom = this.data.pop();
         this.length--;
 
