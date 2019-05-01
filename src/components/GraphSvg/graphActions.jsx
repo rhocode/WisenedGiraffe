@@ -166,6 +166,13 @@ const poolCalculation = (blobOrder, blobToNodes, blobIncoming) => {
   return {sources: sources, sinks: sinks, pools: commonalities, poolOutputs: poolLookupOutputs, poolInputs: poolLookupInputs, poolLookup};
 };
 
+
+const splitterCalculator = () => {
+
+}
+
+
+
 const bfs = (source, target, parent, adjacency, capacity) => {
   parent[source] = -2;
   const queue = [];
@@ -190,7 +197,7 @@ const bfs = (source, target, parent, adjacency, capacity) => {
   return 0;
 };
 
-const maxFlow = (source, target) => {
+const maxFlow = (source, target, edgeCapacities) => {
   let flow = 0;
   const parent = {};
   let new_flow = null;
@@ -343,11 +350,12 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, graphLinks)  =>
 };
 
 
+
+
 const processPool = function(blobOrder, sourceBlobs, sinkBlobs, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob) {
 
-
   const masterSource = -1000;
-  const endingSink = -2000;
+  const masterSink = -2000;
   console.log(edgeCapacities);
 
   const masterEdgeCapacities = {};
@@ -355,7 +363,6 @@ const processPool = function(blobOrder, sourceBlobs, sinkBlobs, blobToNodes, blo
   // Connect sources
   sourceBlobs.forEach(blob => {
     const nodes = blobToNodes[blob];
-
     nodes.forEach(node => {
       masterEdgeCapacities[masterSource] = masterEdgeCapacities[masterSource] || {};
       masterEdgeCapacities[masterSource][node.id] = Infinity;
@@ -367,7 +374,7 @@ const processPool = function(blobOrder, sourceBlobs, sinkBlobs, blobToNodes, blo
     const nodes = blobToNodes[blob];
     nodes.forEach(node => {
       masterEdgeCapacities[node.id] = masterEdgeCapacities[node.id] || {};
-      masterEdgeCapacities[node.id][endingSink] = Infinity;
+      masterEdgeCapacities[node.id][masterSink] = Infinity;
     });
   });
 
@@ -457,15 +464,13 @@ const processPool = function(blobOrder, sourceBlobs, sinkBlobs, blobToNodes, blo
         });
       });
 
-      console.log(blob, nodes.map(i => i.id), 'going out to blob', outgoingBlob, blobToNodes[outgoingBlob].map(i => i.id));
+      // console.log(blob, nodes.map(i => i.id), 'going out to blob', outgoingBlob, blobToNodes[outgoingBlob].map(i => i.id));
     });
 
 
   });
 
-  console.log('MASTER, MY EDGE CAPACITIES');
-  console.log(masterEdgeCapacities);
-
+  maxFlow(masterSource, masterSink, masterEdgeCapacities);
 };
 
 const forwardPropagation = function (blobOrder, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob) {
