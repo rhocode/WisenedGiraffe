@@ -20,7 +20,7 @@ import {calculateLabelPositions, insertEdgeLabel, pathMouseClick, recalculateSto
 import {strongly_connected_components_standalone} from './algorithms';
 import TinyQueue from '../TinyQueue';
 import {useExperimentalFeature} from './util';
-import React from "react";
+import React from 'react';
 
 
 const isMiner = (node) => {
@@ -36,7 +36,7 @@ const isMerger = (node) => {
 };
 
 const isContainer = (node) => {
-  return node.machine.name === 'Container'
+  return node.machine.name === 'Container';
 };
 
 const calculateBaseNodeThroughput = (throughput) => {
@@ -103,9 +103,9 @@ const poolCalculation = (blobOrder, blobToNodes, blobIncoming) => {
           simplifyPool(poolLookupOutputs, outputPool, realOutputPool);
         }
       });
-      outputPool =  poolLookup[blob] // refresh outputool
+      outputPool =  poolLookup[blob]; // refresh outputool
     } else if (outputPool.length === 0) {
-      outputPool = [newPoolIndex++]
+      outputPool = [newPoolIndex++];
     }
 
     const nodes = blobToNodes[blob];
@@ -117,8 +117,8 @@ const poolCalculation = (blobOrder, blobToNodes, blobIncoming) => {
         poolLookupOutputs[blob] = poolLookupOutputs[blob] || [];
         poolLookupOutputs[blob].push(outputPool[0]);
       } else if ((blobIncoming[blob] || []).length === 0) {
-          poolLookupOutputs[blob] = poolLookupOutputs[blob] || [];
-          poolLookupOutputs[blob].push(outputPool[0]);
+        poolLookupOutputs[blob] = poolLookupOutputs[blob] || [];
+        poolLookupOutputs[blob].push(outputPool[0]);
       } else if (isSplitter(node)) {
       } else if (isMerger(node)) {
       } else if (isContainer(node)) {
@@ -140,7 +140,7 @@ const poolCalculation = (blobOrder, blobToNodes, blobIncoming) => {
   const outputs = Object.keys(poolLookupOutputs).map(i =>poolLookupOutputs[i]).flat(1);
   const inputs = Object.keys(poolLookupInputs).map(i =>poolLookupInputs[i]).flat(1);
   const commonalities = Array.from(new Set(outputs.filter(output => {
-    return inputs.includes(output)
+    return inputs.includes(output);
   })));
 
   const sources ={};
@@ -150,7 +150,7 @@ const poolCalculation = (blobOrder, blobToNodes, blobIncoming) => {
       if (commonalities.includes(item)) {
         sources[input] = item;
       }
-    })
+    });
   });
 
   const sinks ={};
@@ -160,54 +160,56 @@ const poolCalculation = (blobOrder, blobToNodes, blobIncoming) => {
       if (commonalities.includes(item)) {
         sinks[input] = item;
       }
-    })
+    });
   });
 
-  return {sources: sources, sinks: sinks, pools: commonalities};
+  return {sources: sources, sinks: sinks, pools: commonalities, poolOutputs: poolLookupOutputs, poolInputs: poolLookupInputs, poolLookup};
 };
 
 const bfs = (source, target, parent, adjacency, capacity) => {
-    parent[source] = -2;
-    const queue = [];
-    queue.push([source, Infinity]);
+  parent[source] = -2;
+  const queue = [];
+  queue.push([source, Infinity]);
 
-    while(!queue.length) {
-        const item = queue.pop();
-        const cur = item[0];
-        const flow = item[1];
-        adjacency[cur].forEach(next => {
-            if (parent[next] === -1 && capacity[cur][next]) {
-                parent[next] = cur;
-                const new_flow = min(flow, capacity[cur][next]);
-                if (next === target) {
-                    return new_flow;
-                }
-                queue.push([next, new_flow]);
-            }
-        });
-    }
+  while(!queue.length) {
+    const item = queue.pop();
+    const cur = item[0];
+    const flow = item[1];
+    adjacency[cur].forEach(next => {
+      if (parent[next] === -1 && capacity[cur][next]) {
+        parent[next] = cur;
+        const new_flow = Math.min(flow, capacity[cur][next]);
+        if (next === target) {
+          return new_flow;
+        }
+        queue.push([next, new_flow]);
+      }
+    });
+  }
+
+  return 0;
 };
 
 const maxFlow = (source, target) => {
-    let flow = 0;
-    const parent = {};
-    let new_flow = null;
-    const capacities = {};
+  let flow = 0;
+  const parent = {};
+  let new_flow = null;
+  const capacities = {};
 
-    new_flow = bfs(source, target, parent);
-    while(new_flow) {
-        flow += new_flow;
-        let cur = target;
-        while(cur !== source) {
-            const prev  = parent[cur];
-            capacities[prev][cur] -= new_flow;
-            capacities[cur][prev] += new_flow;
-            cur = prev;
-        }
-      new_flow = bfs(source, target, parent);
+  new_flow = bfs(source, target, parent);
+  while(new_flow) {
+    flow += new_flow;
+    let cur = target;
+    while(cur !== source) {
+      const prev  = parent[cur];
+      capacities[prev][cur] -= new_flow;
+      capacities[cur][prev] += new_flow;
+      cur = prev;
     }
+    new_flow = bfs(source, target, parent);
+  }
 
-    return flow;
+  return flow;
 };
 
 const demandCalculation = (blobOrder, blobToNodes, blobIncoming, graphLinks)  => {
@@ -221,7 +223,7 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, graphLinks)  =>
     const nodes = blobToNodes[blob];
     const throughputDemand = demandByBlob[blob] || {};
 
-      console.log("Processing", blob, throughputDemand, nodes.map(item => item.id));
+    console.log('Processing', blob, throughputDemand, nodes.map(item => item.id));
 
     let inputsBase = {};
     let inputsMaxSpeed = {};
@@ -261,10 +263,8 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, graphLinks)  =>
           })
         };
 
-        const actualThroughput = Math.min(calculateActualThroughput(throughput), throughputDemand[throughput.item] || Infinity);
+        const actualThroughput = Math.min(calculateActualThroughput(throughput), (throughputDemand[throughput.item] || {actual: Infinity}).actual);
         const maxThroughput = calculateAbsoluteMaxNodeThroughput(throughput);
-        inputsBase = {};
-        inputsMaxSpeed = {};
 
         throughput.inputs.forEach(input => {
           const item = input.item;
@@ -275,7 +275,6 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, graphLinks)  =>
           const throughputMaxNeeded = maxThroughput * (quantity / throughput.quantity);
           inputsBase[item] = inputsBase[item] || 0;
           inputsMaxSpeed[item] = inputsMaxSpeed[item] || 0;
-
           inputsBase[item] += throughputActualNeeded;
           inputsMaxSpeed[item] += throughputMaxNeeded;
         });
@@ -297,11 +296,11 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, graphLinks)  =>
               const speed = link.instance.speed;
 
               if (speed < totalItemsActual) {
-                actualIsFraction = true
+                actualIsFraction = true;
               }
 
               if (speed < totalItemsActualMax) {
-                maxIsFraction = true
+                maxIsFraction = true;
               }
 
               Object.keys(inputsBase).forEach(itemKey => {
@@ -311,12 +310,14 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, graphLinks)  =>
                   edgeCapacities[source.id] = edgeCapacities[source.id] || {};
                   edgeCapacities[source.id][target.id] = edgeCapacities[source.id][target.id] || 0;
                   const addition = ((inputsBase[itemKey]  * speed) / totalItemsActual);
+
                   demandByBlob[incomingBlob][itemKey].actual += addition;
                   edgeCapacities[source.id][target.id] += addition;
                 } else {
                   edgeCapacities[source.id] = edgeCapacities[source.id] || {};
                   edgeCapacities[source.id][target.id] = edgeCapacities[source.id][target.id] || 0;
                   const addition = inputsBase[itemKey];
+
                   demandByBlob[incomingBlob][itemKey].actual += addition;
                   edgeCapacities[source.id][target.id] += addition;
                 }
@@ -341,39 +342,58 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, graphLinks)  =>
   return {poolData, edgeCapacities, demandByBlob};
 };
 
-const forwardPropagation = function (blobOrder, blobToNodes, blobIncoming, graphLinks, poolData, edgeCapacities, demandByBlob) {
-  const poolsVisited = new Set();
-  const blobSources = new Set(Object.keys(poolData.sources));
-  const blobSinks = new Set(Object.keys(poolData.sinks));
+
+const processPool = function(blobOrder, sourceBlobs, sinkBlobs, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob) {
+
+
+  const masterSource = -1000;
+  const endingSink = -2000;
+  console.log(edgeCapacities);
+
+  const masterEdgeCapacities = {};
+
+  // Connect sources
+  sourceBlobs.forEach(blob => {
+    const nodes = blobToNodes[blob];
+
+    nodes.forEach(node => {
+      masterEdgeCapacities[masterSource] = masterEdgeCapacities[masterSource] || {};
+      masterEdgeCapacities[masterSource][node.id] = Infinity;
+    });
+  });
+
+  // Connect sinks
+  sinkBlobs.forEach(blob => {
+    const nodes = blobToNodes[blob];
+    nodes.forEach(node => {
+      masterEdgeCapacities[node.id] = masterEdgeCapacities[node.id] || {};
+      masterEdgeCapacities[node.id][endingSink] = Infinity;
+    });
+  });
+
 
   blobOrder.forEach(blob => {
     const nodes = blobToNodes[blob];
     const throughputDemand = demandByBlob[blob] || {};
+    const thisPool = poolData.sinks[blob] || poolData.sources[blob] || ((poolData.poolLookup[blob] || []).length ? poolData.poolLookup[blob][0] : null);
 
-    let inputsBase = {};
-    let inputsMaxSpeed = {};
-    const thisPool = poolData.sinks[blob];
-    if (blobSinks.has(blob) && !poolsVisited.has(thisPool)) {
-      poolsVisited.add(thisPool);
+    let throughputUsed = Infinity;
+    let throughput = {};
 
-
-    }
 
     if (nodes.length === 1) {
       const node = nodes[0];
       const nodeSpeed = node.instance.speed / 100;
       const overclock = node.overclock / 100;
-      let throughput = null;
-      let efficiency = null;
 
       if (isMiner(node)) {
-
+        // this is a purity calculation (aka miner or pump)
         const recipe = node.data.recipe;
         const purity = node.data.purity;
         const fetchedPurity = recipe.purities.filter(item => item.name === purity);
 
         if (fetchedPurity.length !== 1) {
-          throw new Error('Trying to get purity', purity, 'wtf?');
+          throw new Error('Trying to get purity' + purity + 'but none found');
         }
 
         const actualPurity = fetchedPurity[0];
@@ -387,26 +407,90 @@ const forwardPropagation = function (blobOrder, blobToNodes, blobIncoming, graph
           power: node.instance.power,
           inputs: []
         };
-        efficiency = 1;
 
-        const actualThroughput = calculateActualThroughput(throughput);
+        throughputUsed = calculateActualThroughput(throughput);
+
       } else if (isSplitter(node)) {
       } else if (isMerger(node)) {
       } else if (isContainer(node)) {
       } else { // it's a machine node
+        // throughput = {
+        //   speed: nodeSpeed,
+        //   overclock,
+        //   quantity: node.data.recipe.quantity,
+        //   item: node.data.recipe.item.id,
+        //   time: node.data.recipe.time,
+        //   power: node.data.recipe.power,
+        //   inputs: node.data.recipe.inputs.map(elem => {
+        //     return {item: elem.item.id, quantity: elem.quantity};
+        //   })
+        // };
+      }
+    } else {
+      // it's a cycle
+    }
+
+    (blobOutgoing[blob] || []).forEach(outgoingBlob => {
+      if (sinkBlobs.indexOf(blob) !== -1) {
+        return;
       }
 
-      if (blobSources.has(blob)) {
-        console.log(blob, "IS A SOURCE");
-      }
+      const sources = blobToNodes[blob];
+      const targets = blobToNodes[outgoingBlob];
+      sources.forEach(source => {
+        targets.forEach(target => {
+          try {
+            getLink(graphLinks, source, target);
 
-      console.log(poolData.sources, blob, blobToNodes[blob].map(i => i.id));
+            const edgeAccessor = edgeCapacities[source.id] || {};
+            const edgeWeight = !edgeAccessor[target.id] && edgeAccessor[target.id] !== 0 ? Infinity : edgeAccessor[target.id];
 
-      (blobIncoming[blob] || []).forEach(incomingBlob => {
+            if (!edgeAccessor[target.id] && edgeAccessor[target.id] !== 0) {
+              console.error('There is a problem!!!', edgeAccessor[target.id], JSON.stringify(edgeAccessor, null, 4), target.id);
+            }
+
+            masterEdgeCapacities[source.id] = masterEdgeCapacities[source.id] || {};
+            masterEdgeCapacities[source.id][target.id] = Math.min(throughputUsed, edgeWeight);
+          } catch (err) {
+            //noOp
+          }
+        });
       });
 
-    } else {
-      // copy over cycle code
+      console.log(blob, nodes.map(i => i.id), 'going out to blob', outgoingBlob, blobToNodes[outgoingBlob].map(i => i.id));
+    });
+
+
+  });
+
+  console.log('MASTER, MY EDGE CAPACITIES');
+  console.log(masterEdgeCapacities);
+
+};
+
+const forwardPropagation = function (blobOrder, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob) {
+  const poolsVisited = new Set();
+  const blobSources = new Set(Object.keys(poolData.sources));
+  const blobSinks = new Set(Object.keys(poolData.sinks));
+
+  blobOrder.forEach(blob => {
+    const thisPool = poolData.sinks[blob];
+    if (blobSinks.has(blob) && !poolsVisited.has(thisPool)) {
+      poolsVisited.add(thisPool);
+      const subBlobOrder = blobOrder.filter(subBlob => {
+        return ((poolData.poolLookup[subBlob] || []).length && thisPool === poolData.poolLookup[subBlob][0])
+        || thisPool === poolData.sinks[subBlob] || thisPool === poolData.sources[subBlob];
+      });
+
+      const subBlobSources = blobOrder.filter(subBlob => {
+        return thisPool === poolData.sources[subBlob];
+      });
+
+      const subBlobSinks = blobOrder.filter(subBlob => {
+        return thisPool === poolData.sinks[subBlob];
+      });
+
+      processPool(subBlobOrder, subBlobSources, subBlobSinks, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob);
     }
   });
 };
@@ -463,7 +547,7 @@ export const analyzeGraph = function (optimize=false) {
         const thisBlobIndex = nodeToBlobIndex[id];
         if (thisBlobIndex !== blobIndex)
           blobGraphAccessor.add(thisBlobIndex);
-          blobGraphAccessorCopy.add(thisBlobIndex);
+        blobGraphAccessorCopy.add(thisBlobIndex);
       });
     });
   };
@@ -531,8 +615,8 @@ export const analyzeGraph = function (optimize=false) {
     reverseTopologicalQueue.reheapify();
   }
 
-  const {poolData, edgeCapacities, demandByBlob} = demandCalculation(reverseBlobTopologicalSort, blobToNodes, immutableBlobGraphIncoming, this.graphData.links)
-  forwardPropagation(blobTopologicalSort, blobToNodes, immutableBlobGraphOutgoing, this.graphData.links, poolData, edgeCapacities, demandByBlob)
+  const {poolData, edgeCapacities, demandByBlob} = demandCalculation(reverseBlobTopologicalSort, blobToNodes, immutableBlobGraphIncoming, this.graphData.links);
+  forwardPropagation(blobTopologicalSort, blobToNodes, immutableBlobGraphOutgoing, this.graphData.links, poolData, edgeCapacities, demandByBlob);
 };
 
 const clearEdgeState = (link) => {
