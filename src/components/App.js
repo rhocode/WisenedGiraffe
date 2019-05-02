@@ -8,13 +8,14 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
 import Divider from '@material-ui/core/Divider';
-import InfoIcon from '@material-ui/icons/Info';
+import Link from '@material-ui/core/Link';
 import * as ReactGA from 'react-ga';
 
 import WarningIcon from '@material-ui/icons/Warning';
 import MenuIcon from '@material-ui/icons/Menu';
 import OfflineBoltIcon from '@material-ui/icons/OfflineBolt';
 import SettingsInputComponentIcon from '@material-ui/icons/SettingsInputComponent';
+import InfoIcon from '@material-ui/icons/Info';
 
 import Button from '@material-ui/core/Button';
 import Loader from './Loader';
@@ -29,6 +30,7 @@ import SidebarPanel from './SidebarPanel';
 import ClearButton from './ClearButton';
 import ShareButton from './ShareButton';
 import SelectorPanel from './SelectorPanel';
+import NightToggle from './NightToggle';
 import {loadHash, useExperimentalFeature} from './GraphSvg/util';
 
 import createDatabase from './newData';
@@ -126,6 +128,13 @@ const styles = theme => ({
 });
 
 const palette = {
+  type: 'light',
+  primary: { main: '#FF9100' },
+  secondary: { main: '#FF3D00', contrastText: '#FAFAFA' }
+};
+
+const paletteDark = {
+  type: 'dark',
   primary: { main: '#FF9100' },
   secondary: { main: '#FF3D00', contrastText: '#FAFAFA' }
 };
@@ -134,16 +143,41 @@ const themeName = 'Pizazz Vermilion Gayal';
 
 const theme = createMuiTheme({ typography: {
   useNextVariants: true,
-}, palette, themeName: themeName});
+}, palette : {
+  type: 'light',
+  primary: { main: '#FF9100' },
+  secondary: { main: '#FF3D00', contrastText: '#FAFAFA'},
+}, themeName: themeName});
+
+const themeDark = createMuiTheme({ typography: {
+  useNextVariants: true,
+}, palette: {
+  type: 'dark',
+  primary: { main: '#FF9100' },
+  secondary: { main: '#FF3D00', contrastText: '#FAFAFA'},
+}, themeName: themeName});
 
 class App extends Component {
   constructor(props) {
     super(props);
+    let n = (window.localStorage.getItem('nightMode') != null) ? window.localStorage.getItem('nightMode') : 'light';
+    window.localStorage.setItem('nightMode', n);
     this.state = {
       loaded: false,
-      mobileOpen: false
+      mobileOpen: false,
+      theme: n === 'light' ? theme : themeDark,
+      night: n,
     };
   }
+
+  handleNightToggle = () => {
+    let newPaletteType = window.localStorage.getItem('nightMode') === 'light' ? 'dark' : 'light';
+    this.setState({
+      theme: newPaletteType === 'light' ? theme : themeDark,
+      night: newPaletteType
+    });
+    window.localStorage.setItem('nightMode', newPaletteType);
+  };
 
     handleDrawerToggle = () => {
       this.setState(state => ({ mobileOpen: !state.mobileOpen }));
@@ -488,9 +522,9 @@ class App extends Component {
 
         <List>
           <SidebarPopup Icon={InfoIcon} label='About/Disclaimers' title='About/Disclaimers'>
-            <Typography variant="body1">Created by <a href="https://github.com/tehalexf" target="_blank">Alex</a> and <a
-              href="https://github.com/thinkaliker" target="_blank">Adam</a> (<a
-              href="https://twitter.com/thinkaliker" target="_blank">@thinkaliker</a>).</Typography>
+            <Typography variant="body1">Created by <Link href="https://github.com/tehalexf" target="_blank" rel="noopener" color='secondary'>Alex</Link> and <Link
+              href="https://github.com/thinkaliker" target="_blank" rel="noopener" color='secondary'>Adam</Link> (<Link
+              href="https://twitter.com/thinkaliker" target="_blank" rel="noopener" color='secondary'>@thinkaliker</Link>).</Typography>
             <Typography variant="body1">Not officially affiliated with Satisfactory, Coffee Stain
                       Studios AB, or THQ Nordic AB.</Typography>
             <Typography variant="body1">Images sourced from the Satisfactory Wiki, which is sourced from
@@ -498,8 +532,8 @@ class App extends Component {
           </SidebarPopup>
           <SidebarPopup Icon={WarningIcon} label='Known Issues' title='Known Issues'>
             <ul>
-              <li><Typography>Resource nodes do not have purities displayed on the graph.</Typography></li>
-              <li><Typography>No option yet to hide belt and factory numbers.</Typography></li>
+              <Typography variant='body1'><li>Resource nodes do not have purities displayed on the graph.</li></Typography>
+              <Typography variant='body1'><li>No option yet to hide belt and factory numbers.</li></Typography>
             </ul>
           </SidebarPopup>
         </List>
@@ -516,7 +550,7 @@ class App extends Component {
       return <div className={classes.root}>
 
         <CssBaseline/>
-        <MuiThemeProvider theme={theme}>
+        <MuiThemeProvider theme={this.state.theme}>
           <AppBar position="fixed" className={classes.appBar}>
             <Toolbar>
               <Hidden mdUp implementation="css">
@@ -541,6 +575,7 @@ class App extends Component {
               </Hidden>
 
               <div className={classes.grow} />
+              <NightToggle t={t} onNightToggle={this.handleNightToggle} night={this.state.night}/>
               {useExperimentalFeature('opt') ? <Button color="inherit" onClick={() => t.graphSvg.optimize()}>
                 <OfflineBoltIcon/>
                 <Hidden smDown implementation="css">
@@ -563,21 +598,19 @@ class App extends Component {
             <Typography variant="h4">Welcome to SatisGraphtory!</Typography>
             <Typography variant="body1">This is a factory planner/optimizer/analyzer tool for factories old and new, meant to accompany the game Satisfactory by Coffee Stain Studios. </Typography>
             <br />
-            <Typography variant="body1">Thanks for checking out our tool! If you have any questions, suggestions, feedback, or want to contribute feel free to join our <a href={'https://discord.gg/ZRpcgqY'} target="_blank">Discord server</a>! We're always looking to add more
+            <Typography variant="body1">Thanks for checking out our tool! If you have any questions, suggestions, feedback, or want to contribute feel free to join our <Link href={'https://discord.gg/ZRpcgqY'} target="_blank" rel="noopener" color="secondary">Discord server</Link>! We're always looking to add more
               functionality!</Typography>
             <br />
             <Typography variant="h5">This tool will always be free.</Typography>
             <br />
             <Typography variant="h5">Graph Basics</Typography>
             <ul>
-              <li><Typography variant="body1">Use the <b>left menu</b> to <b>add</b> machines to the diagram</Typography>
-              </li>
-              <li><Typography variant="body1"><b>CLICK</b> on a node/path to <b>select</b> it</Typography></li>
-              <li><Typography variant="body1">Press <b>BACKSPACE</b> on a selected node/path to delete
-                            it</Typography></li>
-              <li><Typography variant="body1">Hold down <b>SHIFT</b> and <b>drag</b> from node to node to create belts</Typography></li>
-              <li><Typography variant="body1">Use <b>MOUSE SCROLL</b> to control overclock (black text in the
-                            white circle)</Typography></li>
+              <Typography variant="body1"><li>Use the <b>left menu</b> to <b>add</b> machines to the diagram</li></Typography>
+              
+              <Typography variant="body1"><li><b>CLICK</b> on a node/path to <b>select</b> it</li></Typography>
+              <Typography variant="body1"><li>Press <b>BACKSPACE</b> on a selected node/path to delete it</li></Typography>
+              <Typography variant="body1"><li>Hold down <b>SHIFT</b> and <b>drag</b> from node to node to create belts</li></Typography>
+              <Typography variant="body1"><li>Use <b>MOUSE SCROLL</b> to control overclock (black text in the white circle)</li></Typography>
             </ul>
             <Typography variant="h5">Sharing</Typography>
             <Typography variant="body1">Generate a share code by using the Share button in the top right.</Typography>
@@ -627,7 +660,7 @@ class App extends Component {
 
 
 
-          <div id="svgParent" className={classes.content}>
+          <div id="svgParent" className={`${classes.content} ${this.state.night === 'dark' ? 'dark' : ''}`}>
             {this.state.loaded ? <GraphSvg parentAccessor={this} ref={(graphSvg) => {
               t.graphSvg = graphSvg;
             }}/> : <div/>}

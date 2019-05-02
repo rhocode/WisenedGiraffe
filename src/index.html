@@ -60,13 +60,24 @@
             margin-top: 10em;
             max-width: 50%;
         }
+
+        .dark-bg {
+            background-color: #555555;
+        }
+        .dark-text {
+            color: white;
+        }
     </style>
 </head>
-<body>
+<body id='body'>
 <div class="full-div loader-spinner" id="app"></div>
 <div class="align-loading">
-    <div class="loading-text align-loading-text">
+    <div class="loading-text align-loading-text" id='loading-text'>
         <script>
+          if (window.localStorage.getItem('nightMode') === 'dark') {
+            document.getElementById('body').classList.add('dark-bg');
+            document.getElementById('loading-text').classList.add('dark-text')
+          }
           var loading = [
             'Loading...',
             'Burning Coal...',
@@ -85,5 +96,4 @@
     </div>
 </div>
 </body>
-
 </html>

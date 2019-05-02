@@ -23,6 +23,12 @@ export const styles = theme => ({
 class Loader extends React.Component {
   constructor(props) {
     super(props);
+    const nightModeStore = window.localStorage.getItem('nightMode');
+    let night = 'light';
+    if (night !== nightModeStore) {
+      night = 'dark';
+    }
+    this.state = { night };
   }
 
   componentDidUpdate(previousProps, previousState) {
@@ -40,7 +46,7 @@ class Loader extends React.Component {
         <div className="loader-spinner"/>
         <div className="align-loading">
           <div
-            className='loading-text align-loading-text'>{loading[Math.floor(Math.random() * loading.length)]}</div>
+            className={`'loading-text align-loading-text' ${this.state.night === 'dark' ? 'dark-text' : ''}`}>{loading[Math.floor(Math.random() * loading.length)]}</div>
         </div>
       </React.Fragment>
     );

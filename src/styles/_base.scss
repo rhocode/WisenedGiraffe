@@ -165,6 +165,10 @@ svg#mainRender {
   background-color: #E0E0E0;
 }
 
+.dark svg#mainRender {
+  background-color: #555555;
+}
+
 .hiddenGraphElement {
   display: none;
 }

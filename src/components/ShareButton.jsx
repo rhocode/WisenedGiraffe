@@ -70,7 +70,7 @@ class ShareButton extends React.Component {
                         <div>
                             <TextField spellCheck={ false } inputRef={ref => this.inputRef = ref} label="Share Code" value={value}>
                             </TextField>
-                            <Button color="inherit" className={classes.inlineDialogButton} onClick={
+                            <Button color="primary" className={classes.inlineDialogButton} onClick={
                                 () => new Promise(resolve => {
                                     this.inputRef.select();
                                     document.execCommand('copy');
