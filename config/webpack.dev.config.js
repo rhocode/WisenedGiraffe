@@ -9,7 +9,7 @@ const config = {
     contentBase: commonPaths.outputPath,
     compress: true,
     hot: false,
-    port: 9000
+    port: 9001
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin()
