@@ -313,12 +313,16 @@ const bfs = (source, target, parent, adjacency, capacity) => {
 
 const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reverseBlobOrder, blobToNodes, demandByBlob, poolData, linksByBlob) => {
 
+  const produceQuantityByBlob = {};
+
   blobOrder.forEach(blob => {
+
+    const outgoingLinks = linksByBlob[blob] || [];
+
     const nodes = blobToNodes[blob];
     const throughputDemand = demandByBlob[blob] || {};
     const thisPool = poolData.sinks[blob] || poolData.sources[blob] || ((poolData.poolLookup[blob] || []).length ? poolData.poolLookup[blob][0] : null);
 
-    let throughputUsed = Infinity;
     let throughput = {};
 
     if (nodes.length === 1) {
@@ -348,28 +352,60 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
           inputs: []
         };
 
-        throughputUsed = calculateActualThroughput(throughput);
+        const actualThroughput = calculateActualThroughput(throughput);
+
+        outgoingLinks.forEach(link => {
+          const { source, target, sourceBlob, targetBlob } = link;
+          produceQuantityByBlob[targetBlob] = produceQuantityByBlob[targetBlob] || [];
+          produceQuantityByBlob[targetBlob].push({throughput: actualThroughput, item: throughput.item});
+        });
 
       } else if (isSplitter(node)) {
-        console.log(node);
       } else if (isMerger(node)) {
       } else if (isContainer(node)) {
+        outgoingLinks.forEach(link => {
+          const { source, target, sourceBlob, targetBlob } = link;
+          const propagatedThroughput = produceQuantityByBlob[sourceBlob] || [];
+
+          produceQuantityByBlob[targetBlob] = produceQuantityByBlob[targetBlob] || [];
+
+          propagatedThroughput.forEach(throughput => {
+            produceQuantityByBlob[targetBlob].push(throughput);
+          });
+
+        });
       } else { // it's a machine node
-        // throughput = {
-        //   speed: nodeSpeed,
-        //   overclock,
-        //   quantity: node.data.recipe.quantity,
-        //   item: node.data.recipe.item.id,
-        //   time: node.data.recipe.time,
-        //   power: node.data.recipe.power,
-        //   inputs: node.data.recipe.inputs.map(elem => {
-        //     return {item: elem.item.id, quantity: elem.quantity};
-        //   })
-        // };
+        throughput = {
+          speed: nodeSpeed,
+          overclock,
+          quantity: node.data.recipe.quantity,
+          item: node.data.recipe.item.id,
+          time: node.data.recipe.time,
+          power: node.data.recipe.power,
+          inputs: node.data.recipe.inputs.map(elem => {
+            return {item: elem.item.id, quantity: elem.quantity};
+          })
+        };
+
+        const actualThroughput = Math.min(calculateActualThroughput(throughput), (throughputDemand[throughput.item] || {actual: Infinity}).actual);
+
+        throughput.inputs.forEach(input => {
+          const item = input.item;
+          const quantity = input.quantity;
+
+          let throughputActualNeeded = actualThroughput * (quantity / throughput.quantity);
+
+          const throughputMaxNeeded = maxThroughput * (quantity / throughput.quantity);
+          inputsBase[item] = inputsBase[item] || 0;
+          inputsMaxSpeed[item] = inputsMaxSpeed[item] || 0;
+          inputsBase[item] += throughputActualNeeded;
+          inputsMaxSpeed[item] += throughputMaxNeeded;
+        });
       }
     } else {
       // it's a cycle
     }
+
   });
 };
 
@@ -551,8 +587,6 @@ const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs
           try {
             getLink(graphLinks, source, target);
 
-            linksByBlob[blob].push([source, target]);
-
             const edgeAccessor = edgeCapacities[source.id] || {};
             const edgeWeight = !edgeAccessor[target.id] && edgeAccessor[target.id] !== 0 ? Infinity : edgeAccessor[target.id];
 
@@ -563,6 +597,8 @@ const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs
             masterEdgeCapacities[source.id] = masterEdgeCapacities[source.id] || {};
             masterEdgeCapacities[source.id][target.id] = edgeWeight;
 
+
+            linksByBlob[blob].push({source, target, sourceBlob: blob, targetBlob: outgoingBlob, edgeWeight});
               // Math.min(throughputUsed, edgeWeight);
           } catch (err) {
             //noOp
