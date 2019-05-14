@@ -311,8 +311,66 @@ const bfs = (source, target, parent, adjacency, capacity) => {
   return 0;
 };
 
-const experimentalPropagation = (source, target, edgeCapacities) => {
-  console.log(source, target, edgeCapacities);
+const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reverseBlobOrder, blobToNodes, demandByBlob, poolData, linksByBlob) => {
+
+  blobOrder.forEach(blob => {
+    const nodes = blobToNodes[blob];
+    const throughputDemand = demandByBlob[blob] || {};
+    const thisPool = poolData.sinks[blob] || poolData.sources[blob] || ((poolData.poolLookup[blob] || []).length ? poolData.poolLookup[blob][0] : null);
+
+    let throughputUsed = Infinity;
+    let throughput = {};
+
+    if (nodes.length === 1) {
+      const node = nodes[0];
+      const nodeSpeed = node.instance.speed / 100;
+      const overclock = node.overclock / 100;
+
+      if (isMiner(node)) {
+        // this is a purity calculation (aka miner or pump)
+        const recipe = node.data.recipe;
+        const purity = node.data.purity;
+        const fetchedPurity = recipe.purities.filter(item => item.name === purity);
+
+        if (fetchedPurity.length !== 1) {
+          throw new Error('Trying to get purity' + purity + 'but none found');
+        }
+
+        const actualPurity = fetchedPurity[0];
+
+        throughput = {
+          speed: nodeSpeed,
+          overclock,
+          quantity: actualPurity.quantity,
+          item: recipe.item.id,
+          time: 60,
+          power: node.instance.power,
+          inputs: []
+        };
+
+        throughputUsed = calculateActualThroughput(throughput);
+
+      } else if (isSplitter(node)) {
+        console.log(node);
+      } else if (isMerger(node)) {
+      } else if (isContainer(node)) {
+      } else { // it's a machine node
+        // throughput = {
+        //   speed: nodeSpeed,
+        //   overclock,
+        //   quantity: node.data.recipe.quantity,
+        //   item: node.data.recipe.item.id,
+        //   time: node.data.recipe.time,
+        //   power: node.data.recipe.power,
+        //   inputs: node.data.recipe.inputs.map(elem => {
+        //     return {item: elem.item.id, quantity: elem.quantity};
+        //   })
+        // };
+      }
+    } else {
+      // it's a cycle
+    }
+  });
 };
 
 const maxFlow = (source, target, edgeCapacities) => {
@@ -478,64 +536,8 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, blobOutgoing, g
 const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob) {
 
   const masterEdgeCapacities = {};
-
+  const linksByBlob = {};
   blobOrder.forEach(blob => {
-    const nodes = blobToNodes[blob];
-    const throughputDemand = demandByBlob[blob] || {};
-    const thisPool = poolData.sinks[blob] || poolData.sources[blob] || ((poolData.poolLookup[blob] || []).length ? poolData.poolLookup[blob][0] : null);
-
-    let throughputUsed = Infinity;
-    let throughput = {};
-
-    if (nodes.length === 1) {
-      const node = nodes[0];
-      const nodeSpeed = node.instance.speed / 100;
-      const overclock = node.overclock / 100;
-
-      if (isMiner(node)) {
-        // this is a purity calculation (aka miner or pump)
-        const recipe = node.data.recipe;
-        const purity = node.data.purity;
-        const fetchedPurity = recipe.purities.filter(item => item.name === purity);
-
-        if (fetchedPurity.length !== 1) {
-          throw new Error('Trying to get purity' + purity + 'but none found');
-        }
-
-        const actualPurity = fetchedPurity[0];
-
-        throughput = {
-          speed: nodeSpeed,
-          overclock,
-          quantity: actualPurity.quantity,
-          item: recipe.item.id,
-          time: 60,
-          power: node.instance.power,
-          inputs: []
-        };
-
-        throughputUsed = calculateActualThroughput(throughput);
-
-      } else if (isSplitter(node)) {
-      } else if (isMerger(node)) {
-      } else if (isContainer(node)) {
-      } else { // it's a machine node
-        // throughput = {
-        //   speed: nodeSpeed,
-        //   overclock,
-        //   quantity: node.data.recipe.quantity,
-        //   item: node.data.recipe.item.id,
-        //   time: node.data.recipe.time,
-        //   power: node.data.recipe.power,
-        //   inputs: node.data.recipe.inputs.map(elem => {
-        //     return {item: elem.item.id, quantity: elem.quantity};
-        //   })
-        // };
-      }
-    } else {
-      // it's a cycle
-    }
-
     (blobOutgoing[blob] || []).forEach(outgoingBlob => {
       if (sinkBlobs.indexOf(blob) !== -1) {
         return;
@@ -543,10 +545,13 @@ const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs
 
       const sources = blobToNodes[blob];
       const targets = blobToNodes[outgoingBlob];
+      linksByBlob[blob] = linksByBlob[blob] || [];
       sources.forEach(source => {
         targets.forEach(target => {
           try {
             getLink(graphLinks, source, target);
+
+            linksByBlob[blob].push([source, target]);
 
             const edgeAccessor = edgeCapacities[source.id] || {};
             const edgeWeight = !edgeAccessor[target.id] && edgeAccessor[target.id] !== 0 ? Infinity : edgeAccessor[target.id];
@@ -556,7 +561,9 @@ const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs
             }
 
             masterEdgeCapacities[source.id] = masterEdgeCapacities[source.id] || {};
-            masterEdgeCapacities[source.id][target.id] = Math.min(throughputUsed, edgeWeight);
+            masterEdgeCapacities[source.id][target.id] = edgeWeight;
+
+              // Math.min(throughputUsed, edgeWeight);
           } catch (err) {
             //noOp
             console.log(err)
@@ -569,7 +576,8 @@ const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs
 
 
   });
-  experimentalPropagation(sourceBlobs, sinkBlobs, masterEdgeCapacities);
+  // console.error(masterEdgeCapacities);
+  experimentalPropagation(sourceBlobs, sinkBlobs, masterEdgeCapacities, blobOrder, reverseBlobOrder, blobToNodes, demandByBlob, poolData, linksByBlob);
   // console.error(sourceBlobs.map(i => blobToNodes[i][0].id), sinkBlobs.map(i => blobToNodes[i][0].id))
   // maxFlow(masterSource, masterSink, masterEdgeCapacities);
 };
