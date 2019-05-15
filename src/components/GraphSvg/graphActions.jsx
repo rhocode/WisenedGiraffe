@@ -217,7 +217,9 @@ const splitterCalculator = (inputSpeed, outputsSpeed) => {
   const checkedSequence = [];
   let readyToCheck = false;
   const usedItemsLength = usedItems.length;
-  while(true) {
+  let iterator = 0;
+  while(iterator < 100000) {
+    iterator++;
     let lastBeltUsed = -1;
     let time = Math.round(i * timeScale * scaleMultiplier);
     let beltChanged = false;
@@ -273,13 +275,32 @@ const splitterCalculator = (inputSpeed, outputsSpeed) => {
 
   const [left, right] = splitList(checkedSequence);
 
+  const totalTime = (timeScale * left.length);
+
+  const adjustedInput = (left.filter(i => i !== -1).length) / totalTime;
+  // console.log(adjustedInput * 60, (left.length) / (timeScale * left.length) * 60);
+
+  const leftSplit = left.filter(i => i === 0).length;
+  const middleSplit = left.filter(i => i === 1).length;
+  const rightSplit = left.filter(i => i === 2).length;
+  const beltOutputs = [leftSplit * 60 / totalTime, middleSplit * 60 / totalTime, rightSplit * 60 / totalTime];
+
+  const manifoldOutput = outputsSpeed.map(speed => {
+
+    const multiplier = Math.ceil((1/speed) / (1/inputSpeed));
+
+    return inputSpeed / multiplier;
+  });
+
+  const manifoldInput = manifoldOutput.reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
+
   return {
-    timeScale, sequence: left
+    timeScale, sequence: left, adjustedInput: adjustedInput * 60, beltOutputs, manifoldOutput, manifoldInput
   }
 };
 
-const beltOutputs = [60, 120, 270];
-const beltInputs = 450;
+const beltOutputs = [60, 30, 30];
+const beltInputs = 120;
 
 splitterCalculator(beltInputs, beltOutputs);
 
@@ -359,8 +380,21 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
           produceQuantityByBlob[targetBlob] = produceQuantityByBlob[targetBlob] || [];
           produceQuantityByBlob[targetBlob].push({throughput: actualThroughput, item: throughput.item});
         });
-
+        console.log(produceQuantityByBlob);
       } else if (isSplitter(node)) {
+        // const { source, target, sourceBlob, targetBlob } = link;
+
+
+        console.log(outgoingLinks);
+        const totalInput =  (produceQuantityByBlob[blob] || []).map(i => i.throughput).reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
+        const totalOutput = outgoingLinks.map(i => i.edgeWeight).reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
+        const limitedInput = Math.min(totalInput, totalOutput);
+        console.log(limitedInput, outgoingLinks.map(i => i.edgeWeight));
+        const splitCalculation = splitterCalculator(limitedInput, outgoingLinks.map(i => i.edgeWeight));
+        console.log(totalInput, totalOutput, outgoingLinks);
+        console.error("REACHED SPLITTER", splitCalculation)
+        const outputSplit = splitCalculation.beltOutputs
+        console.log(outputSplit)
       } else if (isMerger(node)) {
       } else if (isContainer(node)) {
         outgoingLinks.forEach(link => {
@@ -395,11 +429,6 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
 
           let throughputActualNeeded = actualThroughput * (quantity / throughput.quantity);
 
-          const throughputMaxNeeded = maxThroughput * (quantity / throughput.quantity);
-          inputsBase[item] = inputsBase[item] || 0;
-          inputsMaxSpeed[item] = inputsMaxSpeed[item] || 0;
-          inputsBase[item] += throughputActualNeeded;
-          inputsMaxSpeed[item] += throughputMaxNeeded;
         });
       }
     } else {
