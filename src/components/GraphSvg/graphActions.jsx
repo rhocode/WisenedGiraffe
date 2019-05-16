@@ -285,17 +285,17 @@ const splitterCalculator = (inputSpeed, outputsSpeed) => {
   const rightSplit = left.filter(i => i === 2).length;
   const beltOutputs = [leftSplit * 60 / totalTime, middleSplit * 60 / totalTime, rightSplit * 60 / totalTime];
 
-  const manifoldOutput = outputsSpeed.map(speed => {
+  // const manifoldOutput = outputsSpeed.map(speed => {
+  //
+  //   const multiplier = Math.ceil((1/speed) / (1/inputSpeed));
+  //
+  //   return inputSpeed / multiplier;
+  // });
 
-    const multiplier = Math.ceil((1/speed) / (1/inputSpeed));
-
-    return inputSpeed / multiplier;
-  });
-
-  const manifoldInput = manifoldOutput.reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
+  // const manifoldInput = manifoldOutput.reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
 
   return {
-    timeScale, sequence: left, adjustedInput: adjustedInput * 60, beltOutputs, manifoldOutput, manifoldInput
+    timeScale, sequence: left, adjustedInput: adjustedInput * 60, beltOutputs
   }
 };
 
@@ -390,6 +390,30 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
         const totalOutput = outgoingLinks.map(i => i.edgeWeight).reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
         const limitedInput = Math.min(totalInput, totalOutput);
         console.log(limitedInput, outgoingLinks.map(i => i.edgeWeight));
+
+        const permutator = (inputArr) => {
+          let result = [];
+
+          const permute = (arr, m = []) => {
+            if (arr.length === 0) {
+              result.push(m)
+            } else {
+              for (let i = 0; i < arr.length; i++) {
+                let curr = arr.slice();
+                let next = curr.splice(i, 1);
+                permute(curr.slice(), m.concat(next))
+              }
+            }
+          }
+
+          permute(inputArr)
+
+          return result;
+        };
+
+        const permutes = permutator(outgoingLinks.map(i => i.edgeWeight));
+
+        console.error(permutes, "DNJFNS")
         const splitCalculation = splitterCalculator(limitedInput, outgoingLinks.map(i => i.edgeWeight));
         console.log(totalInput, totalOutput, outgoingLinks);
         console.error("REACHED SPLITTER", splitCalculation)
