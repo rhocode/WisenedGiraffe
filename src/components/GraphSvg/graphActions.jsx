@@ -200,6 +200,38 @@ const splitList = (list) => {
 };
 
 const splitterCalculator = (inputSpeed, outputsSpeed) => {
+
+  const permutator = (inputArr) => {
+    let result = [];
+
+    const permute = (arr, m = []) => {
+      if (arr.length === 0) {
+        result.push(m)
+      } else {
+        for (let i = 0; i < arr.length; i++) {
+          let curr = arr.slice();
+          let next = curr.splice(i, 1);
+          permute(curr.slice(), m.concat(next));
+        }
+      }
+    };
+
+    permute(inputArr);
+
+    return result;
+  };
+
+
+  const outputsPermuted = permutator(outputsSpeed);
+
+  const outputted = outputsPermuted.map(out => splitterCalculatorHelper(inputSpeed, out));
+
+  const bestOutput = Math.max(...outputted.map(i => i.adjustedInput));
+
+  return outputted.filter(i => i.adjustedInput === bestOutput)[0];
+};
+
+const splitterCalculatorHelper = (inputSpeed, outputsSpeed) => {
   let belt = 1;
   let blocked = [0, 0, 0];
 
@@ -264,7 +296,7 @@ const splitterCalculator = (inputSpeed, outputsSpeed) => {
 
         if (JSON.stringify(left) === JSON.stringify(right)) {
           i+= 1;
-          break
+          break;
         }
       }
     }
@@ -285,24 +317,31 @@ const splitterCalculator = (inputSpeed, outputsSpeed) => {
   const rightSplit = left.filter(i => i === 2).length;
   const beltOutputs = [leftSplit * 60 / totalTime, middleSplit * 60 / totalTime, rightSplit * 60 / totalTime];
 
-  // const manifoldOutput = outputsSpeed.map(speed => {
-  //
-  //   const multiplier = Math.ceil((1/speed) / (1/inputSpeed));
-  //
-  //   return inputSpeed / multiplier;
-  // });
+  const maxSpeed = Math.max(...outputsSpeed);
 
-  // const manifoldInput = manifoldOutput.reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
+  const manifoldOutput = outputsSpeed.map(speed => {
+
+    if (speed === maxSpeed) {
+      const multiplier = Math.ceil((1/speed) / (1/(inputSpeed)));
+
+      return inputSpeed / multiplier;
+    }
+
+    return speed;
+  });
+
+  const manifoldInput = manifoldOutput.reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
 
   return {
-    timeScale, sequence: left, adjustedInput: adjustedInput * 60, beltOutputs
-  }
+    timeScale, sequence: left, adjustedInput: adjustedInput * 60, beltOutputs, manifoldInput, manifoldOutput, originalOutput: outputsSpeed
+  };
 };
 
-const beltOutputs = [60, 30, 30];
-const beltInputs = 120;
-
-splitterCalculator(beltInputs, beltOutputs);
+const beltOutputs = [60, 120, 270];
+const beltInputs = 450;
+console.log(beltInputs, beltOutputs)
+const zz = splitterCalculator(beltInputs, beltOutputs);
+console.log(zz);
 
 
 //************************** end splitter calcs
@@ -382,44 +421,59 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
         });
         console.log(produceQuantityByBlob);
       } else if (isSplitter(node)) {
+        const itemQuantity =  (produceQuantityByBlob[blob] || []);
         // const { source, target, sourceBlob, targetBlob } = link;
 
-
         console.log(outgoingLinks);
-        const totalInput =  (produceQuantityByBlob[blob] || []).map(i => i.throughput).reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
+        const totalInput = itemQuantity.map(i => i.throughput).reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
         const totalOutput = outgoingLinks.map(i => i.edgeWeight).reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
         const limitedInput = Math.min(totalInput, totalOutput);
         console.log(limitedInput, outgoingLinks.map(i => i.edgeWeight));
 
-        const permutator = (inputArr) => {
-          let result = [];
 
-          const permute = (arr, m = []) => {
-            if (arr.length === 0) {
-              result.push(m)
-            } else {
-              for (let i = 0; i < arr.length; i++) {
-                let curr = arr.slice();
-                let next = curr.splice(i, 1);
-                permute(curr.slice(), m.concat(next))
-              }
-            }
-          }
-
-          permute(inputArr)
-
-          return result;
-        };
-
-        const permutes = permutator(outgoingLinks.map(i => i.edgeWeight));
-
-        console.error(permutes, "DNJFNS")
+        // const permutes = permutator(outgoingLinks.map(i => i.edgeWeight));
+        //
+        // console.error(permutes, "DNJFNS")
         const splitCalculation = splitterCalculator(limitedInput, outgoingLinks.map(i => i.edgeWeight));
-        console.log(totalInput, totalOutput, outgoingLinks);
-        console.error("REACHED SPLITTER", splitCalculation)
-        const outputSplit = splitCalculation.beltOutputs
-        console.log(outputSplit)
+
+        const outputIndex = outgoingLinks.map(i => {
+          return splitCalculation.originalOutput.indexOf(i.edgeWeight);
+        });
+
+        // console.log(totalInput, totalOutput, outgoingLinks);
+        console.error("REACHED SPLITTER", splitCalculation, itemQuantity)
+        // const outputSplit = splitCalculation.beltOutputs
+        // console.log(outputSplit)
+
+        //Manifold mode!
+
+        if (totalInput >= totalOutput) {
+          console.log("MANIFOLD MODE");
+          const itemsPropagated = itemQuantity.map(i => i.item)
+        } else {
+          console.log("NORMAL SPLIT MODE");
+
+
+          outgoingLinks.forEach((link, index) => {
+            const permutedIndex = outputIndex[index];
+
+            console.log(link, splitCalculation, permutedIndex);
+
+            const thisFraction = splitCalculation.manifoldOutput[permutedIndex] / splitCalculation.manifoldInput;
+
+            itemQuantity.forEach(propagation => {
+              console.log(propagation.throughput * thisFraction, propagation.throughput, thisFraction)
+              produceQuantityByBlob[link.targetBlob] = produceQuantityByBlob[link.targetBlob] || [];
+              produceQuantityByBlob[link.targetBlob].push({throughput: propagation.throughput * thisFraction, item: propagation.item});
+            });
+          });
+          // Split mode
+        }
+
       } else if (isMerger(node)) {
+
+        // In this step we need to mark any mergers are "overloaded"
+
       } else if (isContainer(node)) {
         outgoingLinks.forEach(link => {
           const { source, target, sourceBlob, targetBlob } = link;
