@@ -171,6 +171,9 @@ const poolCalculation = (blobOrder, blobToNodes, blobIncoming, blobOutgoing) => 
 
 //************ Splitter Calc
 const greatestCommonDivisor = (a, b) => {
+  if (isNaN(a) || isNaN(b)) {
+    return 0;
+  }
   if (b === 0)
     return a;
   else
@@ -371,9 +374,113 @@ const bfs = (source, target, parent, adjacency, capacity) => {
   return 0;
 };
 
-const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reverseBlobOrder, blobToNodes, demandByBlob, poolData, linksByBlob) => {
+const calculateDemand = (blobOrder, blobToNodes, blobIncoming, blobOutgoing, graphLinks) => {
+    const demandByBlob = {};
+    const edgeCapacities = {};
 
-  const produceQuantityByBlob = {};
+    blobOrder.forEach(blob => {
+
+      const nodes = blobToNodes[blob];
+      const throughputDemand = demandByBlob[blob] || {};
+
+      let inputsBase = {};
+      let inputsMaxSpeed = {};
+
+      if (nodes.length === 1) {
+        const node = nodes[0];
+        if (isMiner(node)) {
+          // NoOp?
+        } else if (isSplitter(node)) {
+          Object.keys(throughputDemand).forEach(key => {
+            inputsBase[key] = ((throughputDemand[key] || {}).actual || Infinity);
+            inputsMaxSpeed[key] = ((throughputDemand[key] || {}).max || Infinity);
+          });
+        } else if (isMerger(node)) {
+          Object.keys(throughputDemand).forEach(key => {
+            inputsBase[key] = ((throughputDemand[key] || {}).actual || Infinity);
+            inputsMaxSpeed[key] = ((throughputDemand[key] || {}).max || Infinity);
+          });
+        } else if (isContainer(node)) {
+          Object.keys(throughputDemand).forEach(key => {
+            inputsBase[key] = ((throughputDemand[key] || {}).actual || Infinity);
+            inputsMaxSpeed[key] = ((throughputDemand[key] || {}).max || Infinity);
+          });
+        } else { // it's a machine node
+
+        }
+
+        (blobIncoming[blob] || []).forEach(incomingBlob => {
+          // TODO - Optimize: is it expensive to load the nodes? Or should we just load the indexes instead
+          const sources = blobToNodes[incomingBlob];
+          const targets = blobToNodes[blob];
+          sources.forEach(source => {
+            targets.forEach(target => {
+              try {
+                const link = getLink(graphLinks, source, target);
+                demandByBlob[incomingBlob] = demandByBlob[incomingBlob] || {};
+                const totalItemsActual = Object.keys(inputsBase).map(key => inputsBase[key]).reduce((a, b = 0) => a + b, 0);
+                const totalItemsActualMax = Object.keys(inputsMaxSpeed).map(key => inputsMaxSpeed[key]).reduce((a, b = 0) => a + b, 0);
+                let actualIsFraction = false;
+                let maxIsFraction = false;
+                const speed = link.instance.speed;
+
+                if (speed < totalItemsActual) {
+                  actualIsFraction = true;
+                }
+
+                if (speed < totalItemsActualMax) {
+                  maxIsFraction = true;
+                }
+
+                if (Object.keys(inputsBase).length === 0) {
+                  edgeCapacities[source.id] = edgeCapacities[source.id] || {};
+                  edgeCapacities[source.id][target.id] = speed;
+                }
+
+                Object.keys(inputsBase).forEach(itemKey => {
+
+                  demandByBlob[incomingBlob][itemKey] = demandByBlob[incomingBlob][itemKey] || {actual: 0, max: 0};
+                  if (actualIsFraction) {
+                    edgeCapacities[source.id] = edgeCapacities[source.id] || {};
+                    edgeCapacities[source.id][target.id] = edgeCapacities[source.id][target.id] || 0;
+                    const addition = ((inputsBase[itemKey]  * speed) / totalItemsActual);
+
+                    demandByBlob[incomingBlob][itemKey].actual += addition;
+                    edgeCapacities[source.id][target.id] += addition;
+                  } else {
+                    edgeCapacities[source.id] = edgeCapacities[source.id] || {};
+                    edgeCapacities[source.id][target.id] = edgeCapacities[source.id][target.id] || 0;
+                    const addition = inputsBase[itemKey];
+
+                    demandByBlob[incomingBlob][itemKey].actual += addition;
+                    edgeCapacities[source.id][target.id] += addition;
+                  }
+
+                  if (maxIsFraction) {
+                    demandByBlob[incomingBlob][itemKey].max += ((inputsMaxSpeed[itemKey] * speed) /  totalItemsActualMax);
+                  } else {
+                    demandByBlob[incomingBlob][itemKey].max += inputsMaxSpeed[itemKey];
+                  }
+                });
+              } catch (err) {
+                console.error(err);
+                //no-op
+              }
+            });
+          });
+        });
+
+      } else {
+        // copy over cycle code
+      }
+    });
+    return {edgeCapacities, demandByBlob};
+};
+
+const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reverseBlobOrder, blobToNodes, demandByBlob, poolData, linksByBlob, sinkPropagationTotals) => {
+
+  const produceQuantityByBlob = sinkPropagationTotals;
+    // JSON.parse(JSON.stringify(sinkPropagationTotals));
 
   blobOrder.forEach(blob => {
 
@@ -390,7 +497,10 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
       const nodeSpeed = node.instance.speed / 100;
       const overclock = node.overclock / 100;
 
+      console.error("Processing", blob, "(", node.id, ')');
+
       if (isMiner(node)) {
+
         // this is a purity calculation (aka miner or pump)
         const recipe = node.data.recipe;
         const purity = node.data.purity;
@@ -419,41 +529,47 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
           produceQuantityByBlob[targetBlob] = produceQuantityByBlob[targetBlob] || [];
           produceQuantityByBlob[targetBlob].push({throughput: actualThroughput, item: throughput.item});
         });
-        console.log(produceQuantityByBlob);
       } else if (isSplitter(node)) {
         const itemQuantity =  (produceQuantityByBlob[blob] || []);
         // const { source, target, sourceBlob, targetBlob } = link;
 
-        console.log(outgoingLinks);
         const totalInput = itemQuantity.map(i => i.throughput).reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
         const totalOutput = outgoingLinks.map(i => i.edgeWeight).reduce( (previousValue, currentValue) => previousValue + currentValue, 0);
+
         const limitedInput = Math.min(totalInput, totalOutput);
-        console.log(limitedInput, outgoingLinks.map(i => i.edgeWeight));
 
-
-        // const permutes = permutator(outgoingLinks.map(i => i.edgeWeight));
-        //
-        // console.error(permutes, "DNJFNS")
         const splitCalculation = splitterCalculator(limitedInput, outgoingLinks.map(i => i.edgeWeight));
 
         const outputIndex = outgoingLinks.map(i => {
           return splitCalculation.originalOutput.indexOf(i.edgeWeight);
         });
 
-        // console.log(totalInput, totalOutput, outgoingLinks);
-        console.error("REACHED SPLITTER", splitCalculation, itemQuantity)
-        // const outputSplit = splitCalculation.beltOutputs
-        // console.log(outputSplit)
-
-        //Manifold mode!
-
         if (totalInput >= totalOutput) {
           console.log("MANIFOLD MODE");
-          const itemsPropagated = itemQuantity.map(i => i.item)
+          const itemsPropagated = new Set(itemQuantity.map(i => i.item))
+          if (totalInput > totalOutput && itemsPropagated.size > 1) {
+            throw new Error("More than one resource propagated incorrectly.")
+          }
+
+          outgoingLinks.forEach((link, index) => {
+            const permutedIndex = outputIndex[index];
+            const thisFraction = splitCalculation.manifoldOutput[permutedIndex] / splitCalculation.manifoldInput;
+            itemQuantity.forEach(propagation => {
+
+              const throttledFraction = limitedInput / Math.max(limitedInput, propagation.throughput)
+
+              produceQuantityByBlob[link.targetBlob] = produceQuantityByBlob[link.targetBlob] || [];
+              produceQuantityByBlob[link.targetBlob].push({throughput: propagation.throughput * thisFraction * throttledFraction, item: propagation.item});
+            });
+          });
+
+          if (totalInput > totalOutput) {
+            console.error("TOO MUCH INPUT!!!!!!", totalInput, totalOutput, outgoingLinks);
+          } else {
+            console.error("Less or equal", totalInput, totalOutput, outgoingLinks);
+          }
         } else {
-          console.log("NORMAL SPLIT MODE");
-
-
+          console.log("NORMAL SPLIT MODE (BROKEN)");
           outgoingLinks.forEach((link, index) => {
             const permutedIndex = outputIndex[index];
 
@@ -474,6 +590,18 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
 
         // In this step we need to mark any mergers are "overloaded"
 
+        //THIS IS BROKEN (or at least incorrect).
+        outgoingLinks.forEach(link => {
+          const { source, target, sourceBlob, targetBlob } = link;
+          const propagatedThroughput = produceQuantityByBlob[sourceBlob] || [];
+
+          produceQuantityByBlob[targetBlob] = produceQuantityByBlob[targetBlob] || [];
+
+          propagatedThroughput.forEach(throughput => {
+            produceQuantityByBlob[targetBlob].push(throughput);
+          });
+        });
+
       } else if (isContainer(node)) {
         outgoingLinks.forEach(link => {
           const { source, target, sourceBlob, targetBlob } = link;
@@ -484,7 +612,6 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
           propagatedThroughput.forEach(throughput => {
             produceQuantityByBlob[targetBlob].push(throughput);
           });
-
         });
       } else { // it's a machine node
         throughput = {
@@ -499,16 +626,46 @@ const experimentalPropagation = (source, target, edgeCapacities, blobOrder, reve
           })
         };
 
-        const actualThroughput = Math.min(calculateActualThroughput(throughput), (throughputDemand[throughput.item] || {actual: Infinity}).actual);
+        const desiredThroughput = Math.min(calculateActualThroughput(throughput), (throughputDemand[throughput.item] || {actual: Infinity}).actual);
+        outgoingLinks.forEach(link => {
+          const { source, target, sourceBlob, targetBlob } = link;
+          const propagatedThroughput = produceQuantityByBlob[sourceBlob] || [];
 
-        throughput.inputs.forEach(input => {
-          const item = input.item;
-          const quantity = input.quantity;
+          const combinedPropagation = {};
 
-          let throughputActualNeeded = actualThroughput * (quantity / throughput.quantity);
+          propagatedThroughput.forEach(throughput => {
+            const item = throughput.item;
+            const quantity = throughput.throughput;
+
+            combinedPropagation[item] = combinedPropagation[item]  || 0;
+            combinedPropagation[item] += quantity;
+          });
+
+          const proportionalOutputQuantity = Math.min(...throughput.inputs.map(input => {
+            const item = input.item;
+            const quantity = input.quantity;
+            const providedItemQuantity = combinedPropagation[item] || 0;
+
+            const ratio = throughput.quantity / quantity;
+
+            return Math.min(desiredThroughput, ratio * providedItemQuantity);
+          })) || 0;
+          //
+          produceQuantityByBlob[targetBlob] = produceQuantityByBlob[targetBlob] || [];
+          //
+          //
+          console.log("Machine node", proportionalOutputQuantity, throughput.item);
+          //
+          propagatedThroughput.forEach(throughput => {
+            produceQuantityByBlob[targetBlob].push({throughput: proportionalOutputQuantity, item: throughput.item});
+          });
 
         });
+
       }
+
+      console.log(JSON.stringify(produceQuantityByBlob, null, 4))
+
     } else {
       // it's a cycle
     }
@@ -549,7 +706,7 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, blobOutgoing, g
     const nodes = blobToNodes[blob];
     const throughputDemand = demandByBlob[blob] || {};
 
-    console.log('Processing', blob, throughputDemand, nodes.map(item => item.id));
+    // console.log('Processing', blob, throughputDemand, nodes.map(item => item.id));
 
     let inputsBase = {};
     let inputsMaxSpeed = {};
@@ -676,10 +833,11 @@ const demandCalculation = (blobOrder, blobToNodes, blobIncoming, blobOutgoing, g
 
 
 
-const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob) {
+const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob, sinkPropagationTotals) {
 
   const masterEdgeCapacities = {};
   const linksByBlob = {};
+
   blobOrder.forEach(blob => {
     (blobOutgoing[blob] || []).forEach(outgoingBlob => {
       if (sinkBlobs.indexOf(blob) !== -1) {
@@ -693,7 +851,7 @@ const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs
         targets.forEach(target => {
           try {
             getLink(graphLinks, source, target);
-
+            console.error("There is a link between", source.id, target.id)
             const edgeAccessor = edgeCapacities[source.id] || {};
             const edgeWeight = !edgeAccessor[target.id] && edgeAccessor[target.id] !== 0 ? Infinity : edgeAccessor[target.id];
 
@@ -720,7 +878,7 @@ const processPool = function(blobOrder, reverseBlobOrder, sourceBlobs, sinkBlobs
 
   });
   // console.error(masterEdgeCapacities);
-  experimentalPropagation(sourceBlobs, sinkBlobs, masterEdgeCapacities, blobOrder, reverseBlobOrder, blobToNodes, demandByBlob, poolData, linksByBlob);
+  experimentalPropagation(sourceBlobs, sinkBlobs, masterEdgeCapacities, blobOrder, reverseBlobOrder, blobToNodes, demandByBlob, poolData, linksByBlob, sinkPropagationTotals);
   // console.error(sourceBlobs.map(i => blobToNodes[i][0].id), sinkBlobs.map(i => blobToNodes[i][0].id))
   // maxFlow(masterSource, masterSink, masterEdgeCapacities);
 };
@@ -850,6 +1008,8 @@ const forwardPropagation = function (blobOrder, reverseBlobOrder, blobToNodes, b
   const blobSources = new Set(Object.keys(poolData.sources));
   const blobSinks = new Set(Object.keys(poolData.sinks));
 
+  const sinkPropagationTotals = {};
+
   blobOrder.forEach(blob => {
     const thisPool = poolData.sinks[blob];
     if (blobSinks.has(blob) && !poolsVisited.has(thisPool)) {
@@ -872,7 +1032,7 @@ const forwardPropagation = function (blobOrder, reverseBlobOrder, blobToNodes, b
         return thisPool === poolData.sinks[subBlob];
       });
 
-      processPool(subBlobOrder, reverseSubBlobOrder, subBlobSources, subBlobSinks, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob);
+      processPool(subBlobOrder, reverseSubBlobOrder, subBlobSources, subBlobSinks, blobToNodes, blobOutgoing, graphLinks, poolData, edgeCapacities, demandByBlob, sinkPropagationTotals);
     }
   });
 };
