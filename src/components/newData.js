@@ -2,7 +2,7 @@ import lf from 'lovefield';
 import { getTraversableComposition } from 'fp-ts/lib/Traversable2v';
 
 /** @namespace lf.Type */
-const schemaBuilder = lf.schema.create('test', 10);
+const schemaBuilder = lf.schema.create('test', 11);
 
 schemaBuilder.createTable('node_type')
   .addColumn('id', lf.Type.INTEGER)
@@ -121,7 +121,7 @@ const getTableEntryIdByName = (table, name) => {
           if (rows.length == 1) {
             resolve(rows[0].id);
           } else {
-            reject('No element found or too many matching rows: ' + table + '|' + name + '|' + rows);
+            reject('No element found or too many matching rows: ' + table + '|' + JSON.stringify(name, null, 4) + '^^^^' + JSON.stringify(rows, null, 4));
           }
         });
     });
@@ -419,7 +419,23 @@ const data = [
       {
         name: 'S.A.M. Ingot',
         icon: baseUrl + 'Generic.png'
-      }
+      },
+      {
+        name: 'Compacted Coal',
+        icon: baseUrl + 'Generic.png'
+      },
+      {
+        name: 'Crystal Oscillator',
+        icon: baseUrl + 'Generic.png'
+      },
+      {
+        name: 'Quartz Crystal',
+        icon: baseUrl + 'Generic.png'
+      },
+      {
+        name: 'Dark Matter',
+        icon: baseUrl + 'Generic.png'
+      },
     ]
   },
   {
@@ -767,6 +783,9 @@ const data = [
       {name: 'Circuit Board (Alt.)'},
       {name: 'Caterium Circuit Board'},
       {name: 'Caterium Computer'},
+      {name: 'Compacted Coal (Alt.)'},
+      {name: 'Silica (Alt.)'},
+      {name: 'Crystal Oscillator (Alt.)'},
 
       // time = output_quantity * 60 / ppm
     ]
@@ -1310,7 +1329,7 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Cable'),
         time: 8,
-        quantity: 5,
+        quantity: 10,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Rubber Cable'),
       },
       {
@@ -1451,6 +1470,127 @@ const data = [
         time: 20,
         quantity: 3,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Stator (Alt.)'),
+      },
+      {
+        name: 'Battery',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Aluminum Sheet'),
+          quantity: 8
+        },
+          {
+            item_id: getTableEntryIdByName('item', 'Sulfur'),
+            quantity: 20
+          },
+          {
+            item_id: getTableEntryIdByName('item', 'Plastic'),
+            quantity: 9
+          },
+          {
+            item_id: getTableEntryIdByName('item', 'Wire'),
+            quantity: 24
+          }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
+        item_id: getTableEntryIdByName('item', 'Battery'),
+        time: 32,
+        quantity: 3
+      },
+      {
+        name: 'Compacted Coal (Alt.)',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Coal Ore'),
+          quantity: 3
+        },
+          {
+            item_id: getTableEntryIdByName('item', 'Sulfur'),
+            quantity: 3
+          }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Compacted Coal'),
+        time: 6,
+        quantity: 3,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Compacted Coal (Alt.)'),
+      },
+      {
+        name: 'Silica (Alt.)',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Raw Quartz'),
+          quantity: 4
+        },
+          {
+            item_id: getTableEntryIdByName('item', 'Limestone Ore'),
+            quantity: 2
+          }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Silica'),
+        time: 8,
+        quantity: 9,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Silica (Alt.)'),
+      },
+      {
+        name: 'Quartz Crystal',
+        inputs: parseRecipeIngredients([
+          {
+            item_id: getTableEntryIdByName('item', 'Raw Quartz'),
+            quantity: 2
+          }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
+        item_id: getTableEntryIdByName('item', 'Quartz Crystal'),
+        time: 4,
+        quantity: 1
+      },
+      {
+        name: 'Quantum Crystal',
+        inputs: parseRecipeIngredients([
+          {
+            item_id: getTableEntryIdByName('item', 'Quartz Crystal'),
+            quantity: 6
+          }, {
+            item_id: getTableEntryIdByName('item', 'Dark Matter'),
+            quantity: 12
+          }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
+        item_id: getTableEntryIdByName('item', 'Quantum Crystal'),
+        time: 24,
+        quantity: 1
+      },
+      {
+        name: 'Crystal Oscillator (Alt.)',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Quartz Crystal'),
+          quantity: 20
+        },
+          {
+            item_id: getTableEntryIdByName('item', 'Rubber'),
+            quantity:24
+          },
+          {
+            item_id: getTableEntryIdByName('item', 'A.I. Limiter'),
+            quantity: 1
+          }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
+        item_id: getTableEntryIdByName('item', 'Crystal Oscillator'),
+        time: 64,
+        quantity: 1,
+        player_unlock_id: getTableEntryIdByName('player_unlock', 'Crystal Oscillator (Alt.)'),
+      },
+      {
+        name: 'Crystal Oscillator',
+        inputs: parseRecipeIngredients([{
+          item_id: getTableEntryIdByName('item', 'Quartz Crystal'),
+          quantity: 10
+        },
+          {
+            item_id: getTableEntryIdByName('item', 'Cable'),
+            quantity: 14
+          },
+          {
+            item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
+            quantity: 4
+          }]),
+        machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
+        item_id: getTableEntryIdByName('item', 'Crystal Oscillator'),
+        time: 32,
+        quantity: 1,
       }
     ]
   }
