@@ -824,7 +824,7 @@ const data = [
         name: 'Caterium Ingot',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Caterium Ore'),
-          quantity: 4
+          quantity: 3
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Smelter'),
         item_id: getTableEntryIdByName('item', 'Caterium Ingot'),
