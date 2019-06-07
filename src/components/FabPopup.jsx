@@ -19,15 +19,15 @@ class FabPopup extends React.Component {
 
     constructor(props) {
         super(props);
-        const dontShowAgain = window.localStorage.getItem('dontShowAgain');
+        const dontShowAgain = window.localStorage.getItem('dontShowAgainv2');
         let modalOpen = false;
         let dontShow = false;
 
         if (dontShowAgain === '1') {
-            window.localStorage.setItem('dontShowAgain', '1');
+            window.localStorage.setItem('dontShowAgainv2', '1');
             dontShow = true;
         } else {
-            window.localStorage.setItem('dontShowAgain', '0');
+            window.localStorage.setItem('dontShowAgainv2', '0');
             dontShow = false;
         }
 
@@ -41,9 +41,9 @@ class FabPopup extends React.Component {
     handleDontShow = event => {
         this.setState({ dontShow: event.target.checked });
         if (event.target.checked) {
-            window.localStorage.setItem('dontShowAgain', '1');
+            window.localStorage.setItem('dontShowAgainv2', '1');
         } else {
-            window.localStorage.setItem('dontShowAgain', '0');
+            window.localStorage.setItem('dontShowAgainv2', '0');
         }
     };
 
