@@ -24,9 +24,12 @@
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
-      ["@semantic-release/changelog", {
-        "changelogFile": "public/CHANGELOG.md"
-      }],
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "public/CHANGELOG.md"
+        }
+      ],
       "@semantic-release/git"
     ],
     "branch": "master"
@@ -143,7 +146,7 @@
     "@material-ui/icons": "^3.0.2",
     "Base64": "^1.0.2",
     "d3": "^5.9.2",
-    "d3-interpolate": "latest",
+    "d3-interpolate": "^1.3.2",
     "firebase": "^5.10.0",
     "flatted": "^2.0.0",
     "intro.js": "^2.9.3",
