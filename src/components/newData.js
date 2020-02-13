@@ -835,12 +835,12 @@ const data = [
         name: 'Iron Plate',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Ingot'),
-          quantity: 2
+          quantity: 3
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Iron Plate'),
         time: 4,
-        quantity: 1
+        quantity: 2
       },
       {
         name: 'Iron Rod',
@@ -862,17 +862,17 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Wire'),
         time: 4,
-        quantity: 3
+        quantity: 2
       },
       {
         name: 'Iron Wire',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Ingot'),
-          quantity: 2
+          quantity: 5
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Wire'),
-        time: 8,
+        time: 24,
         quantity: 9,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Iron Wire')
@@ -886,7 +886,7 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Wire'),
         time: 8,
-        quantity: 9,
+        quantity: 4,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Caterium Wire')
       },
@@ -910,18 +910,18 @@ const data = [
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Screw'),
         time: 4,
-        quantity: 6
+        quantity: 4
       },
       {
         name: 'Screw (Alt.)',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Ingot'),
-          quantity: 2
+          quantity: 5
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Screw'),
-        time: 8,
-        quantity: 12,
+        time: 24,
+        quantity: 20,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Screw (Alt.)')
       },
@@ -940,10 +940,10 @@ const data = [
         name: 'Reinforced Iron Plate',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Plate'),
-          quantity: 4
+          quantity: 6
         }, {
           item_id: getTableEntryIdByName('item', 'Screw'),
-          quantity: 24
+          quantity: 12
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
@@ -954,14 +954,14 @@ const data = [
         name: 'Reinforced Iron Plate (Alt.)',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Plate'),
-          quantity: 10
+          quantity: 16
         }, {
           item_id: getTableEntryIdByName('item', 'Screw'),
-          quantity: 24
+          quantity: 250
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
-        time: 24,
+        time: 12,
         quantity: 3,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Reinforced Iron Plate (Alt.)')
@@ -970,14 +970,14 @@ const data = [
         name: 'Stitched Iron Plate',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Plate'),
-          quantity: 6
+          quantity: 10
         }, {
           item_id: getTableEntryIdByName('item', 'Wire'),
-          quantity: 30
+          quantity: 26
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
-        time: 24,
+        time: 32,
         quantity: 3,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Stitched Iron Plate')
@@ -986,29 +986,29 @@ const data = [
         name: 'Rotor',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Rod'),
-          quantity: 3
+          quantity: 5
         }, {
           item_id: getTableEntryIdByName('item', 'Screw'),
-          quantity: 22
+          quantity: 25
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Rotor'),
-        time: 10,
+        time: 15,
         quantity: 1,
       },
       {
         name: 'Rotor (Alt.)',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Steel Pipe'),
-          quantity: 6
+          quantity: 2
         }, {
           item_id: getTableEntryIdByName('item', 'Wire'),
-          quantity: 20
+          quantity: 12
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Rotor'),
-        time: 20,
-        quantity: 3,
+        time: 12,
+        quantity: 1,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Rotor (Alt.)')
       },
@@ -1019,25 +1019,25 @@ const data = [
           quantity: 3
         }, {
           item_id: getTableEntryIdByName('item', 'Iron Rod'),
-          quantity: 6
+          quantity: 12
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Modular Frame'),
-        time: 15,
-        quantity: 1,
+        time: 60,
+        quantity: 2,
       },
       {
         name: 'Modular Frame (Alt.)',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Reinforced Iron Plate'),
-          quantity: 6
+          quantity: 2
         }, {
           item_id: getTableEntryIdByName('item', 'Steel Pipe'),
-          quantity: 6
+          quantity: 10
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Modular Frame'),
-        time: 30,
+        time: 60,
         quantity: 3,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Modular Frame (Alt.)')
@@ -1053,22 +1053,22 @@ const data = [
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Encased Industrial Beam'),
-        time: 15,
+        time: 10,
         quantity: 1,
       },
       {
         name: 'Encased Industrial Beam (Alt.)',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Steel Pipe'),
-          quantity: 18
+          quantity: 7
         }, {
           item_id: getTableEntryIdByName('item', 'Concrete'),
-          quantity: 10
+          quantity: 5
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Assembler'),
         item_id: getTableEntryIdByName('item', 'Encased Industrial Beam'),
-        time: 30,
-        quantity: 3,
+        time: 15,
+        quantity: 1,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Encased Industrial Beam (Alt.)')
       },
@@ -1085,7 +1085,7 @@ const data = [
           quantity: 15
         }, {
           item_id: getTableEntryIdByName('item', 'Screw'),
-          quantity: 90
+          quantity: 100
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
         item_id: getTableEntryIdByName('item', 'Heavy Modular Frame'),
@@ -1105,7 +1105,7 @@ const data = [
           quantity: 36
         }, {
           item_id: getTableEntryIdByName('item', 'Concrete'),
-          quantity: 25
+          quantity: 22
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Manufacturer'),
         item_id: getTableEntryIdByName('item', 'Heavy Modular Frame'),
@@ -1118,15 +1118,15 @@ const data = [
         name: 'Iron Ingot (Alt.)',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Iron Ore'),
-          quantity: 1
+          quantity: 2
         }, {
           item_id: getTableEntryIdByName('item', 'Copper Ore'),
-          quantity: 1
+          quantity: 2
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
         item_id: getTableEntryIdByName('item', 'Iron Ingot'),
-        time: 4,
-        quantity: 3,
+        time: 6,
+        quantity: 5,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Iron Ingot (Alt.)')
       },
@@ -1151,12 +1151,12 @@ const data = [
           quantity: 3
         }, {
           item_id: getTableEntryIdByName('item', 'Coal Ore'),
-          quantity: 6
+          quantity: 3
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Foundry'),
         item_id: getTableEntryIdByName('item', 'Steel Ingot'),
-        time: 8,
-        quantity: 6,
+        time: 4,
+        quantity: 3,
         hidden: true,
         player_unlock_id: getTableEntryIdByName('player_unlock', 'Steel Ingot (Alt.)')
       },
@@ -1164,23 +1164,23 @@ const data = [
         name: 'Steel Beam',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Steel Ingot'),
-          quantity: 3
+          quantity: 4
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Steel Beam'),
-        time: 6,
+        time: 4,
         quantity: 1,
       },
       {
         name: 'Steel Pipe',
         inputs: parseRecipeIngredients([{
           item_id: getTableEntryIdByName('item', 'Steel Ingot'),
-          quantity: 1
+          quantity: 3
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Steel Pipe'),
-        time: 4,
-        quantity: 1,
+        time: 6,
+        quantity: 2,
       },
       {
         name: 'Quickwire',
@@ -1190,8 +1190,8 @@ const data = [
         }]),
         machine_class_id: getTableEntryIdByName('machine_class', 'Constructor'),
         item_id: getTableEntryIdByName('item', 'Quickwire'),
-        time: 4,
-        quantity: 4,
+        time: 5,
+        quantity: 5,
       },
       {
         name: 'Quickwire (Alt.)',
