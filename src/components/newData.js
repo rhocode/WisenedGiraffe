@@ -770,7 +770,7 @@ const data = [
         ]),
         machine_class_id: getTableEntryIdByName("machine_class", "Constructor"),
         item_id: getTableEntryIdByName("item", "Iron Plate"),
-        time: 4,
+        time: 6,
         quantity: 2
       },
       {
