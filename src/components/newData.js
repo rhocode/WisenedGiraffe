@@ -1,4 +1,3 @@
-import { getTraversableComposition } from "fp-ts/lib/Traversable2v";
 import lf from "lovefield";
 
 /** @namespace lf.Type */
