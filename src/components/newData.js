@@ -270,10 +270,7 @@ const data = [
       { name: "Wire", icon: baseUrl + "Wire.png" },
       { name: "Cable", icon: baseUrl + "Cable.png" },
       { name: "Concrete", icon: baseUrl + "Concrete.png" },
-      {
-        name: "Reinforced Iron Plate",
-        icon: baseUrl + "Reinforced_Iron_Plate.png"
-      },
+      { name: "Reinforced Iron Plate", icon: baseUrl + "Reinforced_Iron_Plate.png" },
       { name: "Modular Frame", icon: baseUrl + "Modular_Frame.png" },
       { name: "Rotor", icon: baseUrl + "Rotor.png" },
       { name: "Caterium Ore", icon: baseUrl + "Caterium_Ore.png" },
@@ -282,15 +279,9 @@ const data = [
       { name: "Steel Ingot", icon: baseUrl + "Steel_Ingot.png" },
       { name: "Steel Beam", icon: baseUrl + "Steel_Beam.png" },
       { name: "Steel Pipe", icon: baseUrl + "Steel_Pipe.png" },
-      {
-        name: "Encased Industrial Beam",
-        icon: baseUrl + "Encased_Industrial_Beam.png"
-      },
+      { name: "Encased Industrial Beam", icon: baseUrl + "Encased_Industrial_Beam.png" },
       { name: "Stator", icon: baseUrl + "Stator.png" },
-      {
-        name: "Heavy Modular Frame",
-        icon: baseUrl + "Heavy_Modular_Frame.png"
-      },
+      { name: "Heavy Modular Frame", icon: baseUrl + "Heavy_Modular_Frame.png" },
       { name: "Motor", icon: baseUrl + "Motor.png" },
       { name: "Crude Oil", icon: baseUrl + "Crude_Oil.png" },
       { name: "Raw Quartz", icon: baseUrl + "Raw_Quartz.png" },
@@ -306,10 +297,7 @@ const data = [
       { name: "Computer", icon: baseUrl + "Computer.png" },
       { name: "A.I. Limiter", icon: baseUrl + "AI_Limiter.png" },
       { name: "Supercomputer", icon: baseUrl + "Supercomputer.png" },
-      {
-        name: "High-Speed Connector",
-        icon: baseUrl + "High_Speed_Connector.png"
-      },
+      { name: "High-Speed Connector", icon: baseUrl + "High_Speed_Connector.png" },
       { name: "Nuclear Fuel Rod", icon: baseUrl + "Nuclear_Fuel_Rod.png" },
       { name: "Aluminum Ingot", icon: baseUrl + "Iron_Ingot.png" },
       { name: "Aluminum Sheet", icon: baseUrl + "Aluminum_Sheet.png" },
@@ -326,7 +314,17 @@ const data = [
       { name: "Compacted Coal", icon: baseUrl + "Generic.png" },
       { name: "Crystal Oscillator", icon: baseUrl + "Generic.png" },
       { name: "Quartz Crystal", icon: baseUrl + "Generic.png" },
-      { name: "Dark Matter", icon: baseUrl + "Generic.png" }
+      { name: "Dark Matter", icon: baseUrl + "Generic.png" },
+      { name: "Packaged Fuel", icon: baseUrl + "Generic.png" },
+      { name: "Filter", icon: baseUrl + "Generic.png" },
+      { name: "Smart Plating", icon: baseUrl + "Generic.png" },
+      { name: "Versatile Framework", icon: baseUrl + "Generic.png" },
+      { name: "Automated Wiring", icon: baseUrl + "Generic.png" },
+      { name: "Modular Engine", icon: baseUrl + "Generic.png" },
+      { name: "Adaptive Control Unit", icon: baseUrl + "Generic.png" },
+      { name: "Copper Sheet", icon: baseUrl + "Generic.png" },
+      { name: "Aluminum Scrap", icon: baseUrl + "Generic.png" },
+      { name: "Black Powder", icon: baseUrl + "Generic.png" }
     ]
   },
   {
