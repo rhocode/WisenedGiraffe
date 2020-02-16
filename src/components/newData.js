@@ -326,7 +326,17 @@ const data = [
       { name: "Compacted Coal", icon: baseUrl + "Generic.png" },
       { name: "Crystal Oscillator", icon: baseUrl + "Generic.png" },
       { name: "Quartz Crystal", icon: baseUrl + "Generic.png" },
-      { name: "Dark Matter", icon: baseUrl + "Generic.png" }
+      { name: "Dark Matter", icon: baseUrl + "Generic.png" },
+      { name: "Packaged Fuel", icon: baseUrl + "Generic.png" },
+      { name: "Filter", icon: baseUrl + "Generic.png" },
+      { name: "Smart Plating", icon: baseUrl + "Generic.png" },
+      { name: "Versatile Framework", icon: baseUrl + "Generic.png" },
+      { name: "Automated Wiring", icon: baseUrl + "Generic.png" },
+      { name: "Modular Engine", icon: baseUrl + "Generic.png" },
+      { name: "Adaptive Control Unit", icon: baseUrl + "Generic.png" },
+      { name: "Copper Sheet", icon: baseUrl + "Generic.png" },
+      { name: "Aluminum Scrap", icon: baseUrl + "Generic.png" },
+      { name: "Black Powder", icon: baseUrl + "Generic.png" }
     ]
   },
   {
@@ -1206,10 +1216,7 @@ const data = [
             item_id: getTableEntryIdByName("item", "Circuit Board"),
             quantity: 1
           },
-          {
-            item_id: getTableEntryIdByName("item", "Quickwire"),
-            quantity: 18
-          }
+          { item_id: getTableEntryIdByName("item", "Quickwire"), quantity: 18 }
         ]),
         machine_class_id: getTableEntryIdByName("machine_class", "Assembler"),
         item_id: getTableEntryIdByName("item", "A.I. Limiter"),
@@ -1219,14 +1226,8 @@ const data = [
       {
         name: "Circuit Board",
         inputs: parseRecipeIngredients([
-          {
-            item_id: getTableEntryIdByName("item", "Wire"),
-            quantity: 12
-          },
-          {
-            item_id: getTableEntryIdByName("item", "Plastic"),
-            quantity: 6
-          }
+          { item_id: getTableEntryIdByName("item", "Wire"), quantity: 12 },
+          { item_id: getTableEntryIdByName("item", "Plastic"), quantity: 6 }
         ]),
         machine_class_id: getTableEntryIdByName("machine_class", "Assembler"),
         item_id: getTableEntryIdByName("item", "Circuit Board"),
@@ -1236,14 +1237,8 @@ const data = [
       {
         name: "Circuit Board (Alt.)",
         inputs: parseRecipeIngredients([
-          {
-            item_id: getTableEntryIdByName("item", "Rubber"),
-            quantity: 16
-          },
-          {
-            item_id: getTableEntryIdByName("item", "Wire"),
-            quantity: 24
-          }
+          { item_id: getTableEntryIdByName("item", "Rubber"), quantity: 16 },
+          { item_id: getTableEntryIdByName("item", "Wire"), quantity: 24 }
         ]),
         machine_class_id: getTableEntryIdByName("machine_class", "Assembler"),
         item_id: getTableEntryIdByName("item", "Circuit Board"),
@@ -1257,14 +1252,8 @@ const data = [
       {
         name: "Caterium Circuit Board",
         inputs: parseRecipeIngredients([
-          {
-            item_id: getTableEntryIdByName("item", "Plastic"),
-            quantity: 12
-          },
-          {
-            item_id: getTableEntryIdByName("item", "Quickwire"),
-            quantity: 32
-          }
+          { item_id: getTableEntryIdByName("item", "Plastic"), quantity: 12 },
+          { item_id: getTableEntryIdByName("item", "Quickwire"), quantity: 32 }
         ]),
         machine_class_id: getTableEntryIdByName("machine_class", "Assembler"),
         item_id: getTableEntryIdByName("item", "Circuit Board"),
@@ -1278,14 +1267,8 @@ const data = [
       {
         name: "Rubber Cable",
         inputs: parseRecipeIngredients([
-          {
-            item_id: getTableEntryIdByName("item", "Wire"),
-            quantity: 3
-          },
-          {
-            item_id: getTableEntryIdByName("item", "Rubber"),
-            quantity: 2
-          }
+          { item_id: getTableEntryIdByName("item", "Wire"), quantity: 3 },
+          { item_id: getTableEntryIdByName("item", "Rubber"), quantity: 2 }
         ]),
         machine_class_id: getTableEntryIdByName("machine_class", "Assembler"),
         item_id: getTableEntryIdByName("item", "Cable"),
