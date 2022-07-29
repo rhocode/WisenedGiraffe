@@ -5,7 +5,7 @@ const config = {
   mode: 'development',
   devtool: 'inline-source-map',
   devServer: {
-    host: '0.0.0.0',
+    host: '127.0.0.1',
     contentBase: commonPaths.outputPath,
     compress: true,
     hot: false,
