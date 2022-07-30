@@ -37,8 +37,6 @@ import createDatabase from './newData';
 import IconButton from '@material-ui/core/IconButton';
 import Hidden from '@material-ui/core/Hidden';
 
-import globalData from './data';
-
 const drawerWidth = 260;
 
 const styles = theme => ({
@@ -191,7 +189,7 @@ class App extends Component {
 
   generateRecursiveStructureFireBase(startingTable) {
     const db = this.state.fbdb;
-    const starting = db[startingTable]
+    const starting = db[startingTable];
     this.globalStructure = this.globalStructure || {};
     const globalStructure = this.globalStructure;
 
@@ -308,18 +306,18 @@ class App extends Component {
     });
   }
 
-  recursiveCall(index, db) {
+  recursiveDataTransferFromDb(index, db, tempData) {
     if (index < db.getSchema().tables().length-1) {
 
-      return this.recursiveCall(index + 1, db).then((result) => {        
+      return this.recursiveDataTransferFromDb(index + 1, db, tempData).then((result) => {        
 
         if (index+1 == db.getSchema().tables().length-1) {
-          this.setState({[db.getSchema().tables()[index+1].getName()]: result});
+          tempData[db.getSchema().tables()[index+1].getName()] = result;
         }
         
         return db.select().from(db.getSchema().tables()[index]).exec();
       }).then((result) => {
-        this.setState({[db.getSchema().tables()[index].getName()]: result});
+        tempData[db.getSchema().tables()[index].getName()] = result;
         return Promise.resolve(result);
       });
 
@@ -336,96 +334,53 @@ class App extends Component {
       document.location.reload();
     }, false);
 
-    let kindaDb;
+    let temporaryData = {};
 
     loadHash().then(data => {
       this.setState({coreGraphData: data}, () => {
 
         createDatabase().then((db) => {
-          console.log(2);
-          kindaDb = db;
           return db;
         }).then((db) => {
-          console.log(3)
-          return this.recursiveCall(0, db);
+          return this.recursiveDataTransferFromDb(0, db, temporaryData);
          
         }).then(() => {
 
-          console.log(5);
-          this.setState({loaded: true});
-
-          console.log(`this.state loaded ${this.state.loaded}`);
-          console.log(`this.state.spring_type ${JSON.stringify(this.state.spring_type, null, 2)}`);
-        }).then(() => {
-          this.setState({isLoaded: true});
+          this.setState({fbdb: temporaryData, loaded: true}, () => {
+  
+            const generate = (name, cb = () => {}) => {
+              console.log (20);
+              return () => {
+                return this.generateRecursiveStructureFireBase(name).then(data => {
+                  this.setState({[name]: data}, () => {
+                    cb();
+                  });
+                });
+              };
+            };
+  
+            let wrappedFunction = () => {
+              this.setState({isLoaded: true});
+            };
+  
+            const list = ['spring', 'recipe', 'path_type','machine_node', 'player_unlock', 'machine_class', 'item', 'spring_type', 'purity_type', 'node_type', 'machine_version', 'machine_class'];
+  
+            list.forEach(item => {
+              wrappedFunction = generate(item, wrappedFunction);
+            });
+  
+            wrappedFunction();
+  
+          });
         });
-
-        // ========================================================================================================================
-
-        // this.setState({fbdb: globalData, loaded: true}, () => {
-        //   console.log (1);
-
-        //   const generate = (name, cb = () => {}) => {
-        //     console.log (20);
-        //     return () => {
-        //       return this.generateRecursiveStructureFireBase(name).then(data => {
-        //         this.setState({[name]: data}, () => {
-        //           // console.log(`Setting state for: ${name}`);
-        //           // console.log(`Data to set: ${JSON.stringify(data)}`);
-        //           cb();
-        //         });
-        //       });
-        //     };
-        //   };
-
-        //   console.log (2);
-
-        //   let wrappedFunction = () => {
-        //     console.log (10);
-        //     this.setState({isLoaded: true});
-        //   };
-
-        //   console.log (3);
-        //   const list = ['spring', 'recipe', 'path_type','machine_node', 'player_unlock', 'machine_class', 'item', 'spring_type', 'purity_type', 'node_type', 'machine_version', 'machine_class'];
-
-          
-
-        //   console.log (4);
-        //   list.forEach(item => {
-        //     console.log(`call for ${item}`);
-        //     wrappedFunction = generate(item, wrappedFunction);
-        //   });
-
-        //   console.log (5);
-        //   wrappedFunction();
-
-        //   console.log (6);
-        //   // if (process.env.NODE_ENV && process.env.NODE_ENV !== 'production') {
-
-        //   // }
-
-        // });
-
-
-        // ========================================================================================================================
-
       });
     });
-
-    kindaDb.select()
-           .from(db.getSchema().table('recipe'))
-           .innerJoin(db.getSchema().table('item'))
-           .exec().then((result) => {
-              console.log(`Internal recipe contents: ${JSON.stringify(result[0], null, 2)}`);
-           })
   }
 
   generateNodeList() {
-    console.log("Entered generateNodeList");
     const recipesByMachineClass = {};
     const machineClassPlural = {};
-    this.state.recipe.forEach(recipe => {
-      console.log(`recipe contents: ${JSON.stringify(recipe, null, 2)}`)
+    this.state.recipe && this.state.recipe.recipe.forEach(recipe => {
       const thisList = recipesByMachineClass[recipe.machine_class.name] || [];
       thisList.push(recipe);
       recipesByMachineClass[recipe.machine_class.name] = thisList;
@@ -443,16 +398,15 @@ class App extends Component {
   }
 
   generateContainerList() {
-    console.log("Entered generateContainerList");
     const springByClass = {};
-    this.state.purity_type && this.state.spring.forEach(spring => {
+    this.state.purity_type && this.state.spring && this.state.spring.spring.forEach(spring => {
       const thisList = springByClass[spring.spring_type.name] || [];
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
 
     // Manually handle splitters and mergers
-    springByClass['Logistic'] = this.state.machine_node.filter(elem => elem.machine_class.name === 'Logistic');
+    springByClass['Logistic'] = this.state.machine_node.machine_node.filter(elem => elem.machine_class.name === 'Logistic');
 
 
     return (
@@ -464,10 +418,9 @@ class App extends Component {
   }
 
   generateUnlocksList() {
-    console.log("Entered generateUnlocksList");
     const dataList = [];
-    this.state.player_unlock.forEach(player_unlock => {
-      const item = this.state.recipe.filter(elem => elem.player_unlock && (elem.player_unlock.id === player_unlock.id))[0];
+    this.state.player_unlock && this.state.player_unlock.player_unlock.forEach(player_unlock => {
+      const item = this.state.recipe.recipe.filter(elem => elem.player_unlock && (elem.player_unlock.id === player_unlock.id))[0];
       if (item) {
         // dataList.push({player_unlock, item});
       }
@@ -478,23 +431,13 @@ class App extends Component {
   }
 
   generateSpringList() {
-    console.log("Entered generateSpringList");
     this.generateUnlocksList();
     const springByClass = {};
-    this.state.spring.forEach(spring => {
+    this.state.spring && this.state.spring.spring.forEach(spring => {
       const thisList = springByClass[spring.spring_type.name] || [];
       thisList.push(spring);
       springByClass[spring.spring_type.name] = thisList;
     });
-
-    if (this.state.spring.spring) {
-      console.log(`this.spring.length: ${this.state.spring.length}`);
-      console.log(`this.spring_type.length: ${this.state.spring_type.length}`);
-    }
-    else {
-      console.log(`this.spring undefined`);
-    }
-
     return (
       <NestedSidebarButton label='Miners' listItems={springByClass} appObject={this}/>
     );
@@ -538,10 +481,8 @@ class App extends Component {
   render() {
     const {classes} = this.props;
     if (!this.state.isReady) {
-      console.log(`Internal: ${this.state.isReady}`);
       return <Loader ready={this.state.isLoaded} parentState={this}/>;
     }
-    console.log(`External: ${this.state.isReady}`);
     const t = this;
 
     return <div className={classes.root}>
