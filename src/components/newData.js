@@ -540,6 +540,17 @@ const data = [
         output_slots: 1
       },
       {
+        name: "Miner Mk.3",
+        machine_version_id: getTableEntryIdByName("machine_version", "Mk.3"),
+        machine_class_id: getTableEntryIdByName("machine_class", "Miner"),
+        icon: baseUrl + "Miner_MK2.png",
+        speed: 300,
+        power: 12,
+        hidden: true,
+        input_slots: 0,
+        output_slots: 1
+      },
+      {
         name: "Oil Pump",
         machine_version_id: getTableEntryIdByName("machine_version", "Mk.1"),
         machine_class_id: getTableEntryIdByName("machine_class", "Oil Pump"),
@@ -1599,11 +1610,9 @@ const createDatabase = () => {
           .into(table)
           .values(rows)
           .exec();
-        console.info("Loaded " + rows.length + " into " + key);
+        // console.info("Loaded " + rows.length + " into " + key);
       }
 
-      console.log("Here is the finished doc");
-      console.log(JSON.stringify(firebaseRaw));
       await Promise.all(promiseList);
       return db;
     });
