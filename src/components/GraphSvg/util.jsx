@@ -58,7 +58,6 @@ export const loadHash = () => {
         resolve(inflate(responseRaw.data));
       })
         .catch(function (error) {
-          console.log('Fetch error:', error.message);
           resolve(inflate(data));
         });
     } else {

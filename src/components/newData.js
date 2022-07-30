@@ -1610,7 +1610,7 @@ const createDatabase = () => {
           .into(table)
           .values(rows)
           .exec();
-        // console.info("Loaded " + rows.length + " into " + key);
+        console.info("Loaded " + rows.length + " into " + key);
       }
 
       await Promise.all(promiseList);
